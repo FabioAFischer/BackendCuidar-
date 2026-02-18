@@ -26,12 +26,12 @@ public abstract class Usuario {
     @Column(name = "id", updatable = false, nullable = false)
     private int id;
 
-    @NotBlank(message = "{erro.usuario.nome.obrigatorio}")
-    @Size(max = 200, message = "{erro.usuario.nome.tamanho}")
+    @NotBlank(message = "Nome Obrigatorio")
+    @Size(max = 200, message = "Tamanho do nome do usuário excedido")
     @Column(name = "nome", nullable = false, length = 200)
     private String nome;
 
-    @NotBlank(message = "{erro.usuario.data.obrigatorio}")
+    @NotBlank(message = "Data de criação é obrigatória")
     @Column(name = "data_criacao", nullable = false)
     private LocalDateTime data_criacao;
 
