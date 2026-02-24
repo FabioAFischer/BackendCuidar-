@@ -2,11 +2,18 @@ package com.example.demo.entity;
 
 import java.time.LocalDateTime;
 
+import com.example.demo.enums.Perfil;
+import com.example.demo.enums.Status;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -19,6 +26,7 @@ import lombok.*;
 @AllArgsConstructor
 @ToString
 @Table(name = "usuario")
+@Inheritance(strategy = InheritanceType.JOINED)
 public abstract class Usuario {
 
     @Id
@@ -37,4 +45,14 @@ public abstract class Usuario {
 
     @Column(name = "data_atualizacao")
     private LocalDateTime data_atualizacao;
+
+    @NotBlank(message = "Perfil é obrigatório")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false, length = 20)
+    private Perfil perfil;
+
+    @NotBlank(message = "Status é obrigatório")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false, length = 20)
+    private Status status;
 }
