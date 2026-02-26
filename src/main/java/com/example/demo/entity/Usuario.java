@@ -17,7 +17,11 @@ import jakarta.persistence.InheritanceType;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @Getter
@@ -48,7 +52,7 @@ public abstract class Usuario {
 
     @NotBlank(message = "Perfil é obrigatório")
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false, length = 20)
+    @Column(name = "perfil", nullable = false, length = 20)
     private Perfil perfil;
 
     @NotBlank(message = "Status é obrigatório")
