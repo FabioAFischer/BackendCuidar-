@@ -7,6 +7,8 @@ import com.example.demo.enums.Perfil;
 import ch.qos.logback.core.status.Status;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
@@ -50,7 +52,9 @@ public class Prescricao {
     @NotNull(message = "Inicio obrigatório")
     private LocalDateTime data_criacao;
 
-    @Column(nullable = false)
+    @NotNull(message = "campo status vazio")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status",nullable = false, length = 20)
     private Status status;
 
     private LocalDateTime data_fim;
