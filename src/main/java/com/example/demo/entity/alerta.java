@@ -1,6 +1,11 @@
 package com.example.demo.entity;
 
+import com.example.demo.enums.TipoAlerta;
+
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
@@ -9,6 +14,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -22,7 +28,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-@Table(name = "idoso")
+@Table(name = "alerta")
 public class alerta {
 
     @Id
@@ -34,5 +40,8 @@ public class alerta {
     @JoinColumn(name = "id_idoso", nullable = false, foreignKey = @ForeignKey(name = "fk_idoso_prescricao"))
     private Idoso idoso;
 
-    
+    @NotBlank(message = "tipo do alerta é obrigatório")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tipoAlerta", nullable = false, length = 20)
+    private TipoAlerta tipoAlerta;
 }
