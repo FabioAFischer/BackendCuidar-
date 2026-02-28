@@ -10,7 +10,6 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -41,19 +40,6 @@ public class Instituicao extends Usuario {
     @Column(length = 8)
     private String cep;
 
-    @NotNull(message = "Um DDD deve ser inserido")
-    @Column(length = 3)
-    private String ddd;
-
-    @NotNull(message = "Um número de contato deve ser preenchido")
-    @Column(length = 15)
-    private String telefone;
-
-    @OneToMany(
-        mappedBy = "instituicao",
-        fetch = FetchType.LAZY,
-        cascade = CascadeType.ALL,
-        orphanRemoval = true
-    )
+    @OneToMany(mappedBy = "instituicao",fetch = FetchType.LAZY,cascade = CascadeType.ALL,orphanRemoval = true)
     private List<Idoso> idosos = new ArrayList<>();
 }
