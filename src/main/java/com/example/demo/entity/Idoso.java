@@ -1,4 +1,3 @@
-
 package com.example.demo.entity;
 
 import jakarta.persistence.Column;
@@ -24,15 +23,20 @@ import lombok.ToString;
 @Table(name = "idoso")
 public class Idoso extends Usuario {
 
-    @NotNull(message = "Instituição é obrigatória")
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "instituicao_id", nullable = false, foreignKey = @ForeignKey(name = "fk_idoso_instituicao"))
-    private Instituicao instituicao;
-
     @NotNull(message = "CPF deve ser preenchido")
     @Column(length = 11, nullable = false, unique = true)
     private Long cpf;
 
     @Column(length = 300)
     private String observacoes;
+
+    @NotNull(message = "Instituição é obrigatória")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "instituicao_id", nullable = false, foreignKey = @ForeignKey(name = "fk_idoso_instituicao"))
+    private Instituicao instituicao;
+
+    @NotNull(message = "Contato é obrigatório")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "contato_id", nullable = false, foreignKey = @ForeignKey(name = "fk_idoso_contato"))
+    private Contato contato;
 }
