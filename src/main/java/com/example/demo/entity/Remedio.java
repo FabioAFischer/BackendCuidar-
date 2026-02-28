@@ -33,7 +33,7 @@ public class Remedio {
     private String nome;
 
     @Size(max = 500, message = "Tamanho da observação excedido")
-    @Column(name = "nome", length = 500)
+    @Column(name = "observacao", length = 500)
     private String observacao;
 
 
