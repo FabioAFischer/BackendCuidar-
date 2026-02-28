@@ -1,25 +1,16 @@
 package com.example.demo.entity;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
+@ToString(callSuper = true, exclude = {"contato", "instituicao"})
 @Table(name = "cuidador")
 public class Cuidador extends Usuario {
 
@@ -37,4 +28,8 @@ public class Cuidador extends Usuario {
 
     @OneToOne(mappedBy = "cuidador", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Contato contato;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "instituicao_id", nullable = false)
+    private Instituicao instituicao;
 }

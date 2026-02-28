@@ -21,7 +21,7 @@ import lombok.ToString;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(callSuper = true)
+@ToString(callSuper = true, exclude = "cuidadores")
 @Table(name = "instituicao")
 public class Instituicao extends Usuario {
 
@@ -40,6 +40,9 @@ public class Instituicao extends Usuario {
     @Column(length = 8)
     private String cep;
 
-    @OneToMany(mappedBy = "instituicao",fetch = FetchType.LAZY,cascade = CascadeType.ALL,orphanRemoval = true)
+    @OneToMany(mappedBy = "instituicao", fetch = FetchType.LAZY,cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Idoso> idosos = new ArrayList<>();
+
+    @OneToMany(mappedBy = "instituicao", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Cuidador> cuidadores = new ArrayList<>();
 }
