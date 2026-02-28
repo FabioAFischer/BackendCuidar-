@@ -29,7 +29,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @ToString
 @Table(name = "alerta")
-public class alerta {
+public class Alerta {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
