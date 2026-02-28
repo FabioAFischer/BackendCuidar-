@@ -1,6 +1,9 @@
 package com.example.demo.entity;
 
+import com.example.demo.enums.StatusAlertas;
 import com.example.demo.enums.TipoAlerta;
+
+import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -28,7 +31,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-@Table(name = "alerta")
+@Table(name = "alertas")
 public class Alertas {
 
     @Id
@@ -44,4 +47,19 @@ public class Alertas {
     @Enumerated(EnumType.STRING)
     @Column(name = "tipoAlerta", nullable = false, length = 20)
     private TipoAlerta tipoAlerta;
+
+    @NotBlank(message = "Status do alerta é obrigatório")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "statusAlerta", nullable = false, length = 20)
+    private StatusAlertas statusAlertas;
+
+    @NotBlank(message = "Data de criação é obrigatória")
+    @Column(name = "data_criacao", nullable = false)
+    private LocalDateTime data_criacao;
+
+    @Column(name = "data_atualizacao")
+    private LocalDateTime data_atualizacao;
+
+    @Column(name = "data_agendade")
+    private LocalDateTime data_agendade;
 }
