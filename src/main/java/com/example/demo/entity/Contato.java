@@ -3,7 +3,7 @@ package com.example.demo.entity;
 import java.util.ArrayList;
 import java.util.List;
 
-import jakarta.persistence.Column;
+import jakarta.persistence.*;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -22,7 +22,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name="contato")
+@Table(name = "contato")
 public class Contato {
 
     @Id
@@ -37,6 +37,7 @@ public class Contato {
     @Column(length = 15, nullable = false)
     private String telefone;
 
-    @OneToMany(mappedBy = "contato", fetch = FetchType.LAZY)
-    private List<Idoso> idosos = new ArrayList<>();
+    @OneToOne
+    @JoinColumn(name = "cuidador_id",nullable = false,unique = true )
+    private Cuidador cuidador;
 }
