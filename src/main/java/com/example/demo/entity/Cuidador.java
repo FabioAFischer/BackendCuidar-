@@ -1,15 +1,13 @@
 package com.example.demo.entity;
 
-<<<<<<< HEAD
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import lombok.*;
-=======
+import java.util.ArrayList;
+import java.util.List;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
@@ -19,18 +17,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
->>>>>>> 5c81f87296b574421e2da467fce6f8ae1583c2b9
 
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-<<<<<<< HEAD
-@ToString(callSuper = true, exclude = {"contato", "instituicao"})
-=======
-@ToString
->>>>>>> 5c81f87296b574421e2da467fce6f8ae1583c2b9
+@ToString(callSuper = true, exclude = { "contato", "vinculos" })
 @Table(name = "cuidador")
 public class Cuidador extends Usuario {
 
@@ -48,11 +41,7 @@ public class Cuidador extends Usuario {
 
     @OneToOne(mappedBy = "cuidador", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Contato contato;
-<<<<<<< HEAD
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "instituicao_id", nullable = false)
-    private Instituicao instituicao;
-=======
->>>>>>> 5c81f87296b574421e2da467fce6f8ae1583c2b9
+    @OneToMany(mappedBy = "cuidador", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Vinculo> vinculos = new ArrayList<>();
 }
