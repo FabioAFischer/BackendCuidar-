@@ -1,5 +1,8 @@
 package com.example.demo.mappers;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.example.demo.dtos.InstituicaoDTO;
 import com.example.demo.entity.Instituicao;
 
@@ -42,4 +45,18 @@ public class InstituicaoMapper {
         return instituicao;
     }
 
+    public static List<InstituicaoDTO> toDTOList(List<Instituicao> instituicoes) {
+        List<InstituicaoDTO> lista = new ArrayList<>();
+
+        if (instituicoes == null) {
+            return lista;
+        }
+
+        for (Instituicao instituicao : instituicoes) {
+            lista.add(toDTO(instituicao));
+        }
+
+        return lista;
+    }
+}
 }
