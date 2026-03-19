@@ -18,7 +18,7 @@ import com.example.demo.dtos.InstituicaoDTO;
 import com.example.demo.services.InstituicaoService;
 
 @RestController
-@RequestMapping("/api/instituicao")
+@RequestMapping("/instituicao")
 @CrossOrigin(origins = "*")
 public class InstituicaoController {
 
@@ -34,7 +34,7 @@ public class InstituicaoController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<InstituicaoDTO> buscarPorId(@PathVariable Long id) {
+    public ResponseEntity<InstituicaoDTO> buscarPorId(@PathVariable Integer id) {
         return ResponseEntity.ok(service.buscarPorId(id));
     }
 
@@ -44,13 +44,13 @@ public class InstituicaoController {
         return ResponseEntity.status(HttpStatus.CREATED).body(criada);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<InstituicaoDTO> atualizar(@PathVariable Long id, @RequestBody InstituicaoDTO dto) {
+    @PutMapping("/atualizar/{id}")
+    public ResponseEntity<InstituicaoDTO> atualizar(@PathVariable Integer id, @RequestBody InstituicaoDTO dto) {
         return ResponseEntity.ok(service.atualizar(id, dto));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable Long id) {
+    @DeleteMapping("/deletar/{id}")
+    public ResponseEntity<Void> deletar(@PathVariable Integer id) {
         service.deletar(id);
         return ResponseEntity.noContent().build();
     }

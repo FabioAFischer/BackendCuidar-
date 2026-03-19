@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import com.example.demo.entity.Instituicao;
 
 @Repository
-public interface InstituicaoRepository extends JpaRepository<Instituicao, Long> {
+public interface InstituicaoRepository extends JpaRepository<Instituicao, Integer> {
 
     Optional<Instituicao> findByCnpj(String cnpj);
 
