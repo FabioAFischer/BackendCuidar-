@@ -59,4 +59,3 @@ public class InstituicaoMapper {
         return lista;
     }
 }
-}
