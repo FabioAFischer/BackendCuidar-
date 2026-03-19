@@ -1,5 +1,6 @@
 package com.example.demo.services;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -23,7 +24,7 @@ public class InstituicaoService {
         return InstituicaoMapper.toDTOList(lista);
     }
 
-    public InstituicaoDTO buscarPorId(Long id) {
+    public InstituicaoDTO buscarPorId(Integer id) {
         Instituicao instituicao = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Instituição não encontrada"));
 
@@ -31,17 +32,17 @@ public class InstituicaoService {
     }
 
     public InstituicaoDTO criar(InstituicaoDTO dto) {
-
         if (repository.existsByCnpj(dto.getCnpj())) {
             throw new RuntimeException("Já existe uma instituição com esse CNPJ");
         }
+
         Instituicao instituicao = InstituicaoMapper.toEntity(dto);
         Instituicao salva = repository.save(instituicao);
+
         return InstituicaoMapper.toDTO(salva);
     }
 
-    public InstituicaoDTO atualizar(Long id, InstituicaoDTO dto) {
-
+    public InstituicaoDTO atualizar(Integer id, InstituicaoDTO dto) {
         Instituicao instituicao = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Instituição não encontrada"));
 
@@ -56,13 +57,13 @@ public class InstituicaoService {
         instituicao.setUf(dto.getUf());
         instituicao.setNumero(dto.getNumero());
         instituicao.setCep(dto.getCep());
+        instituicao.setData_atualizacao(LocalDateTime.now());
 
         Instituicao atualizada = repository.save(instituicao);
-
         return InstituicaoMapper.toDTO(atualizada);
     }
 
-    public void deletar(Long id) {
+    public void deletar(Integer id) {
         Instituicao instituicao = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Instituição não encontrada"));
 
