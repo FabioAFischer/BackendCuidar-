@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.demo.dtos.InstituicaoDTO;
 import com.example.demo.entity.Instituicao;
+import com.example.demo.enums.Status;
 import com.example.demo.mappers.InstituicaoMapper;
 import com.example.demo.repository.InstituicaoRepository;
 
@@ -67,6 +68,9 @@ public class InstituicaoService {
         Instituicao instituicao = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Instituição não encontrada"));
 
-        repository.delete(instituicao);
+        instituicao.setStatus(Status.INATIVO);
+        instituicao.setData_atualizacao(LocalDateTime.now());
+
+        repository.save(instituicao);
     }
 }
