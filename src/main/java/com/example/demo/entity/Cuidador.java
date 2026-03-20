@@ -31,7 +31,7 @@ public class Cuidador extends Usuario {
 
     @NotNull(message = "CPF deve ser preenchido")
     @Column(length = 11, nullable = false, unique = true)
-    private Long cpf;
+    private Integer cpf;
 
     @NotBlank
     @Column(length = 300, nullable = false)
