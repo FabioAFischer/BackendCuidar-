@@ -31,7 +31,7 @@ public class Contato {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     @NotBlank(message = "Um DDD deve ser inserido")
     @Column(length = 3, nullable = false)
