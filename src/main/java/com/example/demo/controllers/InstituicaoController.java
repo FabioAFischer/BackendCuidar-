@@ -1,7 +1,8 @@
 package com.example.demo.controllers;
 
-import java.util.List;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -29,8 +30,9 @@ public class InstituicaoController {
     }
 
     @GetMapping("/listar_todas")
-    public ResponseEntity<List<InstituicaoDTO>> listarTodas() {
-        return ResponseEntity.ok(service.listarTodas());
+    public ResponseEntity<Page<InstituicaoDTO>> listarTodas(
+            @PageableDefault(size = 10, sort = "nome") Pageable pageable) {
+        return ResponseEntity.ok(service.listarAtivas(pageable));
     }
 
     @GetMapping("/{id}")
@@ -51,7 +53,7 @@ public class InstituicaoController {
 
     @DeleteMapping("/deletar/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Integer id) {
-        service.deletar(id);
+        service.inativar(id);
         return ResponseEntity.noContent().build();
     }
 }

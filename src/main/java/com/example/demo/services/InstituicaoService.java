@@ -1,8 +1,9 @@
 package com.example.demo.services;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.dtos.InstituicaoDTO;
@@ -20,9 +21,9 @@ public class InstituicaoService {
         this.repository = repository;
     }
 
-    public List<InstituicaoDTO> listarTodas() {
-        List<Instituicao> lista = repository.findAll();
-        return InstituicaoMapper.toDTOList(lista);
+    public Page<InstituicaoDTO> listarAtivas(Pageable pageable) {
+        return repository.findByStatus(Status.ATIVO, pageable)
+                .map(InstituicaoMapper::toDTO);
     }
 
     public InstituicaoDTO buscarPorId(Integer id) {
@@ -64,7 +65,7 @@ public class InstituicaoService {
         return InstituicaoMapper.toDTO(atualizada);
     }
 
-    public void deletar(Integer id) {
+    public void inativar(Integer id) {
         Instituicao instituicao = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Instituição não encontrada"));
 
