@@ -10,7 +10,6 @@ import com.example.demo.entity.Idoso;
 
 public class ContatoMapper {
 
-    
     public static ContatoDTO toDTO(Contato contato) {
         if (contato == null) return null;
 
@@ -19,12 +18,10 @@ public class ContatoMapper {
         dto.setDdd(contato.getDdd());
         dto.setTelefone(contato.getTelefone());
 
-        
         if (contato.getCuidador() != null) {
             dto.setCuidadorId(contato.getCuidador().getId());
         }
 
-       
         if (contato.getIdosos() != null) {
             List<Integer> idososIds = contato.getIdosos()
                     .stream()
@@ -37,7 +34,6 @@ public class ContatoMapper {
         return dto;
     }
 
-  
     public static Contato toEntity(ContatoDTO dto, Cuidador cuidador, List<Idoso> idosos) {
         if (dto == null) return null;
 
@@ -45,27 +41,18 @@ public class ContatoMapper {
         contato.setId(dto.getId());
         contato.setDdd(dto.getDdd());
         contato.setTelefone(dto.getTelefone());
-
-        
         contato.setCuidador(cuidador);
         contato.setIdosos(idosos);
 
         return contato;
     }
 
-   
     public static void updateEntity(Contato contato, ContatoDTO dto, Cuidador cuidador, List<Idoso> idosos) {
         if (dto == null) return;
 
         contato.setDdd(dto.getDdd());
         contato.setTelefone(dto.getTelefone());
-
-        if (cuidador != null) {
-            contato.setCuidador(cuidador);
-        }
-
-        if (idosos != null) {
-            contato.setIdosos(idosos);
-        }
+        contato.setCuidador(cuidador);
+        contato.setIdosos(idosos);
     }
 }
