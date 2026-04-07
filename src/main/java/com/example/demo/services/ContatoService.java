@@ -27,12 +27,12 @@ public class ContatoService {
     //@Autowired
     //private  IdosoRepository idosoRepository;
 
-	public Page<ContatoDTO> listarPorIdoso(Integer idosoId, Pageable pageable) {
+	public Page<ContatoDTO> listarPorIdoso(Long idosoId, Pageable pageable) {
 		return contatoRepository.findByIdosos_Id(idosoId, pageable)
               .map(ContatoMapper::toDTO);
 	}
 
-   public ContatoDTO atualizar(Integer id, ContatoDTO dto) {
+   public ContatoDTO atualizar(Long id, ContatoDTO dto) {
         Contato contato = contatoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Contato não encontrado"));
 
@@ -61,7 +61,7 @@ public class ContatoService {
         return ContatoMapper.toDTO(atualizado);
     }
 
-   public void inativar(Integer id) {
+   public void inativar(Long id) {
         Contato contato = contatoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Contato não encontrado"));
 

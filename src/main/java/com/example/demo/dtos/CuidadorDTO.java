@@ -11,15 +11,13 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class InstituicaoDTO {
-    
+public class CuidadorDTO {
+
     private Long id;
     private String nome;
-    private String cnpj;
-    private String bairro;
-    private String uf;
-    private Long numero;
-    private String cep;
-
-
+    private Long cpf;
+    private String login;
+    private String senha;
+    private Long instituicaoId;
+    private ContatoDTO contato;
 }

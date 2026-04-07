@@ -28,7 +28,7 @@ public class ContatoController {
     )
     @GetMapping("/listar/{idosoId}")
     public ResponseEntity<Page<ContatoDTO>> listarTodas(
-            @PathVariable Integer idosoId,
+            @PathVariable Long idosoId,
             @PageableDefault(size = 10, sort = "id") Pageable pageable) {
 
         return ResponseEntity.ok(service.listarPorIdoso(idosoId, pageable));
@@ -62,7 +62,7 @@ public class ContatoController {
         description = "Realiza a exclusão lógica (inativação) de um contato com base no ID informado"
     )
     @DeleteMapping("/deletar/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable Integer id) {
+    public ResponseEntity<Void> deletar(@PathVariable Long id) {
         service.inativar(id);
         return ResponseEntity.noContent().build();
     }

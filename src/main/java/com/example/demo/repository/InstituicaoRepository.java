@@ -11,7 +11,7 @@ import com.example.demo.entity.Instituicao;
 import com.example.demo.enums.Status;
 
 @Repository
-public interface InstituicaoRepository extends JpaRepository<Instituicao, Integer> {
+public interface InstituicaoRepository extends JpaRepository<Instituicao, Long> {
 
     Optional<Instituicao> findByCnpj(String cnpj);
 

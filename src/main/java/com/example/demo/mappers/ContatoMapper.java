@@ -23,7 +23,7 @@ public class ContatoMapper {
         }
 
         if (contato.getIdosos() != null) {
-            List<Integer> idososIds = contato.getIdosos()
+            List<Long> idososIds = contato.getIdosos()
                     .stream()
                     .map(Idoso::getId)
                     .collect(Collectors.toList());
