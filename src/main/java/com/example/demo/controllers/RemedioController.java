@@ -40,7 +40,7 @@ public class RemedioController {
         description = "Retorna os dados de um remédio específico com base no ID informado"
     )
     @GetMapping("/listar/{id}")
-    public ResponseEntity<RemedioDTO> buscarPorId(@PathVariable Int id) {
+    public ResponseEntity<RemedioDTO> buscarPorId(@PathVariable int id) {
         return ResponseEntity.ok(service.buscarPorId(id));
     }
 
@@ -68,7 +68,7 @@ public class RemedioController {
         description = "Realiza a exclusão lógica (inativação) de um remédio com base no ID informado"
     )
     @DeleteMapping("/deletar/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable Integer id) {
+    public ResponseEntity<Void> deletar(@PathVariable int id) {
         service.inativar(id);
         return ResponseEntity.noContent().build();
     }
