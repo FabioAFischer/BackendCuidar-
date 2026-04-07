@@ -4,7 +4,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.example.demo.dtos.ContatoDTO;
 import com.example.demo.dtos.CuidadorDTO;
+import com.example.demo.entity.Contato;
 import com.example.demo.entity.Cuidador;
 import com.example.demo.entity.Instituicao;
 import com.example.demo.enums.Perfil;
@@ -31,6 +33,16 @@ public class CuidadorMapper {
             dto.setInstituicaoId(cuidador.getInstituicao().getId());
         }
 
+        if (cuidador.getContato() != null) {
+            ContatoDTO contatoDTO = new ContatoDTO();
+            contatoDTO.setId(cuidador.getContato().getId());
+            contatoDTO.setDdd(cuidador.getContato().getDdd());
+            contatoDTO.setTelefone(cuidador.getContato().getTelefone());
+            contatoDTO.setCuidadorId(cuidador.getId());
+
+            dto.setContato(contatoDTO);
+        }
+
         return dto;
     }
 
@@ -50,6 +62,16 @@ public class CuidadorMapper {
             Instituicao instituicao = new Instituicao();
             instituicao.setId(dto.getInstituicaoId());
             cuidador.setInstituicao(instituicao);
+        }
+
+        if (dto.getContato() != null) {
+            Contato contato = new Contato();
+            contato.setId(dto.getContato().getId());
+            contato.setDdd(dto.getContato().getDdd());
+            contato.setTelefone(dto.getContato().getTelefone());
+
+            contato.setCuidador(cuidador);
+            cuidador.setContato(contato);
         }
 
         cuidador.setData_criacao(LocalDateTime.now());

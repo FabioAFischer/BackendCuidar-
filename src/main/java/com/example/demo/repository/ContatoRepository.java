@@ -10,9 +10,9 @@ import org.springframework.stereotype.Repository;
 import com.example.demo.entity.Contato;
 
 @Repository
-public interface ContatoRepository extends JpaRepository<Contato, Integer> {
+public interface ContatoRepository extends JpaRepository<Contato, Long> {
 
     Optional<Contato> findByTelefone(String telefone);
 
-    Page<Contato> findByIdosos_Id(Integer idosoId, Pageable pageable);
+    Page<Contato> findByIdosos_Id(Long idosoId, Pageable pageable);
 }

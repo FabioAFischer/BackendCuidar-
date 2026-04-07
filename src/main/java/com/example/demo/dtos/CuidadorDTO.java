@@ -13,10 +13,11 @@ import lombok.ToString;
 @ToString
 public class CuidadorDTO {
 
-    private Integer id;
+    private Long id;
     private String nome;
-    private Integer cpf;
+    private Long cpf;
     private String login;
     private String senha;
-    private Integer instituicaoId;
+    private Long instituicaoId;
+    private ContatoDTO contato;
 }

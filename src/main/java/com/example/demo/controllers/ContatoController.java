@@ -3,15 +3,11 @@ package com.example.demo.controllers;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -32,7 +28,7 @@ public class ContatoController {
 
     @GetMapping("/listar_todas/idoso/{idosoId}")
     public ResponseEntity<Page<ContatoDTO>> listarTodas(
-            @PathVariable Integer idosoId,
+            @PathVariable Long idosoId,
             @PageableDefault(size = 10, sort = "id") Pageable pageable) {
         return ResponseEntity.ok(service.listarPorIdoso(idosoId, pageable));
     }
@@ -45,12 +41,12 @@ public class ContatoController {
     //}
 
     /*@PutMapping("/atualizar/{id}")
-    public ResponseEntity<ContatoDTO> atualizar(@PathVariable Integer id, @RequestBody ContatoDTO dto) {
+    public ResponseEntity<ContatoDTO> atualizar(@PathVariable Long id, @RequestBody ContatoDTO dto) {
         return ResponseEntity.ok(service.atualizar(id, dto));
     }*/
 
     @DeleteMapping("/deletar/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable Integer id) {
+    public ResponseEntity<Void> deletar(@PathVariable Long id) {
         service.inativar(id);
         return ResponseEntity.noContent().build();
     }

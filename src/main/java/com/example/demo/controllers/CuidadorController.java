@@ -36,7 +36,7 @@ public class CuidadorController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CuidadorDTO> buscarPorId(@PathVariable Integer id) {
+    public ResponseEntity<CuidadorDTO> buscarPorId(@PathVariable Long id) {
         return ResponseEntity.ok(service.buscarPorId(id));
     }
 
@@ -47,13 +47,18 @@ public class CuidadorController {
     }
 
     @PutMapping("/atualizar/{id}")
-    public ResponseEntity<CuidadorDTO> atualizar(@PathVariable Integer id, @RequestBody CuidadorDTO dto) {
+    public ResponseEntity<CuidadorDTO> atualizar(@PathVariable Long id, @RequestBody CuidadorDTO dto) {
         return ResponseEntity.ok(service.atualizar(id, dto));
     }
 
     @DeleteMapping("/deletar/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable Integer id) {
+    public ResponseEntity<Void> deletar(@PathVariable Long id) {
         service.inativar(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/ping")
+    public String ping() {
+        return "pong";
     }
 }

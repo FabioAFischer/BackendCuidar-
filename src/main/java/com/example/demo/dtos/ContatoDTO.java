@@ -1,4 +1,5 @@
 package com.example.demo.dtos;
+
 import java.util.List;
 
 import lombok.AllArgsConstructor;
@@ -7,7 +8,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-
 @Getter
 @Setter
 @NoArgsConstructor
@@ -15,10 +15,9 @@ import lombok.ToString;
 @ToString
 public class ContatoDTO {
 
-    private Integer id;
+    private Long id;
     private String ddd;
     private String telefone;
-    private Integer cuidadorId;
-    private List<Integer> idososIds;
-
+    private Long cuidadorId;
+    private List<Long> idososIds;
 }

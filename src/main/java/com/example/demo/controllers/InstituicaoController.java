@@ -36,7 +36,7 @@ public class InstituicaoController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<InstituicaoDTO> buscarPorId(@PathVariable Integer id) {
+    public ResponseEntity<InstituicaoDTO> buscarPorId(@PathVariable Long id) {
         return ResponseEntity.ok(service.buscarPorId(id));
     }
 
@@ -47,12 +47,12 @@ public class InstituicaoController {
     }
 
     @PutMapping("/atualizar/{id}")
-    public ResponseEntity<InstituicaoDTO> atualizar(@PathVariable Integer id, @RequestBody InstituicaoDTO dto) {
+    public ResponseEntity<InstituicaoDTO> atualizar(@PathVariable Long id, @RequestBody InstituicaoDTO dto) {
         return ResponseEntity.ok(service.atualizar(id, dto));
     }
 
     @DeleteMapping("/deletar/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable Integer id) {
+    public ResponseEntity<Void> deletar(@PathVariable Long id) {
         service.inativar(id);
         return ResponseEntity.noContent().build();
     }

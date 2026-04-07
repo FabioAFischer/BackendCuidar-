@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.dtos.CuidadorDTO;
+import com.example.demo.entity.Contato;
 import com.example.demo.entity.Cuidador;
 import com.example.demo.entity.Instituicao;
 import com.example.demo.enums.Status;
@@ -30,7 +31,7 @@ public class CuidadorService {
                 .map(CuidadorMapper::toDTO);
     }
 
-    public CuidadorDTO buscarPorId(Integer id) {
+    public CuidadorDTO buscarPorId(Long id) {
         Cuidador cuidador = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Cuidador não encontrado"));
 
@@ -46,6 +47,10 @@ public class CuidadorService {
             throw new RuntimeException("Já existe um cuidador com esse login");
         }
 
+        if (dto.getContato() == null) {
+            throw new RuntimeException("O contato do cuidador deve ser informado");
+        }
+
         Instituicao instituicao = instituicaoRepository.findById(dto.getInstituicaoId())
                 .orElseThrow(() -> new RuntimeException("Instituição não encontrada"));
 
@@ -56,7 +61,7 @@ public class CuidadorService {
         return CuidadorMapper.toDTO(salvo);
     }
 
-    public CuidadorDTO atualizar(Integer id, CuidadorDTO dto) {
+    public CuidadorDTO atualizar(Long id, CuidadorDTO dto) {
         Cuidador cuidador = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Cuidador não encontrado"));
 
@@ -80,11 +85,24 @@ public class CuidadorService {
         cuidador.setInstituicao(instituicao);
         cuidador.setData_atualizacao(LocalDateTime.now());
 
+        if (dto.getContato() != null) {
+            Contato contato = cuidador.getContato();
+
+            if (contato == null) {
+                contato = new Contato();
+                contato.setCuidador(cuidador);
+                cuidador.setContato(contato);
+            }
+
+            contato.setDdd(dto.getContato().getDdd());
+            contato.setTelefone(dto.getContato().getTelefone());
+        }
+
         Cuidador atualizado = repository.save(cuidador);
         return CuidadorMapper.toDTO(atualizado);
     }
 
-    public void inativar(Integer id) {
+    public void inativar(Long id) {
         Cuidador cuidador = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Cuidador não encontrado"));
 

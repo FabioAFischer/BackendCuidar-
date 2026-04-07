@@ -35,7 +35,7 @@ public class Instituicao extends Usuario {
     @Column(length = 2)
     private String uf;
 
-    private Integer numero;
+    private Long numero;
 
     @Column(length = 8)
     private String cep;

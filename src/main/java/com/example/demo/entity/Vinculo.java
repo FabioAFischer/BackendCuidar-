@@ -34,7 +34,7 @@ public class Vinculo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", updatable = false, nullable = false)
-    private Integer id;
+    private Long id;
 
     @NotNull(message = "Data de criação é obrigatória")
     @Column(name = "data_criacao", nullable = false)
