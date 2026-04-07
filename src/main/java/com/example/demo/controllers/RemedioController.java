@@ -8,8 +8,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.demo.dtos.ContatoDTO;
-import com.example.demo.dtos.InstituicaoDTO;
+import com.example.demo.dtos.RemedioDTO;
 import com.example.demo.services.ContatoService;
+import com.example.demo.services.RemedioService;
 
 import io.swagger.v3.oas.annotations.Operation;
 
