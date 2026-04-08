@@ -30,7 +30,7 @@ public class Idoso extends Usuario {
 
     @NotNull(message = "CPF deve ser preenchido")
     @Column(length = 11, nullable = false, unique = true)
-    private Long cpf;
+    private String cpf;
 
     @Column(length = 300)
     private String observacoes;
