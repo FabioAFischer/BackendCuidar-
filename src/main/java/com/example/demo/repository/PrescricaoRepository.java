@@ -20,4 +20,6 @@ public interface PrescricaoRepository extends JpaRepository<Prescricao, Integer>
 
     Page<Prescricao> findByRemedio(Integer remedio, Pageable pageable);
 
+    boolean existsById(Integer id);
+
 }

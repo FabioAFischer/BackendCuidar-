@@ -1,19 +1,8 @@
 package com.example.demo.services;
 
-import org.jspecify.annotations.Nullable;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 
-import com.example.demo.dtos.ContatoDTO;
-import com.example.demo.dtos.InstituicaoDTO;
-import com.example.demo.entity.Contato;
-import com.example.demo.entity.Cuidador;
-import com.example.demo.entity.Idoso;
-import com.example.demo.entity.Instituicao;
-import com.example.demo.enums.Status;
-import com.example.demo.mappers.ContatoMapper;
-import com.example.demo.mappers.InstituicaoMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+
 
 import org.springframework.stereotype.Service;
 
