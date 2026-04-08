@@ -24,7 +24,6 @@ public class PrescricaoDTO {
     private LocalDateTime data_criacao;
     private Status status;
     private LocalDateTime data_fim;
-    private Boolean necessario_jejum;
     private String instrucao;
     private Double intervalo;
     private String dosagem;
