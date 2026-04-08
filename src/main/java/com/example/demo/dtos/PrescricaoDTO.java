@@ -18,10 +18,9 @@ import lombok.ToString;
 @ToString
 public class PrescricaoDTO {
 
-    private int id;
+    private Integer id;
     private Remedio remedio;
     private Idoso idoso;
-    private String medicamento;
     private LocalDateTime data_criacao;
     private Status status;
     private LocalDateTime data_fim;
