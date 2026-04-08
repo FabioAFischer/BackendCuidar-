@@ -1,6 +1,8 @@
 package com.example.demo.entity;
 
 
+import com.example.demo.enums.Status;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -36,5 +38,8 @@ public class Remedio {
     @Column(name = "observacao", length = 500)
     private String observacao;
 
+    @Size(max = 20, message = "Tamanho do status excedido")
+    @Column(name = "status", length = 20)
+    private Status status;
 
 }

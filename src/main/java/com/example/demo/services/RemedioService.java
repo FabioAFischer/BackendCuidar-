@@ -12,7 +12,10 @@ import com.example.demo.entity.Instituicao;
 import com.example.demo.entity.Remedio;
 import com.example.demo.enums.Status;
 import com.example.demo.mappers.InstituicaoMapper;
-import com.example.demo.repository.InstituicaoRepository;
+import com.example.demo.mappers.RemedioMapper;
+
+import com.example.demo.repository.RemedioRepository;
+
 
 @Service
 public class RemedioService {
@@ -28,7 +31,7 @@ public class RemedioService {
                 .map(RemedioMapper::toDTO);
     }
 
-    public RemedioDTO buscarPorId(Long id) {
+    public RemedioDTO buscarPorId(int id) {
         Remedio remedio = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Remédio não encontrado"));
 
@@ -47,7 +50,7 @@ public class RemedioService {
     }
 
 
-    public RemedioDTO atualizar(Long id, RemedioDTO dto) {
+    public RemedioDTO atualizar(int id, RemedioDTO dto) {
         Remedio remedio = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Remédio não encontrado"));
 
@@ -57,11 +60,20 @@ public class RemedioService {
         }
 
         remedio.setNome(dto.getNome());
-        remedio.setDescricao(dto.getDescricao());
-        remedio.setDataAtualizacao(LocalDateTime.now());
+        remedio.setObservacao(dto.getObservacao());
+        
 
         Remedio atualizado = repository.save(remedio);
         return RemedioMapper.toDTO(atualizado);
+    }
+
+    public void inativar(int id) {
+        Remedio remedio = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Remédio não encontrado"));
+
+        remedio.setStatus(Status.INATIVO);
+
+        repository.save(remedio);
     }
 
 

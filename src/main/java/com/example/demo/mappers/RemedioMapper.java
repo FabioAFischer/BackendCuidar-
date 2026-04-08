@@ -12,6 +12,7 @@ public class RemedioMapper {
         dto.setId(remedio.getId());
         dto.setNome(remedio.getNome());
         dto.setObservacao(remedio.getObservacao());
+        dto.setStatus(remedio.getStatus());
 
 
         return dto;
@@ -24,6 +25,7 @@ public class RemedioMapper {
         remedio.setId(dto.getId());
         remedio.setNome(dto.getNome());
         remedio.setObservacao(dto.getObservacao());
+        remedio.setStatus(dto.getStatus());
 
         return remedio;
     }
@@ -33,6 +35,7 @@ public class RemedioMapper {
 
         remedio.setNome(dto.getNome());
         remedio.setObservacao(dto.getObservacao());
+        remedio.setStatus(dto.getStatus());
     }
 
 }

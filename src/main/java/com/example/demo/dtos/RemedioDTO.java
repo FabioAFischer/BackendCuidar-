@@ -1,5 +1,7 @@
 package com.example.demo.dtos;
 
+import com.example.demo.enums.Status;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,4 +17,5 @@ public class RemedioDTO {
     private int id;
     private String nome;
     private String observacao;
+    private Status status;
 }
