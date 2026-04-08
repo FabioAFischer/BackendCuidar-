@@ -1,9 +1,15 @@
 package com.example.demo.mappers;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
+import com.example.demo.dtos.InstituicaoDTO;
 import com.example.demo.dtos.PrescricaoDTO;
+import com.example.demo.entity.Instituicao;
 import com.example.demo.entity.Prescricao;
-
+import com.example.demo.enums.Perfil;
+import com.example.demo.enums.Status;
 
 
 public class PrescricaoMapper {
