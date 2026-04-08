@@ -47,7 +47,7 @@ public class ContatoMapper {
         return contato;
     }
 
-    public static void updateEntity(Contato contato, ContatoDTO dto, Cuidador cuidador, List<Idoso> idosos) {
+    public static void atualizarContato(Contato contato, ContatoDTO dto, Cuidador cuidador, List<Idoso> idosos) {
         if (dto == null) return;
 
         contato.setDdd(dto.getDdd());
