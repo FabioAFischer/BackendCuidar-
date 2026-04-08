@@ -46,5 +46,8 @@ public class Idoso extends Usuario {
     private Contato contato;
 
     @OneToMany(mappedBy = "idoso", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Alerta> alertas = new ArrayList<>();
+
+    @OneToMany(mappedBy = "idoso", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Vinculo> vinculos = new ArrayList<>();
 }
