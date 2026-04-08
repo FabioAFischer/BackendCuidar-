@@ -31,7 +31,7 @@ public class CuidadorService {
                 .map(CuidadorMapper::toDTO);
     }
 
-    public CuidadorDTO buscarPorId(Long id) {
+    public CuidadorDTO buscarPorId(Integer id) {
         Cuidador cuidador = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Cuidador não encontrado"));
 
@@ -61,7 +61,7 @@ public class CuidadorService {
         return CuidadorMapper.toDTO(salvo);
     }
 
-    public CuidadorDTO atualizar(Long id, CuidadorDTO dto) {
+    public CuidadorDTO atualizar(Integer id, CuidadorDTO dto) {
         Cuidador cuidador = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Cuidador não encontrado"));
 
@@ -102,7 +102,7 @@ public class CuidadorService {
         return CuidadorMapper.toDTO(atualizado);
     }
 
-    public void inativar(Long id) {
+    public void inativar(Integer id) {
         Cuidador cuidador = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Cuidador não encontrado"));
 

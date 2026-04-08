@@ -16,7 +16,7 @@ import io.swagger.v3.oas.annotations.Operation;
 @CrossOrigin(origins = "*")
 public class ContatoController {
 
-    private final ContatoService service;
+    /*private final ContatoService service;
 
     public ContatoController(ContatoService service) {
         this.service = service;
@@ -28,13 +28,13 @@ public class ContatoController {
     )
     @GetMapping("/listar/{idosoId}")
     public ResponseEntity<Page<ContatoDTO>> listarTodas(
-            @PathVariable Long idosoId,
+            @PathVariable Integer idosoId,
             @PageableDefault(size = 10, sort = "id") Pageable pageable) {
 
         return ResponseEntity.ok(service.listarPorIdoso(idosoId, pageable));
     }
 
-    /*
+    
     @Operation(
         summary = "Cadastrar contato",
         description = "Cria um novo contato com os dados informados"
@@ -55,7 +55,7 @@ public class ContatoController {
     public ResponseEntity<ContatoDTO> atualizar(@PathVariable Integer id, @RequestBody ContatoDTO dto) {
         return ResponseEntity.ok(service.atualizar(id, dto));
     }
-    */
+    
 
     @Operation(
         summary = "Deletar (inativar) contato",
@@ -66,4 +66,5 @@ public class ContatoController {
         service.inativar(id);
         return ResponseEntity.noContent().build();
     }
+    */
 }

@@ -27,12 +27,12 @@ public class ContatoService {
     //@Autowired
     //private  IdosoRepository idosoRepository;
 
-	public Page<ContatoDTO> listarPorIdoso(Long idosoId, Pageable pageable) {
+	/*public Page<ContatoDTO> listarPorIdoso(Integer idosoId, Pageable pageable) {
 		return contatoRepository.findByIdosos_Id(idosoId, pageable)
               .map(ContatoMapper::toDTO);
 	}
 
-   public ContatoDTO atualizar(Long id, ContatoDTO dto) {
+  public ContatoDTO atualizar(Integer id, ContatoDTO dto) {
         Contato contato = contatoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Contato não encontrado"));
 
@@ -44,7 +44,7 @@ public class ContatoService {
                     });
         }
 
-        /*Cuidador cuidador = contato.getCuidador();
+        Cuidador cuidador = contato.getCuidador();
         if (dto.getCuidadorId() != null) {
             cuidador = cuidadorRepository.findById(dto.getCuidadorId())
                     .orElseThrow(() -> new RuntimeException("Cuidador não encontrado"));
@@ -56,19 +56,19 @@ public class ContatoService {
         }
 
         ContatoMapper.updateEntity(contato, dto, cuidador, idosos);
-        */
+        
         Contato atualizado = contatoRepository.save(contato);
         return ContatoMapper.toDTO(atualizado);
     }
 
-   public void inativar(Long id) {
+   public void inativar(Integer id) {
         Contato contato = contatoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Contato não encontrado"));
 
         contatoRepository.delete(contato);
     }
 
-   /* public ContatoDTO criar(ContatoDTO dto) {
+    public ContatoDTO criar(ContatoDTO dto) {
         if (contatoRepository.findByTelefone(dto.getTelefone()).isPresent()) {
             throw new RuntimeException("Já existe um contato com esse telefone");
         }

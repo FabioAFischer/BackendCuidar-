@@ -38,7 +38,7 @@ public class InstituicaoController {
         description = "Retorna os dados de uma instituição específica com base no ID informado"
     )
     @GetMapping("/listar/{id}")
-    public ResponseEntity<InstituicaoDTO> buscarPorId(@PathVariable Long id) {
+    public ResponseEntity<InstituicaoDTO> buscarPorId(@PathVariable Integer id) {
         return ResponseEntity.ok(service.buscarPorId(id));
     }
 
@@ -57,7 +57,7 @@ public class InstituicaoController {
         description = "Atualiza os dados de uma instituição existente com base no ID informado"
     )
     @PutMapping("/atualizar/{id}")
-    public ResponseEntity<InstituicaoDTO> atualizar(@PathVariable Long id, @RequestBody InstituicaoDTO dto) {
+    public ResponseEntity<InstituicaoDTO> atualizar(@PathVariable Integer id, @RequestBody InstituicaoDTO dto) {
         return ResponseEntity.ok(service.atualizar(id, dto));
     }
 
@@ -66,7 +66,7 @@ public class InstituicaoController {
         description = "Realiza a exclusão lógica (inativação) de uma instituição com base no ID informado"
     )
     @DeleteMapping("/deletar/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable Long id) {
+    public ResponseEntity<Void> deletar(@PathVariable Integer id) {
         service.inativar(id);
         return ResponseEntity.noContent().build();
     }

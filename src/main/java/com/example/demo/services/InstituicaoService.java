@@ -26,7 +26,7 @@ public class InstituicaoService {
                 .map(InstituicaoMapper::toDTO);
     }
 
-    public InstituicaoDTO buscarPorId(Long id) {
+    public InstituicaoDTO buscarPorId(Integer id) {
         Instituicao instituicao = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Instituição não encontrada"));
 
@@ -44,7 +44,7 @@ public class InstituicaoService {
         return InstituicaoMapper.toDTO(salva);
     }
 
-    public InstituicaoDTO atualizar(Long id, InstituicaoDTO dto) {
+    public InstituicaoDTO atualizar(Integer id, InstituicaoDTO dto) {
         Instituicao instituicao = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Instituição não encontrada"));
 
@@ -65,7 +65,7 @@ public class InstituicaoService {
         return InstituicaoMapper.toDTO(atualizada);
     }
 
-    public void inativar(Long id) {
+    public void inativar(Integer id) {
         Instituicao instituicao = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Instituição não encontrada"));
 

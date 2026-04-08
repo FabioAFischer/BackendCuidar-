@@ -11,11 +11,11 @@ import com.example.demo.entity.Cuidador;
 import com.example.demo.enums.Status;
 
 @Repository
-public interface CuidadorRepository extends JpaRepository<Cuidador, Long> {
+public interface CuidadorRepository extends JpaRepository<Cuidador, Integer> {
 
-    Optional<Cuidador> findByCpf(Long cpf);
+    Optional<Cuidador> findByCpf(String cpf);
 
-    boolean existsByCpf(Long cpf);
+    boolean existsByCpf(String cpf);
 
     Optional<Cuidador> findByLogin(String login);
 
