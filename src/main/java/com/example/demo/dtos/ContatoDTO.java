@@ -15,9 +15,9 @@ import lombok.ToString;
 @ToString
 public class ContatoDTO {
 
-    private Long id;
+    private Integer id;
     private String ddd;
     private String telefone;
-    private Long cuidadorId;
-    private List<Long> idososIds;
+    private Integer cuidadorId;
+    private List<Integer> idosos;
 }
