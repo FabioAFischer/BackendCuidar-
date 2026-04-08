@@ -7,8 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.example.demo.entity.Cuidador;
-import com.example.demo.entity.Instituicao;
+
 import com.example.demo.entity.Remedio;
 import com.example.demo.enums.Status;
 
