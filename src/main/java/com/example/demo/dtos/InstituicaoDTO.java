@@ -13,12 +13,12 @@ import lombok.ToString;
 @ToString
 public class InstituicaoDTO {
     
-    private Long id;
+    private Integer id;
     private String nome;
     private String cnpj;
     private String bairro;
     private String uf;
-    private Long numero;
+    private Integer numero;
     private String cep;
 
 

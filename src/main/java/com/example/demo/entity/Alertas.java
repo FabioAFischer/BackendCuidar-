@@ -36,7 +36,7 @@ public class Alertas {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private int id;
     
     @NotNull(message = "idoso obrigatório")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

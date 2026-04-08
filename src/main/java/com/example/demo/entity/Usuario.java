@@ -36,7 +36,7 @@ public abstract class Usuario {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", updatable = false, nullable = false)
-    private Long id;
+    private int id;
 
     @NotBlank(message = "Nome Obrigatorio")
     @Size(max = 200, message = "Tamanho do nome do usuário excedido")
