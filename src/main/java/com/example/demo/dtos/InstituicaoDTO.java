@@ -13,7 +13,7 @@ import lombok.ToString;
 @ToString
 public class InstituicaoDTO {
     
-    private Long id;
+    private Inte id;
     private String nome;
     private String cnpj;
     private String bairro;
