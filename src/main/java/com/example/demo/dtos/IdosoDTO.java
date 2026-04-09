@@ -18,12 +18,12 @@ import lombok.ToString;
 @ToString
 public class IdosoDTO {
 
-    private Long id;
+    private Integer id;
     private String nome;
-    private Long cpf;
+    private String cpf;
     private String observacoes;
-    private Long instituicaoId;
-    private Long contatoId;
+    private Integer instituicaoId;
+    private Integer contatoId;
     private com.example.demo.dtos.ContatoDTO contato;
     private LocalDateTime data_criacao;
     private LocalDateTime data_atualizacao;

@@ -11,11 +11,11 @@ import com.example.demo.entity.Idoso;
 import com.example.demo.enums.Status;
 
 @Repository
-public interface IdosoRepository extends JpaRepository<Idoso, Long> {
+public interface IdosoRepository extends JpaRepository<Idoso, Integer> {
 
-    Optional<Idoso> findByCpf(Long cpf);
+    Optional<Idoso> findByCpf(String cpf);
 
-    boolean existsByCpf(Long cpf);
+    boolean existsByCpf(String cpf);
 
     Page<Idoso> findByStatus(Status status, Pageable pageable);
 
