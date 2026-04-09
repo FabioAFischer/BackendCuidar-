@@ -36,7 +36,7 @@ public class IdosoService {
                 .map(IdosoMapper::toDTO);
     }
 
-    public IdosoDTO buscarPorId(Long id) {
+    public IdosoDTO buscarPorId(Integer id) {
         Idoso idoso = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Idoso não encontrado"));
 
@@ -76,7 +76,7 @@ public class IdosoService {
         return IdosoMapper.toDTO(salvo);
     }
 
-    public IdosoDTO atualizar(Long id, IdosoDTO dto) {
+    public IdosoDTO atualizar(Integer id, IdosoDTO dto) {
         Idoso idoso = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Idoso não encontrado"));
 
@@ -120,7 +120,7 @@ public class IdosoService {
         return IdosoMapper.toDTO(atualizado);
     }
 
-    public void inativar(Long id) {
+    public void inativar(Integer id) {
         Idoso idoso = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Idoso não encontrado"));
 
