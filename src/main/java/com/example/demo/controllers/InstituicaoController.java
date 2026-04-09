@@ -38,7 +38,7 @@ public class InstituicaoController {
         description = "Retorna os dados de uma instituição específica com base no ID informado"
     )
     @GetMapping("/listar/{id}")
-    public ResponseEntity<InstituicaoDTO> buscarPorId(@PathVariable Integer id) {
+    public ResponseEntity<InstituicaoDTO> buscarPorId(@PathVariable int id) {
         return ResponseEntity.ok(service.buscarPorId(id));
     }
 

@@ -19,5 +19,6 @@ public class ContatoDTO {
     private String ddd;
     private String telefone;
     private Integer cuidadorId;
-    private List<Integer> idosos;
+    private List<Integer> idososIds;
+
 }
