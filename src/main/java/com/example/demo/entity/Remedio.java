@@ -1,10 +1,11 @@
 package com.example.demo.entity;
 
-
 import com.example.demo.enums.Status;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -12,7 +13,6 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
-
 
 @Entity
 @Getter
@@ -22,7 +22,6 @@ import lombok.*;
 @ToString
 @Table(name = "remedio")
 public class Remedio {
-    
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,8 +37,8 @@ public class Remedio {
     @Column(name = "observacao", length = 500)
     private String observacao;
 
-    @Size(max = 20, message = "Tamanho do status excedido")
-    @Column(name = "status", length = 20)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false, length = 20)
     private Status status;
 
 }

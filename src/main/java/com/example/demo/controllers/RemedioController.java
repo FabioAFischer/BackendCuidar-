@@ -72,4 +72,9 @@ public class RemedioController {
         service.inativar(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/ping")
+    public String ping() {
+        return "pong";
+    }
 }

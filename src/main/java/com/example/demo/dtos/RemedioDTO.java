@@ -14,7 +14,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @ToString
 public class RemedioDTO {
-    private int id;
+    private Integer id;
     private String nome;
     private String observacao;
     private Status status;
