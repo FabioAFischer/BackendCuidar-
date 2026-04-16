@@ -29,14 +29,18 @@ public class Instituicao extends Usuario {
     @Column(length = 14, nullable = false, unique = true)
     private String cnpj;
 
+    @NotBlank(message = "Bairro deve ser preenchido")
     @Column(length = 200)
     private String bairro;
 
+    @NotBlank(message = "Uf deve ser preenchido")
     @Column(length = 2)
     private String uf;
 
+    @NotBlank(message = "Número deve ser preenchido")
     private int numero;
 
+    @NotBlank(message = "CEP deve ser preenchido")
     @Column(length = 8)
     private String cep;
 
