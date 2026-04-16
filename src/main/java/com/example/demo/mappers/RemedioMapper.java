@@ -25,7 +25,6 @@ public class RemedioMapper {
 
         Remedio remedio = new Remedio();
 
-        // NÃO SETA ID
         remedio.setNome(dto.getNome());
         remedio.setObservacao(dto.getObservacao());
 
