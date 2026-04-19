@@ -52,7 +52,7 @@ public class CuidadorMapper {
         }
 
         Cuidador cuidador = new Cuidador();
-        cuidador.setId(dto.getId());
+        
         cuidador.setNome(dto.getNome());
         cuidador.setCpf(dto.getCpf());
         cuidador.setLogin(dto.getLogin());
