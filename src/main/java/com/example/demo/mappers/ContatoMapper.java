@@ -38,7 +38,7 @@ public class ContatoMapper {
         if (dto == null) return null;
 
         Contato contato = new Contato();
-        contato.setId(dto.getId());
+        
         contato.setDdd(dto.getDdd());
         contato.setTelefone(dto.getTelefone());
         contato.setCuidador(cuidador);

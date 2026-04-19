@@ -37,7 +37,7 @@ public class InstituicaoMapper {
         }
 
         Instituicao instituicao = new Instituicao();
-        instituicao.setId(dto.getId());
+        
         instituicao.setNome(dto.getNome());
         instituicao.setCnpj(dto.getCnpj());
         instituicao.setBairro(dto.getBairro());
