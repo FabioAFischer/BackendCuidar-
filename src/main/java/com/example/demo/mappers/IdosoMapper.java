@@ -43,7 +43,7 @@ public class IdosoMapper {
         if (dto == null) return null;
 
         Idoso idoso = new Idoso();
-        idoso.setId(dto.getId());
+       
         idoso.setNome(dto.getNome());
         idoso.setCpf(dto.getCpf());
         idoso.setObservacoes(dto.getObservacoes());
