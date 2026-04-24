@@ -3,6 +3,8 @@ package com.example.demo.entity;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hibernate.validator.constraints.br.CPF;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -29,6 +31,7 @@ import lombok.ToString;
 @Table(name = "cuidador")
 public class Cuidador extends Usuario {
 
+    @CPF
     @NotNull(message = "CPF deve ser preenchido")
     @Column(length = 11, nullable = false, unique = true)
     private String cpf;
