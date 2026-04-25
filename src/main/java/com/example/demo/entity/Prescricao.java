@@ -57,7 +57,7 @@ public class Prescricao {
 
     private LocalDateTime data_fim;
 
-    @NotNulldsa(message = "Campo necessário")
+    @NotNull(message = "Campo necessário")
     private String instrucao;
 
     @NotNull(message = "Campo intervalo vazio")

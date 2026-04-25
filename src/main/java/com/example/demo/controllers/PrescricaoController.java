@@ -1,11 +1,12 @@
 package com.example.demo.controllers;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import com.example.demo.dtos.PrescricaoDTO;
 import com.example.demo.services.PrescricaoService;
 
@@ -16,17 +17,42 @@ import io.swagger.v3.oas.annotations.Operation;
 @CrossOrigin(origins = "*")
 public class PrescricaoController {
 
-    @Autowired
-    private PrescricaoService service;
+    private final PrescricaoService service;
+
+    public PrescricaoController(PrescricaoService service) {
+        this.service = service;
+    }
 
     @Operation(
         summary = "Listar prescrições",
-        description = "Retorna uma lista paginada de prescrições ativas ordenadas por nome"
+        description = "Retorna uma lista paginada de prescrições ativas ordenadas por data de criação"
     )
     @GetMapping("/listar_todas")
     public ResponseEntity<Page<PrescricaoDTO>> listarTodas(
-            @PageableDefault(size = 10, sort = "nome") Pageable pageable) {
+            @PageableDefault(size = 10, sort = "data_criacao") Pageable pageable) {
         return ResponseEntity.ok(service.listarAtivas(pageable));
+    }
+
+    @Operation(
+        summary = "Listar prescrições por idoso",
+        description = "Retorna uma lista paginada de prescrições ativas vinculadas ao idoso informado"
+    )
+    @GetMapping("/listar_por_idoso/{idosoId}")
+    public ResponseEntity<Page<PrescricaoDTO>> listarPorIdoso(
+            @PathVariable Integer idosoId,
+            @PageableDefault(size = 10, sort = "data_criacao") Pageable pageable) {
+        return ResponseEntity.ok(service.listarPorIdoso(idosoId, pageable));
+    }
+
+    @Operation(
+        summary = "Listar prescrições por remédio",
+        description = "Retorna uma lista paginada de prescrições ativas vinculadas ao remédio informado"
+    )
+    @GetMapping("/listar_por_remedio/{remedioId}")
+    public ResponseEntity<Page<PrescricaoDTO>> listarPorRemedio(
+            @PathVariable Integer remedioId,
+            @PageableDefault(size = 10, sort = "data_criacao") Pageable pageable) {
+        return ResponseEntity.ok(service.listarPorRemedio(remedioId, pageable));
     }
 
     @Operation(
