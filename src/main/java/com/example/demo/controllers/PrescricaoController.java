@@ -1,0 +1,96 @@
+package com.example.demo.controllers;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import com.example.demo.dtos.PrescricaoDTO;
+import com.example.demo.services.PrescricaoService;
+
+import io.swagger.v3.oas.annotations.Operation;
+
+@RestController
+@RequestMapping("/prescricao")
+@CrossOrigin(origins = "*")
+public class PrescricaoController {
+
+    private final PrescricaoService service;
+
+    public PrescricaoController(PrescricaoService service) {
+        this.service = service;
+    }
+
+    @Operation(
+        summary = "Listar prescrições",
+        description = "Retorna uma lista paginada de prescrições ativas ordenadas por data de criação"
+    )
+    @GetMapping("/listar_todas")
+    public ResponseEntity<Page<PrescricaoDTO>> listarTodas(
+            @PageableDefault(size = 10, sort = "data_criacao") Pageable pageable) {
+        return ResponseEntity.ok(service.listarAtivas(pageable));
+    }
+
+    @Operation(
+        summary = "Listar prescrições por idoso",
+        description = "Retorna uma lista paginada de prescrições ativas vinculadas ao idoso informado"
+    )
+    @GetMapping("/listar_por_idoso/{idosoId}")
+    public ResponseEntity<Page<PrescricaoDTO>> listarPorIdoso(
+            @PathVariable Integer idosoId,
+            @PageableDefault(size = 10, sort = "data_criacao") Pageable pageable) {
+        return ResponseEntity.ok(service.listarPorIdoso(idosoId, pageable));
+    }
+
+    @Operation(
+        summary = "Listar prescrições por remédio",
+        description = "Retorna uma lista paginada de prescrições ativas vinculadas ao remédio informado"
+    )
+    @GetMapping("/listar_por_remedio/{remedioId}")
+    public ResponseEntity<Page<PrescricaoDTO>> listarPorRemedio(
+            @PathVariable Integer remedioId,
+            @PageableDefault(size = 10, sort = "data_criacao") Pageable pageable) {
+        return ResponseEntity.ok(service.listarPorRemedio(remedioId, pageable));
+    }
+
+    @Operation(
+        summary = "Buscar prescrição por ID",
+        description = "Retorna os dados de uma prescrição específica com base no ID informado"
+    )
+    @GetMapping("/listar/{id}")
+    public ResponseEntity<PrescricaoDTO> buscarPorId(@PathVariable Integer id) {
+        return ResponseEntity.ok(service.buscarPorId(id));
+    }
+
+    @Operation(
+        summary = "Cadastrar prescrição",
+        description = "Cria uma nova prescrição com os dados enviados no corpo da requisição"
+    )
+    @PostMapping("/cadastrar")
+    public ResponseEntity<PrescricaoDTO> criar(@RequestBody PrescricaoDTO dto) {
+        PrescricaoDTO criada = service.criar(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(criada);
+    }
+
+    @Operation(
+        summary = "Atualizar Prescrição",
+        description = "Atualiza os dados de uma prescrição existente com base no ID informado"
+    )
+    @PutMapping("/atualizar/{id}")
+    public ResponseEntity<PrescricaoDTO> atualizar(@PathVariable Integer id, @RequestBody PrescricaoDTO dto) {
+        return ResponseEntity.ok(service.atualizar(id, dto));
+    }
+
+    @Operation(
+        summary = "Deletar (inativar) prescrição",
+        description = "Realiza a exclusão lógica (inativação) de uma prescrição com base no ID informado"
+    )
+    @DeleteMapping("/deletar/{id}")
+    public ResponseEntity<Void> deletar(@PathVariable Integer id) {
+        service.inativar(id);
+        return ResponseEntity.noContent().build();
+    }
+
+}
