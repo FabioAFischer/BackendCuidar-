@@ -10,17 +10,19 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class AlertaDTO {
 
-    private int id;
+    private Integer id;
 
     @NotNull(message = "Idoso é obrigatório")
-    private Long idosoId;
+    private Integer idosoId;
 
     @NotNull(message = "Tipo do alerta é obrigatório")
     private TipoAlerta tipoAlerta;
@@ -28,7 +30,9 @@ public class AlertaDTO {
     @NotNull(message = "Status do alerta é obrigatório")
     private StatusAlertas statusAlertas;
 
-    private LocalDateTime data_Criacao;
-    private LocalDateTime data_Atualizacao;
-    private LocalDateTime data_Agendada;
+    private LocalDateTime dataCriacao;
+    private LocalDateTime dataAtualizacao;
+
+    @NotNull(message = "Data agendada é obrigatória")
+    private LocalDateTime dataAgendada;
 }

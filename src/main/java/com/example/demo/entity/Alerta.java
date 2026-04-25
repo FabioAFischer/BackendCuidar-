@@ -29,17 +29,18 @@ import lombok.ToString;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
+@ToString(exclude = "idoso")
 @Table(name = "alertas")
 public class Alerta {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", updatable = false, nullable = false)
     private int id;
     
     @NotNull(message = "idoso obrigatório")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_idoso", nullable = false, foreignKey = @ForeignKey(name = "fk_idoso_prescricao"))
+    @JoinColumn(name = "id_idoso", nullable = false, foreignKey = @ForeignKey(name = "fk_alerta_idoso"))
     private Idoso idoso;
 
     @NotNull(message = "tipo do alerta é obrigatório")
@@ -59,10 +60,7 @@ public class Alerta {
     @Column(name = "data_atualizacao")
     private LocalDateTime data_atualizacao;
 
-    @Column(name = "data_agendada")
+    @NotNull(message = "Data agendada é obrigatória")
+    @Column(name = "data_agendada", nullable = false)
     private LocalDateTime data_agendada;
-
-    public void setData_agendada(LocalDateTime data_Agendada) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
 }

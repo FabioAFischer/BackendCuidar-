@@ -1,39 +1,92 @@
 package com.example.demo.mappers;
 
-import org.springframework.stereotype.Component;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.example.demo.dtos.AlertaDTO;
 import com.example.demo.entity.Alerta;
 import com.example.demo.entity.Idoso;
+import com.example.demo.enums.StatusAlertas;
 
-@Component
 public class AlertaMapper {
 
-    public Alerta toEntity(AlertaDTO dto, Idoso idoso) {
+    private AlertaMapper() {
+    }
+
+    public static Alerta toEntity(AlertaDTO dto, Idoso idoso) {
+        if (dto == null) {
+            return null;
+        }
+
         Alerta alerta = new Alerta();
 
-        alerta.setId(dto.getId());
         alerta.setIdoso(idoso);
         alerta.setTipoAlerta(dto.getTipoAlerta());
-        alerta.setStatusAlertas(dto.getStatusAlertas());
-        alerta.setData_criacao(dto.getData_Criacao());
-        alerta.setData_atualizacao(dto.getData_Atualizacao());
-        alerta.setData_agendada(dto.getData_Agendada());
+        alerta.setData_criacao(LocalDateTime.now());
+        alerta.setData_agendada(dto.getDataAgendada());
+
+        if (dto.getStatusAlertas() != null) {
+            alerta.setStatusAlertas(dto.getStatusAlertas());
+        } else {
+            alerta.setStatusAlertas(StatusAlertas.AGENDADO);
+        }
 
         return alerta;
     }
 
-    public AlertaDTO toDTO(Alerta alerta) {
+    public static AlertaDTO toDTO(Alerta alerta) {
+        if (alerta == null) {
+            return null;
+        }
+
         AlertaDTO dto = new AlertaDTO();
 
         dto.setId(alerta.getId());
-        dto.setIdosoId(alerta.getIdoso().getId());
+        if (alerta.getIdoso() != null) {
+            dto.setIdosoId(alerta.getIdoso().getId());
+        }
         dto.setTipoAlerta(alerta.getTipoAlerta());
         dto.setStatusAlertas(alerta.getStatusAlertas());
-        dto.setData_Criacao(alerta.getData_criacao());
-        dto.setData_Atualizacao(alerta.getData_atualizacao());
-        dto.setData_Agendada(alerta.getData_agendada());
+        dto.setDataCriacao(alerta.getData_criacao());
+        dto.setDataAtualizacao(alerta.getData_atualizacao());
+        dto.setDataAgendada(alerta.getData_agendada());
 
         return dto;
+    }
+
+    public static void updateEntity(Alerta alerta, AlertaDTO dto, Idoso idoso) {
+        if (alerta == null || dto == null) {
+            return;
+        }
+
+        alerta.setIdoso(idoso);
+        alerta.setTipoAlerta(dto.getTipoAlerta());
+        alerta.setStatusAlertas(dto.getStatusAlertas());
+        alerta.setData_agendada(dto.getDataAgendada());
+        alerta.setData_atualizacao(LocalDateTime.now());
+    }
+
+    public static void inativarEntity(Alerta alerta) {
+        if (alerta == null) {
+            return;
+        }
+
+        alerta.setStatusAlertas(StatusAlertas.CANCELADO);
+        alerta.setData_atualizacao(LocalDateTime.now());
+    }
+
+    public static List<AlertaDTO> toDTOList(List<Alerta> alertas) {
+        List<AlertaDTO> lista = new ArrayList<>();
+
+        if (alertas == null) {
+            return lista;
+        }
+
+        for (Alerta alerta : alertas) {
+            lista.add(toDTO(alerta));
+        }
+
+        return lista;
     }
 }
