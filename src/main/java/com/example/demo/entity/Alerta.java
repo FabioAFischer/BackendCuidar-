@@ -1,9 +1,9 @@
 package com.example.demo.entity;
 
+import java.time.LocalDateTime;
+
 import com.example.demo.enums.StatusAlertas;
 import com.example.demo.enums.TipoAlerta;
-
-import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -17,7 +17,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -30,36 +29,38 @@ import lombok.ToString;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
+@ToString(exclude = "idoso")
 @Table(name = "alertas")
-public class Alertas {
+public class Alerta {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", updatable = false, nullable = false)
     private int id;
     
     @NotNull(message = "idoso obrigatório")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_idoso", nullable = false, foreignKey = @ForeignKey(name = "fk_idoso_prescricao"))
+    @JoinColumn(name = "id_idoso", nullable = false, foreignKey = @ForeignKey(name = "fk_alerta_idoso"))
     private Idoso idoso;
 
-    @NotBlank(message = "tipo do alerta é obrigatório")
+    @NotNull(message = "tipo do alerta é obrigatório")
     @Enumerated(EnumType.STRING)
     @Column(name = "tipoAlerta", nullable = false, length = 20)
     private TipoAlerta tipoAlerta;
 
-    @NotBlank(message = "Status do alerta é obrigatório")
+    @NotNull(message = "Status do alerta é obrigatório")
     @Enumerated(EnumType.STRING)
     @Column(name = "statusAlerta", nullable = false, length = 20)
     private StatusAlertas statusAlertas;
 
-    @NotBlank(message = "Data de criação é obrigatória")
+    @NotNull(message = "Data de criação é obrigatória")
     @Column(name = "data_criacao", nullable = false)
     private LocalDateTime data_criacao;
 
     @Column(name = "data_atualizacao")
     private LocalDateTime data_atualizacao;
 
-    @Column(name = "data_agendade")
-    private LocalDateTime data_agendade;
+    @NotNull(message = "Data agendada é obrigatória")
+    @Column(name = "data_agendada", nullable = false)
+    private LocalDateTime data_agendada;
 }
