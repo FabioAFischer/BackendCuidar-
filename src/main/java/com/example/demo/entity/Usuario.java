@@ -16,6 +16,7 @@ import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -43,19 +44,19 @@ public abstract class Usuario {
     @Column(name = "nome", nullable = false, length = 200)
     private String nome;
 
-    @NotBlank(message = "Data de criação é obrigatória")
+    @NotNull(message = "Data de criação é obrigatória")
     @Column(name = "data_criacao", nullable = false)
     private LocalDateTime data_criacao;
 
     @Column(name = "data_atualizacao")
     private LocalDateTime data_atualizacao;
 
-    @NotBlank(message = "Perfil é obrigatório")
+    @NotNull(message = "Perfil é obrigatório")
     @Enumerated(EnumType.STRING)
     @Column(name = "perfil", nullable = false, length = 20)
     private Perfil perfil;
 
-    @NotBlank(message = "Status é obrigatório")
+    @NotNull(message = "Status é obrigatório")
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
     private Status status;
