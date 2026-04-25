@@ -1,7 +1,5 @@
 package com.example.demo.dtos;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,12 +11,8 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString(exclude = "senha")
-public class AdministradorDTO {
+public class LoginRequestDTO {
 
-    private Integer id;
-    private String nome;
     private String email;
-
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String senha;
 }

@@ -2,6 +2,7 @@ package com.example.demo.services;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.dtos.AdministradorDTO;
@@ -14,9 +15,11 @@ import com.example.demo.repository.AdministradorRepository;
 public class AdministradorService {
 
     private final AdministradorRepository repository;
+    private final PasswordEncoder passwordEncoder;
 
-    public AdministradorService(AdministradorRepository repository) {
+    public AdministradorService(AdministradorRepository repository, PasswordEncoder passwordEncoder) {
         this.repository = repository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public Page<AdministradorDTO> listarAtivos(Pageable pageable) {
@@ -37,6 +40,7 @@ public class AdministradorService {
         }
 
         Administrador administrador = AdministradorMapper.toEntity(dto);
+        administrador.setSenha(criptografarSenha(dto.getSenha()));
         Administrador salvo = repository.save(administrador);
 
         return AdministradorMapper.toDTO(salvo);
@@ -52,6 +56,9 @@ public class AdministradorService {
         }
 
         AdministradorMapper.updateEntity(administrador, dto);
+        if (dto.getSenha() != null && !dto.getSenha().isBlank()) {
+            administrador.setSenha(criptografarSenha(dto.getSenha()));
+        }
 
         Administrador atualizado = repository.save(administrador);
         return AdministradorMapper.toDTO(atualizado);
@@ -64,5 +71,17 @@ public class AdministradorService {
         AdministradorMapper.inativarEntity(administrador);
 
         repository.save(administrador);
+    }
+
+    private String criptografarSenha(String senha) {
+        if (senha == null || senha.isBlank()) {
+            throw new RuntimeException("Senha é obrigatória");
+        }
+
+        if (senha.startsWith("$2a$") || senha.startsWith("$2b$") || senha.startsWith("$2y$")) {
+            return senha;
+        }
+
+        return passwordEncoder.encode(senha);
     }
 }

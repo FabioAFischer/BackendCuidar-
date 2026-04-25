@@ -42,11 +42,16 @@ services:
 
       SPRING_JACKSON_TIME_ZONE: America/Sao_Paulo
       SPRING_JPA_PROPERTIES_HIBERNATE_JDBC_TIME_ZONE: America/Sao_Paulo
+
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS:-86400000}
+
     depends_on:
       db:
         condition: service_healthy
     networks:
       - backend
+
 volumes:
   pg_data:
 
