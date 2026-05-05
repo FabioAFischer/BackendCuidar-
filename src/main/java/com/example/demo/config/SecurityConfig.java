@@ -35,7 +35,7 @@ public class SecurityConfig {
                                 "/v3/api-docs/**")
                         .permitAll()
                         .requestMatchers("/administrador/**").hasRole("ADMINISTRADOR")
-                        .requestMatchers("/instituicao/**").hasRole("INSTITUICAO")
+                        .requestMatchers("/instituicao/**").hasAnyRole("ADMINISTRADOR", "INSTITUICAO")
                         .requestMatchers("/cuidador/**").hasRole("CUIDADOR")
                         .requestMatchers("/idoso/**").hasRole("CUIDADOR")
                         .requestMatchers("/remedio/**").hasRole("CUIDADOR")
