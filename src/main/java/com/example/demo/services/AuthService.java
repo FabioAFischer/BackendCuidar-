@@ -3,6 +3,7 @@ package com.example.demo.services;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.entity.Administrador;
@@ -21,14 +22,17 @@ public class AuthService {
     private final AdministradorRepository administradorRepository;
     private final CuidadorRepository cuidadorRepository;
     private final InstituicaoRepository instituicaoRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public AuthService(
             AdministradorRepository administradorRepository,
             CuidadorRepository cuidadorRepository,
-            InstituicaoRepository instituicaoRepository) {
+            InstituicaoRepository instituicaoRepository,
+            PasswordEncoder passwordEncoder) {
         this.administradorRepository = administradorRepository;
         this.cuidadorRepository = cuidadorRepository;
         this.instituicaoRepository = instituicaoRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public Map<String, Object> login(Map<String, String> dados) {
@@ -51,7 +55,7 @@ public class AuthService {
         Usuario usuario = buscarUsuario(perfil, identificador);
         String senhaSalva = senhaDoUsuario(usuario);
 
-        if (!senha.equals(senhaSalva)) {
+        if (senhaSalva == null || !passwordEncoder.matches(senha, senhaSalva)) {
             throw new RuntimeException("Credenciais invalidas");
         }
 

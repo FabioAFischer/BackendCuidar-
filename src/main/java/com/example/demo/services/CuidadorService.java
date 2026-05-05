@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.dtos.CuidadorDTO;
@@ -20,10 +21,15 @@ public class CuidadorService {
 
     private final CuidadorRepository repository;
     private final InstituicaoRepository instituicaoRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public CuidadorService(CuidadorRepository repository, InstituicaoRepository instituicaoRepository) {
+    public CuidadorService(
+            CuidadorRepository repository,
+            InstituicaoRepository instituicaoRepository,
+            PasswordEncoder passwordEncoder) {
         this.repository = repository;
         this.instituicaoRepository = instituicaoRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public Page<CuidadorDTO> listarAtivos(Pageable pageable) {
@@ -55,6 +61,7 @@ public class CuidadorService {
                 .orElseThrow(() -> new RuntimeException("Instituição não encontrada"));
 
         Cuidador cuidador = CuidadorMapper.toEntity(dto);
+        cuidador.setSenha(passwordEncoder.encode(dto.getSenha()));
         cuidador.setInstituicao(instituicao);
 
         Cuidador salvo = repository.save(cuidador);
@@ -81,7 +88,9 @@ public class CuidadorService {
         cuidador.setNome(dto.getNome());
         cuidador.setCpf(dto.getCpf());
         cuidador.setLogin(dto.getLogin());
-        cuidador.setSenha(dto.getSenha());
+        if (dto.getSenha() != null && !dto.getSenha().isBlank()) {
+            cuidador.setSenha(passwordEncoder.encode(dto.getSenha()));
+        }
         cuidador.setInstituicao(instituicao);
         cuidador.setData_atualizacao(LocalDateTime.now());
 
