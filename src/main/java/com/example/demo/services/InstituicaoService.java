@@ -55,6 +55,9 @@ public class InstituicaoService {
 
         instituicao.setNome(dto.getNome());
         instituicao.setCnpj(dto.getCnpj());
+        if (dto.getSenha() != null && !dto.getSenha().isBlank()) {
+            instituicao.setSenha(dto.getSenha());
+        }
         instituicao.setBairro(dto.getBairro());
         instituicao.setUf(dto.getUf());
         instituicao.setNumero(dto.getNumero());

@@ -29,6 +29,10 @@ public class Instituicao extends Usuario {
     @Column(length = 14, nullable = false, unique = true)
     private String cnpj;
 
+    @NotBlank
+    @Column(length = 300, nullable = false)
+    private String senha;
+
     @Column(length = 200)
     private String bairro;
 
