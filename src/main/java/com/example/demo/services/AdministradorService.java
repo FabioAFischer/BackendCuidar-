@@ -16,10 +16,15 @@ public class AdministradorService {
 
     private final AdministradorRepository repository;
     private final PasswordEncoder passwordEncoder;
+    private final SenhaService senhaService;
 
-    public AdministradorService(AdministradorRepository repository, PasswordEncoder passwordEncoder) {
+    public AdministradorService(
+            AdministradorRepository repository,
+            PasswordEncoder passwordEncoder,
+            SenhaService senhaService) {
         this.repository = repository;
         this.passwordEncoder = passwordEncoder;
+        this.senhaService = senhaService;
     }
 
     public Page<AdministradorDTO> listarAtivos(Pageable pageable) {
@@ -40,6 +45,7 @@ public class AdministradorService {
         }
 
         Administrador administrador = AdministradorMapper.toEntity(dto);
+        senhaService.validar(dto.getSenha());
         administrador.setSenha(passwordEncoder.encode(dto.getSenha()));
         Administrador salvo = repository.save(administrador);
 
@@ -57,6 +63,7 @@ public class AdministradorService {
 
         AdministradorMapper.updateEntity(administrador, dto);
         if (dto.getSenha() != null && !dto.getSenha().isBlank()) {
+            senhaService.validar(dto.getSenha());
             administrador.setSenha(passwordEncoder.encode(dto.getSenha()));
         }
 
