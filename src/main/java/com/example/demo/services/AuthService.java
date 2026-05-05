@@ -15,6 +15,7 @@ import com.example.demo.enums.Status;
 import com.example.demo.repository.AdministradorRepository;
 import com.example.demo.repository.CuidadorRepository;
 import com.example.demo.repository.InstituicaoRepository;
+import com.example.demo.security.JwtService;
 
 @Service
 public class AuthService {
@@ -23,16 +24,19 @@ public class AuthService {
     private final CuidadorRepository cuidadorRepository;
     private final InstituicaoRepository instituicaoRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
     public AuthService(
             AdministradorRepository administradorRepository,
             CuidadorRepository cuidadorRepository,
             InstituicaoRepository instituicaoRepository,
-            PasswordEncoder passwordEncoder) {
+            PasswordEncoder passwordEncoder,
+            JwtService jwtService) {
         this.administradorRepository = administradorRepository;
         this.cuidadorRepository = cuidadorRepository;
         this.instituicaoRepository = instituicaoRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
     }
 
     public Map<String, Object> login(Map<String, String> dados) {
@@ -67,6 +71,8 @@ public class AuthService {
         resposta.put("id", usuario.getId());
         resposta.put("nome", usuario.getNome());
         resposta.put("perfil", usuario.getPerfil());
+        resposta.put("token", jwtService.gerarToken(usuario));
+        resposta.put("tipo", "Bearer");
         resposta.put("autenticado", true);
 
         return resposta;
