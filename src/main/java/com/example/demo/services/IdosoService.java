@@ -1,6 +1,7 @@
 package com.example.demo.services;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -44,7 +45,9 @@ public class IdosoService {
     }
 
     public IdosoDTO criar(IdosoDTO dto) {
-        if (repository.existsByCpf(dto.getCpf())) {
+        Optional<Idoso> idosoExistente = repository.findByCpf(dto.getCpf());
+
+        if (idosoExistente.isPresent() && idosoExistente.get().getStatus() == Status.ATIVO) {
             throw new RuntimeException("Já existe um idoso com esse CPF");
         }
 
@@ -66,6 +69,18 @@ public class IdosoService {
                     .orElseThrow(() -> new RuntimeException("Contato informado não encontrado"));
         } else {
             throw new RuntimeException("Contato é obrigatório");
+        }
+
+        if (idosoExistente.isPresent()) {
+            Idoso idoso = idosoExistente.get();
+
+            IdosoMapper.atualizarIdoso(idoso, dto, instituicao);
+            idoso.setContato(contato);
+            idoso.setStatus(Status.ATIVO);
+            idoso.setData_atualizacao(LocalDateTime.now());
+
+            Idoso reativado = repository.save(idoso);
+            return IdosoMapper.toDTO(reativado);
         }
 
         Idoso idoso = IdosoMapper.toEntity(dto);
