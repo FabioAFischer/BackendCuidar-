@@ -51,14 +51,8 @@ public class ContatoService {
     }
 
     public ContatoDTO criar(ContatoDTO dto) {
-        validarTelefoneEmUso(dto.getTelefone(), null);
-
-        Cuidador cuidador = dto.getCuidadorId() != null
-                ? buscarCuidador(dto.getCuidadorId())
-                : contato.getCuidador();
-        List<Idoso> idosos = dto.getIdosos() != null
-                ? buscarIdosos(dto.getIdosos())
-                : contato.getIdosos();
+        Cuidador cuidador = buscarCuidador(dto.getCuidadorId());
+        List<Idoso> idosos = buscarIdosos(dto.getIdosos());
 
         Contato contato = ContatoMapper.toEntity(dto, cuidador, idosos);
         Contato salvo = contatoRepository.save(contato);
@@ -71,10 +65,12 @@ public class ContatoService {
         Contato contato = contatoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Contato não encontrado"));
 
-        validarTelefoneEmUso(dto.getTelefone(), id);
-
-        Cuidador cuidador = buscarCuidador(dto.getCuidadorId());
-        List<Idoso> idosos = buscarIdosos(dto.getIdosos());
+        Cuidador cuidador = dto.getCuidadorId() != null
+                ? buscarCuidador(dto.getCuidadorId())
+                : contato.getCuidador();
+        List<Idoso> idosos = dto.getIdosos() != null
+                ? buscarIdosos(dto.getIdosos())
+                : contato.getIdosos();
 
         ContatoMapper.atualizarContato(contato, dto, cuidador, idosos);
         Contato atualizado = contatoRepository.save(contato);
@@ -92,18 +88,6 @@ public class ContatoService {
         }
 
         contatoRepository.delete(contato);
-    }
-
-    private void validarTelefoneEmUso(String telefone, Integer idIgnorado) {
-        if (telefone == null) {
-            return;
-        }
-
-        contatoRepository.findByTelefone(telefone)
-                .filter(contato -> idIgnorado == null || contato.getId() != idIgnorado)
-                .ifPresent(contato -> {
-                    throw new RuntimeException("Já existe um contato com esse telefone");
-                });
     }
 
     private Cuidador buscarCuidador(Integer cuidadorId) {
