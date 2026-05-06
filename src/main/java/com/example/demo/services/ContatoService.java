@@ -11,6 +11,8 @@ import com.example.demo.dtos.ContatoDTO;
 import com.example.demo.entity.Contato;
 import com.example.demo.entity.Cuidador;
 import com.example.demo.entity.Idoso;
+import com.example.demo.exceptions.BusinessException;
+import com.example.demo.exceptions.ResourceNotFoundException;
 import com.example.demo.mappers.ContatoMapper;
 import com.example.demo.repository.ContatoRepository;
 import com.example.demo.repository.CuidadorRepository;
@@ -34,18 +36,16 @@ public class ContatoService {
     }
 
     public Page<ContatoDTO> listarTodos(Pageable pageable) {
-        return contatoRepository.findAll(pageable)
-                .map(ContatoMapper::toDTO);
+        return contatoRepository.findAll(pageable).map(ContatoMapper::toDTO);
     }
 
     public Page<ContatoDTO> listarPorIdoso(Integer idosoId, Pageable pageable) {
-        return contatoRepository.findByIdosos_Id(idosoId, pageable)
-                .map(ContatoMapper::toDTO);
+        return contatoRepository.findByIdosos_Id(idosoId, pageable).map(ContatoMapper::toDTO);
     }
 
     public ContatoDTO buscarPorId(Integer id) {
         Contato contato = contatoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Contato não encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Contato", id.longValue()));
 
         return ContatoMapper.toDTO(contato);
     }
@@ -63,7 +63,7 @@ public class ContatoService {
 
     public ContatoDTO atualizar(Integer id, ContatoDTO dto) {
         Contato contato = contatoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Contato não encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Contato", id.longValue()));
 
         Cuidador cuidador = dto.getCuidadorId() != null
                 ? buscarCuidador(dto.getCuidadorId())
@@ -81,48 +81,38 @@ public class ContatoService {
 
     public void deletar(Integer id) {
         Contato contato = contatoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Contato não encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Contato", id.longValue()));
 
         if (contato.getCuidador() != null || (contato.getIdosos() != null && !contato.getIdosos().isEmpty())) {
-            throw new RuntimeException("Contato vinculado a usuário não pode ser deletado");
+            throw new BusinessException("Contato vinculado a usuário não pode ser deletado");
         }
 
         contatoRepository.delete(contato);
     }
 
     private Cuidador buscarCuidador(Integer cuidadorId) {
-        if (cuidadorId == null) {
-            return null;
-        }
+        if (cuidadorId == null) return null;
 
         return cuidadorRepository.findById(cuidadorId)
-                .orElseThrow(() -> new RuntimeException("Cuidador não encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Cuidador", cuidadorId.longValue()));
     }
 
     private List<Idoso> buscarIdosos(List<Integer> idososIds) {
-        if (idososIds == null || idososIds.isEmpty()) {
-            return List.of();
-        }
+        if (idososIds == null || idososIds.isEmpty()) return List.of();
 
         List<Idoso> idosos = idosoRepository.findAllById(idososIds);
 
         if (idosos.size() != idososIds.size()) {
-            throw new RuntimeException("Um ou mais idosos informados não foram encontrados");
+            throw new ResourceNotFoundException("Um ou mais idosos informados não foram encontrados");
         }
 
         return idosos;
     }
 
     private void vincularContatoAIdosos(Contato contato, List<Idoso> idosos) {
-        if (idosos == null || idosos.isEmpty()) {
-            return;
-        }
+        if (idosos == null || idosos.isEmpty()) return;
 
-        for (Idoso idoso : idosos) {
-            idoso.setContato(contato);
-        }
-
+        for (Idoso idoso : idosos) idoso.setContato(contato);
         idosoRepository.saveAll(idosos);
     }
-
 }

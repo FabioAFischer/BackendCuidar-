@@ -1,3 +1,4 @@
+// InstituicaoService.java
 package com.example.demo.services;
 
 import java.time.LocalDateTime;
@@ -10,6 +11,8 @@ import org.springframework.stereotype.Service;
 import com.example.demo.dtos.InstituicaoDTO;
 import com.example.demo.entity.Instituicao;
 import com.example.demo.enums.Status;
+import com.example.demo.exceptions.BusinessException;
+import com.example.demo.exceptions.ResourceNotFoundException;
 import com.example.demo.mappers.InstituicaoMapper;
 import com.example.demo.repository.InstituicaoRepository;
 
@@ -20,47 +23,38 @@ public class InstituicaoService {
     private final PasswordEncoder passwordEncoder;
     private final SenhaService senhaService;
 
-    public InstituicaoService(
-            InstituicaoRepository repository,
-            PasswordEncoder passwordEncoder,
-            SenhaService senhaService) {
+    public InstituicaoService(InstituicaoRepository repository, PasswordEncoder passwordEncoder, SenhaService senhaService) {
         this.repository = repository;
         this.passwordEncoder = passwordEncoder;
         this.senhaService = senhaService;
     }
 
     public Page<InstituicaoDTO> listarAtivas(Pageable pageable) {
-        return repository.findByStatus(Status.ATIVO, pageable)
-                .map(InstituicaoMapper::toDTO);
+        return repository.findByStatus(Status.ATIVO, pageable).map(InstituicaoMapper::toDTO);
     }
 
     public InstituicaoDTO buscarPorId(Integer id) {
         Instituicao instituicao = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Instituição não encontrada"));
-
+                .orElseThrow(() -> new ResourceNotFoundException("Instituição", id.longValue()));
         return InstituicaoMapper.toDTO(instituicao);
     }
 
     public InstituicaoDTO criar(InstituicaoDTO dto) {
         if (repository.existsByCnpj(dto.getCnpj())) {
-            throw new RuntimeException("Já existe uma instituição com esse CNPJ");
+            throw new BusinessException("Já existe uma instituição com esse CNPJ");
         }
-
         Instituicao instituicao = InstituicaoMapper.toEntity(dto);
         senhaService.validar(dto.getSenha());
         instituicao.setSenha(passwordEncoder.encode(dto.getSenha()));
-        Instituicao salva = repository.save(instituicao);
-
-        return InstituicaoMapper.toDTO(salva);
+        return InstituicaoMapper.toDTO(repository.save(instituicao));
     }
 
     public InstituicaoDTO atualizar(Integer id, InstituicaoDTO dto) {
         Instituicao instituicao = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Instituição não encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("Instituição", id.longValue()));
 
-        if (!instituicao.getCnpj().equals(dto.getCnpj())
-                && repository.existsByCnpj(dto.getCnpj())) {
-            throw new RuntimeException("CNPJ já está em uso");
+        if (!instituicao.getCnpj().equals(dto.getCnpj()) && repository.existsByCnpj(dto.getCnpj())) {
+            throw new BusinessException("CNPJ já está em uso");
         }
 
         instituicao.setNome(dto.getNome());
@@ -75,17 +69,14 @@ public class InstituicaoService {
         instituicao.setCep(dto.getCep());
         instituicao.setData_atualizacao(LocalDateTime.now());
 
-        Instituicao atualizada = repository.save(instituicao);
-        return InstituicaoMapper.toDTO(atualizada);
+        return InstituicaoMapper.toDTO(repository.save(instituicao));
     }
 
     public void inativar(Integer id) {
         Instituicao instituicao = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Instituição não encontrada"));
-
+                .orElseThrow(() -> new ResourceNotFoundException("Instituição", id.longValue()));
         instituicao.setStatus(Status.INATIVO);
         instituicao.setData_atualizacao(LocalDateTime.now());
-
         repository.save(instituicao);
     }
 }

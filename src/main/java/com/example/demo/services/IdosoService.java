@@ -13,6 +13,8 @@ import com.example.demo.entity.Contato;
 import com.example.demo.entity.Idoso;
 import com.example.demo.entity.Instituicao;
 import com.example.demo.enums.Status;
+import com.example.demo.exceptions.BusinessException;
+import com.example.demo.exceptions.ResourceNotFoundException;
 import com.example.demo.mappers.ContatoMapper;
 import com.example.demo.mappers.IdosoMapper;
 import com.example.demo.repository.ContatoRepository;
@@ -33,13 +35,12 @@ public class IdosoService {
     }
 
     public Page<IdosoDTO> listarAtivos(Pageable pageable) {
-        return repository.findByStatus(Status.ATIVO, pageable)
-                .map(IdosoMapper::toDTO);
+        return repository.findByStatus(Status.ATIVO, pageable).map(IdosoMapper::toDTO);
     }
 
     public IdosoDTO buscarPorId(Integer id) {
         Idoso idoso = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Idoso não encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Idoso", id.longValue()));
 
         return IdosoMapper.toDTO(idoso);
     }
@@ -48,100 +49,94 @@ public class IdosoService {
         Optional<Idoso> idosoExistente = repository.findByCpf(dto.getCpf());
 
         if (idosoExistente.isPresent() && idosoExistente.get().getStatus() == Status.ATIVO) {
-            throw new RuntimeException("Já existe um idoso com esse CPF");
+            throw new BusinessException("Já existe um idoso ativo com esse CPF");
         }
 
         Instituicao instituicao = instituicaoRepository.findById(dto.getInstituicaoId())
-                .orElseThrow(() -> new RuntimeException("Instituição não encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("Instituição", dto.getInstituicaoId().longValue()));
 
-        Contato contato = null;
-        ContatoDTO contatoDTO = dto.getContato();
-
-        if (contatoDTO != null) {
-            if (contatoDTO.getDdd() == null || contatoDTO.getTelefone() == null) {
-                throw new RuntimeException("Dados de contato incompletos");
-            }
-
-            contato = ContatoMapper.toEntity(contatoDTO, null, java.util.List.of());
-            contato = contatoRepository.save(contato);
-        } else if (dto.getContatoId() != null) {
-            contato = contatoRepository.findById(dto.getContatoId())
-                    .orElseThrow(() -> new RuntimeException("Contato informado não encontrado"));
-        } else {
-            throw new RuntimeException("Contato é obrigatório");
-        }
+        Contato contato = resolverContato(dto);
 
         if (idosoExistente.isPresent()) {
             Idoso idoso = idosoExistente.get();
-
             IdosoMapper.atualizarIdoso(idoso, dto, instituicao);
             idoso.setContato(contato);
             idoso.setStatus(Status.ATIVO);
             idoso.setData_atualizacao(LocalDateTime.now());
-
-            Idoso reativado = repository.save(idoso);
-            return IdosoMapper.toDTO(reativado);
+            return IdosoMapper.toDTO(repository.save(idoso));
         }
 
         Idoso idoso = IdosoMapper.toEntity(dto);
         idoso.setInstituicao(instituicao);
         idoso.setContato(contato);
 
-        Idoso salvo = repository.save(idoso);
-        return IdosoMapper.toDTO(salvo);
+        return IdosoMapper.toDTO(repository.save(idoso));
     }
 
     public IdosoDTO atualizar(Integer id, IdosoDTO dto) {
         Idoso idoso = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Idoso não encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Idoso", id.longValue()));
 
-        if (!idoso.getCpf().equals(dto.getCpf())
-                && repository.existsByCpf(dto.getCpf())) {
-            throw new RuntimeException("CPF já está em uso");
+        if (!idoso.getCpf().equals(dto.getCpf()) && repository.existsByCpf(dto.getCpf())) {
+            throw new BusinessException("CPF já está em uso");
         }
 
         Instituicao instituicao = instituicaoRepository.findById(dto.getInstituicaoId())
-                .orElseThrow(() -> new RuntimeException("Instituição não encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("Instituição", dto.getInstituicaoId().longValue()));
 
-        ContatoDTO contatoDTO = dto.getContato();
         Contato contato = null;
+        ContatoDTO contatoDTO = dto.getContato();
 
         if (contatoDTO != null) {
             if (contatoDTO.getId() != null) {
                 contato = contatoRepository.findById(contatoDTO.getId())
-                        .orElseThrow(() -> new RuntimeException("Contato para atualização não encontrado"));
+                        .orElseThrow(() -> new ResourceNotFoundException("Contato", contatoDTO.getId().longValue()));
                 ContatoMapper.atualizarContato(contato, contatoDTO, null, null);
                 contato = contatoRepository.save(contato);
             } else {
                 if (contatoDTO.getDdd() == null || contatoDTO.getTelefone() == null) {
-                    throw new RuntimeException("Dados de contato incompletos");
+                    throw new BusinessException("Dados de contato incompletos");
                 }
                 contato = ContatoMapper.toEntity(contatoDTO, null, java.util.List.of());
                 contato = contatoRepository.save(contato);
             }
         } else if (dto.getContatoId() != null) {
             contato = contatoRepository.findById(dto.getContatoId())
-                    .orElseThrow(() -> new RuntimeException("Contato informado não encontrado"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Contato", dto.getContatoId().longValue()));
         }
 
-    IdosoMapper.atualizarIdoso(idoso, dto, instituicao);
-        if (contato != null) {
-            idoso.setContato(contato);
-        }
-
+        IdosoMapper.atualizarIdoso(idoso, dto, instituicao);
+        if (contato != null) idoso.setContato(contato);
         idoso.setData_atualizacao(LocalDateTime.now());
 
-        Idoso atualizado = repository.save(idoso);
-        return IdosoMapper.toDTO(atualizado);
+        return IdosoMapper.toDTO(repository.save(idoso));
     }
 
     public void inativar(Integer id) {
         Idoso idoso = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Idoso não encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Idoso", id.longValue()));
 
         idoso.setStatus(Status.INATIVO);
         idoso.setData_atualizacao(LocalDateTime.now());
-
         repository.save(idoso);
+    }
+
+    private Contato resolverContato(IdosoDTO dto) {
+        ContatoDTO contatoDTO = dto.getContato();
+
+        if (contatoDTO != null) {
+            if (contatoDTO.getDdd() == null || contatoDTO.getTelefone() == null) {
+                throw new BusinessException("Dados de contato incompletos");
+            }
+            Contato contato = ContatoMapper.toEntity(contatoDTO, null, java.util.List.of());
+            return contatoRepository.save(contato);
+        }
+
+        if (dto.getContatoId() != null) {
+            return contatoRepository.findById(dto.getContatoId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Contato", dto.getContatoId().longValue()));
+        }
+
+        throw new BusinessException("Contato é obrigatório");
     }
 }
