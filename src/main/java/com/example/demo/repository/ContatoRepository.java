@@ -14,5 +14,5 @@ public interface ContatoRepository extends JpaRepository<Contato, Integer> {
 
     Optional<Contato> findByTelefone(String telefone);
 
-    Page<Contato> findByIdosos_Id(Long idosoId, Pageable pageable);
+    Page<Contato> findByIdosos_Id(Integer idosoId, Pageable pageable);
 }
