@@ -1,96 +1,128 @@
 package com.example.demo.services;
 
-import org.jspecify.annotations.Nullable;
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.demo.dtos.ContatoDTO;
-import com.example.demo.dtos.InstituicaoDTO;
 import com.example.demo.entity.Contato;
 import com.example.demo.entity.Cuidador;
 import com.example.demo.entity.Idoso;
-import com.example.demo.entity.Instituicao;
-import com.example.demo.enums.Status;
 import com.example.demo.mappers.ContatoMapper;
-import com.example.demo.mappers.InstituicaoMapper;
-
-import org.springframework.stereotype.Service;
-
 import com.example.demo.repository.ContatoRepository;
+import com.example.demo.repository.CuidadorRepository;
+import com.example.demo.repository.IdosoRepository;
 
 @Service
+@Transactional
 public class ContatoService {
-    @Autowired
-    private  ContatoRepository contatoRepository;
 
-    //@Autowired
-    //private  IdosoRepository idosoRepository;
+    private final ContatoRepository contatoRepository;
+    private final CuidadorRepository cuidadorRepository;
+    private final IdosoRepository idosoRepository;
 
-	/*public Page<ContatoDTO> listarPorIdoso(Integer idosoId, Pageable pageable) {
-		return contatoRepository.findByIdosos_Id(idosoId, pageable)
-              .map(ContatoMapper::toDTO);
-	}
+    public ContatoService(
+            ContatoRepository contatoRepository,
+            CuidadorRepository cuidadorRepository,
+            IdosoRepository idosoRepository) {
+        this.contatoRepository = contatoRepository;
+        this.cuidadorRepository = cuidadorRepository;
+        this.idosoRepository = idosoRepository;
+    }
 
-  public ContatoDTO atualizar(Integer id, ContatoDTO dto) {
+    public Page<ContatoDTO> listarTodos(Pageable pageable) {
+        return contatoRepository.findAll(pageable)
+                .map(ContatoMapper::toDTO);
+    }
+
+    public Page<ContatoDTO> listarPorIdoso(Integer idosoId, Pageable pageable) {
+        return contatoRepository.findByIdosos_Id(idosoId, pageable)
+                .map(ContatoMapper::toDTO);
+    }
+
+    public ContatoDTO buscarPorId(Integer id) {
         Contato contato = contatoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Contato não encontrado"));
 
-        if (dto.getTelefone() != null) {
-            contatoRepository.findByTelefone(dto.getTelefone())
-                    .filter(c -> !c.getId().equals(id))
-                    .ifPresent(c -> {
-                        throw new RuntimeException("Já existe um contato com esse telefone");
-                    });
-        }
+        return ContatoMapper.toDTO(contato);
+    }
 
-        Cuidador cuidador = contato.getCuidador();
-        if (dto.getCuidadorId() != null) {
-            cuidador = cuidadorRepository.findById(dto.getCuidadorId())
-                    .orElseThrow(() -> new RuntimeException("Cuidador não encontrado"));
-        }
+    public ContatoDTO criar(ContatoDTO dto) {
+        Cuidador cuidador = buscarCuidador(dto.getCuidadorId());
+        List<Idoso> idosos = buscarIdosos(dto.getIdosos());
 
-        List<Idoso> idosos = contato.getIdosos();
-        if (dto.getIdososIds() != null) {
-            idosos = idosoRepository.findAllById(dto.getIdososIds());
-        }
+        Contato contato = ContatoMapper.toEntity(dto, cuidador, idosos);
+        Contato salvo = contatoRepository.save(contato);
+        vincularContatoAIdosos(salvo, idosos);
 
-        ContatoMapper.updateEntity(contato, dto, cuidador, idosos);
-        
+        return ContatoMapper.toDTO(salvo);
+    }
+
+    public ContatoDTO atualizar(Integer id, ContatoDTO dto) {
+        Contato contato = contatoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Contato não encontrado"));
+
+        Cuidador cuidador = dto.getCuidadorId() != null
+                ? buscarCuidador(dto.getCuidadorId())
+                : contato.getCuidador();
+        List<Idoso> idosos = dto.getIdosos() != null
+                ? buscarIdosos(dto.getIdosos())
+                : contato.getIdosos();
+
+        ContatoMapper.atualizarContato(contato, dto, cuidador, idosos);
         Contato atualizado = contatoRepository.save(contato);
+        vincularContatoAIdosos(atualizado, idosos);
+
         return ContatoMapper.toDTO(atualizado);
     }
 
-   public void inativar(Integer id) {
+    public void deletar(Integer id) {
         Contato contato = contatoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Contato não encontrado"));
+
+        if (contato.getCuidador() != null || (contato.getIdosos() != null && !contato.getIdosos().isEmpty())) {
+            throw new RuntimeException("Contato vinculado a usuário não pode ser deletado");
+        }
 
         contatoRepository.delete(contato);
     }
 
-    public ContatoDTO criar(ContatoDTO dto) {
-        if (contatoRepository.findByTelefone(dto.getTelefone()).isPresent()) {
-            throw new RuntimeException("Já existe um contato com esse telefone");
+    private Cuidador buscarCuidador(Integer cuidadorId) {
+        if (cuidadorId == null) {
+            return null;
         }
 
-        Cuidador cuidador = null;
-        if (dto.getCuidadorId() != null) {
-            cuidador = cuidadorRepository.findById(dto.getCuidadorId())
-                    .orElseThrow(() -> new RuntimeException("Cuidador não encontrado"));
+        return cuidadorRepository.findById(cuidadorId)
+                .orElseThrow(() -> new RuntimeException("Cuidador não encontrado"));
+    }
+
+    private List<Idoso> buscarIdosos(List<Integer> idososIds) {
+        if (idososIds == null || idososIds.isEmpty()) {
+            return List.of();
         }
 
-        List<Idoso> idosos = List.of();
-        if (dto.getIdososIds() != null && !dto.getIdososIds().isEmpty()) {
-            idosos = idosoRepository.findAllById(dto.getIdososIds());
+        List<Idoso> idosos = idosoRepository.findAllById(idososIds);
+
+        if (idosos.size() != idososIds.size()) {
+            throw new RuntimeException("Um ou mais idosos informados não foram encontrados");
         }
-       
-        Contato contato = ContatoMapper.toEntity(dto, cuidador, idosos); 
-        Contato salvo = contatoRepository.save(contato);
 
-        return ContatoMapper.toDTO(salvo);
-       
-    } */
+        return idosos;
+    }
 
+    private void vincularContatoAIdosos(Contato contato, List<Idoso> idosos) {
+        if (idosos == null || idosos.isEmpty()) {
+            return;
+        }
 
+        for (Idoso idoso : idosos) {
+            idoso.setContato(contato);
+        }
+
+        idosoRepository.saveAll(idosos);
+    }
 
 }
