@@ -2,7 +2,6 @@ package com.example.demo.controllers;
 
 import java.util.Map;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,11 +24,6 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> dados) {
-        try {
-            return ResponseEntity.ok(authService.login(dados));
-        } catch (RuntimeException exception) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("message", exception.getMessage()));
-        }
+        return ResponseEntity.ok(authService.login(dados));
     }
 }

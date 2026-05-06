@@ -1,6 +1,9 @@
+// SenhaService.java
 package com.example.demo.services;
 
 import org.springframework.stereotype.Service;
+
+import com.example.demo.exceptions.BusinessException;
 
 @Service
 public class SenhaService {
@@ -10,8 +13,8 @@ public class SenhaService {
 
     public void validar(String senha) {
         if (senha == null || !senha.matches(REGEX_SENHA_FORTE)) {
-            throw new RuntimeException(
-                    "A senha deve ter no minimo 8 caracteres, com letra maiuscula, letra minuscula, numero e caractere especial");
+            throw new BusinessException(
+                "A senha deve ter no mínimo 8 caracteres, com letra maiúscula, minúscula, número e caractere especial");
         }
     }
 }

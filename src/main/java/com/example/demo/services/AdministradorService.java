@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import com.example.demo.dtos.AdministradorDTO;
 import com.example.demo.entity.Administrador;
 import com.example.demo.enums.Status;
+import com.example.demo.exceptions.BusinessException;
+import com.example.demo.exceptions.ResourceNotFoundException;
 import com.example.demo.mappers.AdministradorMapper;
 import com.example.demo.repository.AdministradorRepository;
 
@@ -34,14 +36,14 @@ public class AdministradorService {
 
     public AdministradorDTO buscarPorId(Integer id) {
         Administrador administrador = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Administrador nao encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Administrador", id.longValue()));
 
         return AdministradorMapper.toDTO(administrador);
     }
 
     public AdministradorDTO criar(AdministradorDTO dto) {
         if (repository.existsByCpf(dto.getCpf())) {
-            throw new RuntimeException("Ja existe um administrador com esse CPF");
+            throw new BusinessException("Já existe um administrador com esse CPF");
         }
 
         Administrador administrador = AdministradorMapper.toEntity(dto);
@@ -54,11 +56,11 @@ public class AdministradorService {
 
     public AdministradorDTO atualizar(Integer id, AdministradorDTO dto) {
         Administrador administrador = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Administrador nao encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Administrador", id.longValue()));
 
         if (!administrador.getCpf().equals(dto.getCpf())
                 && repository.existsByCpf(dto.getCpf())) {
-            throw new RuntimeException("CPF ja esta em uso");
+            throw new BusinessException("CPF já está em uso");
         }
 
         AdministradorMapper.updateEntity(administrador, dto);
@@ -73,10 +75,9 @@ public class AdministradorService {
 
     public void inativar(Integer id) {
         Administrador administrador = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Administrador nao encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Administrador", id.longValue()));
 
         AdministradorMapper.inativarEntity(administrador);
-
         repository.save(administrador);
     }
 }
