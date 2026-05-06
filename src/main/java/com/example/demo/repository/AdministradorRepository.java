@@ -13,9 +13,9 @@ import com.example.demo.enums.Status;
 @Repository
 public interface AdministradorRepository extends JpaRepository<Administrador, Integer> {
 
-    Optional<Administrador> findByEmail(String email);
+    Optional<Administrador> findByCpf(String cpf);
 
-    boolean existsByEmail(String email);
+    boolean existsByCpf(String cpf);
 
     Page<Administrador> findByStatus(Status status, Pageable pageable);
 }

@@ -20,8 +20,8 @@ import lombok.ToString;
 public class Administrador extends Usuario {
 
     @NotBlank
-    @Column(length = 300, nullable = false, unique = true)
-    private String email;
+    @Column(length = 11, nullable = false, unique = true)
+    private String cpf;
 
     @NotBlank
     @Column(length = 300, nullable = false)

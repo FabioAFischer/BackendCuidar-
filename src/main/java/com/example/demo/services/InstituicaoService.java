@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.dtos.InstituicaoDTO;
@@ -16,9 +17,16 @@ import com.example.demo.repository.InstituicaoRepository;
 public class InstituicaoService {
 
     private final InstituicaoRepository repository;
+    private final PasswordEncoder passwordEncoder;
+    private final SenhaService senhaService;
 
-    public InstituicaoService(InstituicaoRepository repository) {
+    public InstituicaoService(
+            InstituicaoRepository repository,
+            PasswordEncoder passwordEncoder,
+            SenhaService senhaService) {
         this.repository = repository;
+        this.passwordEncoder = passwordEncoder;
+        this.senhaService = senhaService;
     }
 
     public Page<InstituicaoDTO> listarAtivas(Pageable pageable) {
@@ -39,6 +47,8 @@ public class InstituicaoService {
         }
 
         Instituicao instituicao = InstituicaoMapper.toEntity(dto);
+        senhaService.validar(dto.getSenha());
+        instituicao.setSenha(passwordEncoder.encode(dto.getSenha()));
         Instituicao salva = repository.save(instituicao);
 
         return InstituicaoMapper.toDTO(salva);
@@ -55,6 +65,10 @@ public class InstituicaoService {
 
         instituicao.setNome(dto.getNome());
         instituicao.setCnpj(dto.getCnpj());
+        if (dto.getSenha() != null && !dto.getSenha().isBlank()) {
+            senhaService.validar(dto.getSenha());
+            instituicao.setSenha(passwordEncoder.encode(dto.getSenha()));
+        }
         instituicao.setBairro(dto.getBairro());
         instituicao.setUf(dto.getUf());
         instituicao.setNumero(dto.getNumero());

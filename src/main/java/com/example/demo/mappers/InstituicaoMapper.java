@@ -40,6 +40,7 @@ public class InstituicaoMapper {
         
         instituicao.setNome(dto.getNome());
         instituicao.setCnpj(dto.getCnpj());
+        instituicao.setSenha(dto.getSenha());
         instituicao.setBairro(dto.getBairro());
         instituicao.setUf(dto.getUf());
         instituicao.setNumero(dto.getNumero());

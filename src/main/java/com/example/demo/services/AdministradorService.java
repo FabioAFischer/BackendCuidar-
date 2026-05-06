@@ -2,6 +2,7 @@ package com.example.demo.services;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.dtos.AdministradorDTO;
@@ -14,9 +15,16 @@ import com.example.demo.repository.AdministradorRepository;
 public class AdministradorService {
 
     private final AdministradorRepository repository;
+    private final PasswordEncoder passwordEncoder;
+    private final SenhaService senhaService;
 
-    public AdministradorService(AdministradorRepository repository) {
+    public AdministradorService(
+            AdministradorRepository repository,
+            PasswordEncoder passwordEncoder,
+            SenhaService senhaService) {
         this.repository = repository;
+        this.passwordEncoder = passwordEncoder;
+        this.senhaService = senhaService;
     }
 
     public Page<AdministradorDTO> listarAtivos(Pageable pageable) {
@@ -26,17 +34,19 @@ public class AdministradorService {
 
     public AdministradorDTO buscarPorId(Integer id) {
         Administrador administrador = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Administrador não encontrado"));
+                .orElseThrow(() -> new RuntimeException("Administrador nao encontrado"));
 
         return AdministradorMapper.toDTO(administrador);
     }
 
     public AdministradorDTO criar(AdministradorDTO dto) {
-        if (repository.existsByEmail(dto.getEmail())) {
-            throw new RuntimeException("Já existe um administrador com esse email");
+        if (repository.existsByCpf(dto.getCpf())) {
+            throw new RuntimeException("Ja existe um administrador com esse CPF");
         }
 
         Administrador administrador = AdministradorMapper.toEntity(dto);
+        senhaService.validar(dto.getSenha());
+        administrador.setSenha(passwordEncoder.encode(dto.getSenha()));
         Administrador salvo = repository.save(administrador);
 
         return AdministradorMapper.toDTO(salvo);
@@ -44,14 +54,18 @@ public class AdministradorService {
 
     public AdministradorDTO atualizar(Integer id, AdministradorDTO dto) {
         Administrador administrador = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Administrador não encontrado"));
+                .orElseThrow(() -> new RuntimeException("Administrador nao encontrado"));
 
-        if (!administrador.getEmail().equals(dto.getEmail())
-                && repository.existsByEmail(dto.getEmail())) {
-            throw new RuntimeException("Email já está em uso");
+        if (!administrador.getCpf().equals(dto.getCpf())
+                && repository.existsByCpf(dto.getCpf())) {
+            throw new RuntimeException("CPF ja esta em uso");
         }
 
         AdministradorMapper.updateEntity(administrador, dto);
+        if (dto.getSenha() != null && !dto.getSenha().isBlank()) {
+            senhaService.validar(dto.getSenha());
+            administrador.setSenha(passwordEncoder.encode(dto.getSenha()));
+        }
 
         Administrador atualizado = repository.save(administrador);
         return AdministradorMapper.toDTO(atualizado);
@@ -59,7 +73,7 @@ public class AdministradorService {
 
     public void inativar(Integer id) {
         Administrador administrador = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Administrador não encontrado"));
+                .orElseThrow(() -> new RuntimeException("Administrador nao encontrado"));
 
         AdministradorMapper.inativarEntity(administrador);
 

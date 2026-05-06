@@ -16,6 +16,7 @@ public class InstituicaoDTO {
     private Integer id;
     private String nome;
     private String cnpj;
+    private String senha;
     private String bairro;
     private String uf;
     private Integer numero;
