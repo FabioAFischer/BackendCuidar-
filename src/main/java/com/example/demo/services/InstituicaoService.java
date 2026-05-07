@@ -59,6 +59,7 @@ public class InstituicaoService {
 
         instituicao.setNome(dto.getNome());
         instituicao.setCnpj(dto.getCnpj());
+        instituicao.setEmail(dto.getEmail());
         if (dto.getSenha() != null && !dto.getSenha().isBlank()) {
             senhaService.validar(dto.getSenha());
             instituicao.setSenha(passwordEncoder.encode(dto.getSenha()));

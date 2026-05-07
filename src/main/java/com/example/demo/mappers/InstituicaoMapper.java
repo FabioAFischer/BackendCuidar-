@@ -23,6 +23,7 @@ public class InstituicaoMapper {
         dto.setId(instituicao.getId());
         dto.setNome(instituicao.getNome());
         dto.setCnpj(instituicao.getCnpj());
+        dto.setEmail(instituicao.getEmail());
         dto.setBairro(instituicao.getBairro());
         dto.setUf(instituicao.getUf());
         dto.setNumero(instituicao.getNumero());
@@ -40,6 +41,7 @@ public class InstituicaoMapper {
         
         instituicao.setNome(dto.getNome());
         instituicao.setCnpj(dto.getCnpj());
+        instituicao.setEmail(dto.getEmail());
         instituicao.setSenha(dto.getSenha());
         instituicao.setBairro(dto.getBairro());
         instituicao.setUf(dto.getUf());

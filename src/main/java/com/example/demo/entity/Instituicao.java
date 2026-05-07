@@ -30,6 +30,10 @@ public class Instituicao extends Usuario {
     private String cnpj;
 
     @NotBlank
+    @Column(length = 200, nullable = false)
+    private String email;
+
+    @NotBlank
     @Column(length = 300, nullable = false)
     private String senha;
 

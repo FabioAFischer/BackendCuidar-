@@ -23,6 +23,7 @@ public class AdministradorMapper {
         dto.setId(administrador.getId());
         dto.setNome(administrador.getNome());
         dto.setCpf(administrador.getCpf());
+        dto.setEmail(administrador.getEmail());
 
         return dto;
     }
@@ -36,6 +37,7 @@ public class AdministradorMapper {
 
         administrador.setNome(dto.getNome());
         administrador.setCpf(dto.getCpf());
+        administrador.setEmail(dto.getEmail());
         administrador.setSenha(dto.getSenha());
 
         administrador.setData_criacao(LocalDateTime.now());
@@ -52,6 +54,7 @@ public class AdministradorMapper {
 
         administrador.setNome(dto.getNome());
         administrador.setCpf(dto.getCpf());
+        administrador.setEmail(dto.getEmail());
         administrador.setData_atualizacao(LocalDateTime.now());
     }
 

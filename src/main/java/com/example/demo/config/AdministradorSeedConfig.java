@@ -17,6 +17,7 @@ import com.example.demo.repository.AdministradorRepository;
 public class AdministradorSeedConfig {
 
     public static final String ADMIN_CPF = "00000000000";
+    public static final String ADMIN_EMAIL = "admin@bomcuidado.com";
     public static final String ADMIN_SENHA = "Admin@123";
 
     @Bean
@@ -32,6 +33,7 @@ public class AdministradorSeedConfig {
             Administrador administrador = new Administrador();
             administrador.setNome("Administrador Sistema");
             administrador.setCpf(ADMIN_CPF);
+            administrador.setEmail(ADMIN_EMAIL);
             administrador.setSenha(passwordEncoder.encode(ADMIN_SENHA));
             administrador.setPerfil(Perfil.ADMINISTRADOR);
             administrador.setStatus(Status.ATIVO);

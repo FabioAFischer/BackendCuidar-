@@ -89,6 +89,7 @@ public class CuidadorService {
 
         cuidador.setNome(dto.getNome());
         cuidador.setCpf(dto.getCpf());
+        cuidador.setEmail(dto.getEmail());
         cuidador.setLogin(dto.getLogin());
         if (dto.getSenha() != null && !dto.getSenha().isBlank()) {
             senhaService.validar(dto.getSenha());

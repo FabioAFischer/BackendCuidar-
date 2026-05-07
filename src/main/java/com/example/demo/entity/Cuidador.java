@@ -34,6 +34,10 @@ public class Cuidador extends Usuario {
     private String cpf;
 
     @NotBlank
+    @Column(length = 200, nullable = false)
+    private String email;
+
+    @NotBlank
     @Column(length = 300, nullable = false)
     private String login;
 
