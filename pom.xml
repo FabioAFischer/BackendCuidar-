@@ -12,8 +12,8 @@
     <groupId>Cuidar</groupId>
     <artifactId>Cuidar</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>demo</name>
-    <description>Demo project for Spring Boot</description>
+    <name>Cuidar</name>
+    <description>Backend do Cuidar</description>
     <url/>
     <licenses>
         <license/>
