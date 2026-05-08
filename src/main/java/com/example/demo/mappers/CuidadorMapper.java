@@ -52,7 +52,7 @@ public class CuidadorMapper {
         }
 
         Cuidador cuidador = new Cuidador();
-        
+
         cuidador.setNome(dto.getNome());
         cuidador.setCpf(dto.getCpf());
         cuidador.setEmail(dto.getEmail());
@@ -67,10 +67,9 @@ public class CuidadorMapper {
 
         if (dto.getContato() != null) {
             Contato contato = new Contato();
-            contato.setId(dto.getContato().getId());
+            // setId removido — o id é gerado pelo banco
             contato.setDdd(dto.getContato().getDdd());
             contato.setTelefone(dto.getContato().getTelefone());
-
             contato.setCuidador(cuidador);
             cuidador.setContato(contato);
         }

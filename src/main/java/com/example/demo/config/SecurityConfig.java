@@ -34,19 +34,19 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers(
-                                "/auth/login",
-                                "/swagger-ui/**",
-                                "/v3/api-docs/**")
-                        .permitAll()
-                        .requestMatchers("/administrador/**").hasRole("ADMINISTRADOR")
-                        .requestMatchers("/instituicao/**").hasAnyRole("ADMINISTRADOR", "INSTITUICAO")
-                        .requestMatchers("/cuidador/**").hasRole("CUIDADOR")
-                        .requestMatchers("/idoso/**").hasAnyRole("CUIDADOR", "INSTITUICAO")
-                        .requestMatchers("/remedio/**").hasRole("CUIDADOR")
-                        .requestMatchers("/contato/**").authenticated()
-                        .anyRequest().authenticated())
+                    .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                    .requestMatchers(
+                            "/auth/login",
+                            "/swagger-ui/**",
+                            "/v3/api-docs/**")
+                    .permitAll()
+                    .requestMatchers("/administrador/**").hasRole("ADMINISTRADOR")
+                    .requestMatchers("/instituicao/**").hasAnyRole("ADMINISTRADOR", "INSTITUICAO")
+                    .requestMatchers("/cuidador/**").hasAnyRole("ADMINISTRADOR", "INSTITUICAO", "CUIDADOR")
+                    .requestMatchers("/idoso/**").hasAnyRole("ADMINISTRADOR", "CUIDADOR", "INSTITUICAO")
+                    .requestMatchers("/remedio/**").hasAnyRole("ADMINISTRADOR", "CUIDADOR")
+                    .requestMatchers("/contato/**").authenticated()
+                    .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
