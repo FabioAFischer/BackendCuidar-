@@ -42,7 +42,7 @@ public class SecurityConfig {
                         .permitAll()
                         .requestMatchers("/administrador/**").hasRole("ADMINISTRADOR")
                         .requestMatchers("/instituicao/**").hasAnyRole("ADMINISTRADOR", "INSTITUICAO")
-                        .requestMatchers("/cuidador/**").hasRole("CUIDADOR")
+                        .requestMatchers("/cuidador/**").hasAnyRole("CUIDADOR", "INSTITUICAO")
                         .requestMatchers("/idoso/**").hasAnyRole("CUIDADOR", "INSTITUICAO")
                         .requestMatchers("/remedio/**").hasRole("CUIDADOR")
                         .requestMatchers("/contato/**").authenticated()
