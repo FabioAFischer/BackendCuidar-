@@ -17,7 +17,6 @@ public class CuidadorDTO {
     private String nome;
     private String cpf;
     private String email;
-    private String login;
     private String senha;
     private Integer instituicaoId;
     private ContatoDTO contato;
