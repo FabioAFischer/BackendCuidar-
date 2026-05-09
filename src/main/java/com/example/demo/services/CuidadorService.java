@@ -53,10 +53,6 @@ public class CuidadorService {
             throw new BusinessException("Já existe um cuidador com esse CPF");
         }
 
-        if (repository.existsByLogin(dto.getLogin())) {
-            throw new BusinessException("Já existe um cuidador com esse login");
-        }
-
         if (dto.getContato() == null) {
             throw new BusinessException("O contato do cuidador deve ser informado");
         }
@@ -80,17 +76,12 @@ public class CuidadorService {
             throw new BusinessException("CPF já está em uso");
         }
 
-        if (!cuidador.getLogin().equals(dto.getLogin()) && repository.existsByLogin(dto.getLogin())) {
-            throw new BusinessException("Login já está em uso");
-        }
-
         Instituicao instituicao = instituicaoRepository.findById(dto.getInstituicaoId())
                 .orElseThrow(() -> new ResourceNotFoundException("Instituição", dto.getInstituicaoId().longValue()));
 
         cuidador.setNome(dto.getNome());
         cuidador.setCpf(dto.getCpf());
         cuidador.setEmail(dto.getEmail());
-        cuidador.setLogin(dto.getLogin());
         if (dto.getSenha() != null && !dto.getSenha().isBlank()) {
             senhaService.validar(dto.getSenha());
             cuidador.setSenha(passwordEncoder.encode(dto.getSenha()));

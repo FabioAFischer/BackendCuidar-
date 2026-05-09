@@ -17,10 +17,6 @@ public interface CuidadorRepository extends JpaRepository<Cuidador, Integer> {
 
     boolean existsByCpf(String cpf);
 
-    Optional<Cuidador> findByLogin(String login);
-
-    boolean existsByLogin(String login);
-
     Page<Cuidador> findByStatus(Status status, Pageable pageable);
 
     Optional<Cuidador> findByEmail(String email);
