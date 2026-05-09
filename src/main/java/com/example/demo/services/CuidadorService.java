@@ -4,6 +4,9 @@ import java.time.LocalDateTime;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -38,7 +41,32 @@ public class CuidadorService {
     }
 
     public Page<CuidadorDTO> listarAtivos(Pageable pageable) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (usuarioLogadoPossuiPerfil(authentication, "ROLE_INSTITUICAO")) {
+            Integer instituicaoId = usuarioIdAutenticado(authentication);
+            return repository.findByInstituicaoIdAndStatus(instituicaoId, Status.ATIVO, pageable)
+                    .map(CuidadorMapper::toDTO);
+        }
+
         return repository.findByStatus(Status.ATIVO, pageable).map(CuidadorMapper::toDTO);
+    }
+
+    private boolean usuarioLogadoPossuiPerfil(Authentication authentication, String perfil) {
+        return authentication != null
+                && authentication.getAuthorities().stream()
+                        .map(GrantedAuthority::getAuthority)
+                        .anyMatch(perfil::equals);
+    }
+
+    private Integer usuarioIdAutenticado(Authentication authentication) {
+        Object principal = authentication.getPrincipal();
+
+        if (principal instanceof Integer id) {
+            return id;
+        }
+
+        throw new BusinessException("Usuário autenticado inválido");
     }
 
     public CuidadorDTO buscarPorId(Integer id) {
