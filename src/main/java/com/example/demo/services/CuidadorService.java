@@ -52,7 +52,6 @@ public class CuidadorService {
         return repository.findByStatus(Status.ATIVO, pageable).map(CuidadorMapper::toDTO);
     }
 
-<<<<<<< HEAD
     private boolean usuarioLogadoPossuiPerfil(Authentication authentication, String perfil) {
         return authentication != null
                 && authentication.getAuthorities().stream()
@@ -68,7 +67,6 @@ public class CuidadorService {
         }
 
         throw new BusinessException("Usuário autenticado inválido");
-=======
     public Page<CuidadorDTO> listarAtivosPorInstituicao(Integer instituicaoId, String cpf, Pageable pageable) {
         String cpfLimpo = limparDocumento(cpf);
 
@@ -79,7 +77,6 @@ public class CuidadorService {
 
         return repository.findByStatusAndInstituicaoIdAndCpf(Status.ATIVO, instituicaoId, cpfLimpo, pageable)
                 .map(CuidadorMapper::toDTO);
->>>>>>> 350e333 (Filtra cuidadores por instituicao e CPF)
     }
 
     public CuidadorDTO buscarPorId(Integer id) {

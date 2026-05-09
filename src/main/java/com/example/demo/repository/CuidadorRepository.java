@@ -19,13 +19,9 @@ public interface CuidadorRepository extends JpaRepository<Cuidador, Integer> {
 
     Page<Cuidador> findByStatus(Status status, Pageable pageable);
 
-<<<<<<< HEAD
-    Page<Cuidador> findByInstituicaoIdAndStatus(Integer instituicaoId, Status status, Pageable pageable);
-=======
     Page<Cuidador> findByStatusAndInstituicaoId(Status status, Integer instituicaoId, Pageable pageable);
 
     Page<Cuidador> findByStatusAndInstituicaoIdAndCpf(Status status, Integer instituicaoId, String cpf, Pageable pageable);
->>>>>>> 350e333 (Filtra cuidadores por instituicao e CPF)
 
     Optional<Cuidador> findByEmail(String email);
 
