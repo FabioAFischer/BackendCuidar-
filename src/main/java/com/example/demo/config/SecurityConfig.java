@@ -39,6 +39,9 @@ public class SecurityConfig {
                                 "/auth/login",
                                 "/auth/verificar-2fa",
                                 "/swagger-ui/**",
+                                "/auth/recuperar-senha",
+                                "/auth/verificar-recuperacao",
+                                "/auth/nova-senha",
                                 "/v3/api-docs/**")
                         .permitAll()
                         .requestMatchers("/administrador/**").hasRole("ADMINISTRADOR")

@@ -13,6 +13,7 @@ import com.example.demo.entity.Usuario;
 import com.example.demo.enums.Perfil;
 import com.example.demo.enums.Status;
 import com.example.demo.exceptions.BusinessException;
+import com.example.demo.exceptions.ResourceNotFoundException;
 import com.example.demo.exceptions.UnauthorizedException;
 import com.example.demo.repository.AdministradorRepository;
 import com.example.demo.repository.CuidadorRepository;
@@ -30,19 +31,23 @@ public class AuthService {
 
     private final TwoFactorService twoFactorService;
 
+    private final SenhaService senhaService;
+
     public AuthService(
             AdministradorRepository administradorRepository,
             CuidadorRepository cuidadorRepository,
             InstituicaoRepository instituicaoRepository,
             PasswordEncoder passwordEncoder,
             JwtService jwtService,
-            TwoFactorService twoFactorService) {
+            TwoFactorService twoFactorService,
+            SenhaService senhaService) {
         this.administradorRepository = administradorRepository;
         this.cuidadorRepository = cuidadorRepository;
         this.instituicaoRepository = instituicaoRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.twoFactorService = twoFactorService;
+        this.senhaService = senhaService;
     }
 
     public Map<String, Object> login(Map<String, String> dados) {
@@ -169,4 +174,53 @@ public class AuthService {
     private String limparDocumento(String valor) {
         return valor.replaceAll("\\D", "");
     }
+
+    public Map<String, Object> recuperarSenha(String identificador) {
+    if (identificador == null || identificador.isBlank()) {
+        throw new BusinessException("Informe o CPF ou CNPJ");
+    }
+
+    String documento = limparDocumento(identificador);
+
+    Usuario usuario = cuidadorRepository.findByCpf(documento)
+            .map(u -> (Usuario) u)
+            .or(() -> instituicaoRepository.findByCnpj(documento).map(u -> (Usuario) u))
+            .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado com esse CPF ou CNPJ"));
+
+    String email = emailDoUsuario(usuario);
+    twoFactorService.enviarCodigo(email);
+
+    Map<String, Object> resposta = new HashMap<>();
+    resposta.put("email", mascararEmail(email));
+    return resposta;
+}
+
+public Map<String, Object> verificarRecuperacao(String email, String codigo) {
+    twoFactorService.validarCodigo(email, codigo);
+
+    Map<String, Object> resposta = new HashMap<>();
+    resposta.put("valido", true);
+    resposta.put("email", email);
+    return resposta;
+}
+
+public void novaSenha(String email, String novaSenha) {
+    senhaService.validar(novaSenha);
+
+    Usuario usuario = buscarUsuarioPorEmail(email);
+
+    if (usuario instanceof Cuidador cuidador) {
+        cuidador.setSenha(passwordEncoder.encode(novaSenha));
+        cuidadorRepository.save(cuidador);
+        return;
+    }
+
+    if (usuario instanceof Instituicao instituicao) {
+        instituicao.setSenha(passwordEncoder.encode(novaSenha));
+        instituicaoRepository.save(instituicao);
+        return;
+    }
+
+    throw new BusinessException("Perfil não suporta recuperação de senha");
+}
 }
