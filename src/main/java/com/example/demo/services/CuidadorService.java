@@ -115,6 +115,17 @@ public class CuidadorService {
         return CuidadorMapper.toDTO(repository.save(cuidador));
     }
 
+    public CuidadorDTO reativar(Integer id, CuidadorDTO dto) {
+        Cuidador cuidador = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Cuidador", id.longValue()));
+
+        aplicarCamposEnviados(cuidador, dto);
+        cuidador.setStatus(Status.ATIVO);
+        cuidador.setData_atualizacao(LocalDateTime.now());
+
+        return CuidadorMapper.toDTO(repository.save(cuidador));
+    }
+
     public void inativar(Integer id) {
         Cuidador cuidador = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Cuidador", id.longValue()));
@@ -122,6 +133,54 @@ public class CuidadorService {
         cuidador.setStatus(Status.INATIVO);
         cuidador.setData_atualizacao(LocalDateTime.now());
         repository.save(cuidador);
+    }
+
+    private void aplicarCamposEnviados(Cuidador cuidador, CuidadorDTO dto) {
+        if (dto == null) {
+            return;
+        }
+
+        if (dto.getNome() != null) {
+            cuidador.setNome(dto.getNome());
+        }
+
+        if (dto.getCpf() != null && !dto.getCpf().equals(cuidador.getCpf())) {
+            if (repository.existsByCpf(dto.getCpf())) {
+                throw new BusinessException("CPF já está em uso");
+            }
+            cuidador.setCpf(dto.getCpf());
+        }
+
+        if (dto.getEmail() != null) {
+            cuidador.setEmail(dto.getEmail());
+        }
+
+        if (dto.getSenha() != null && !dto.getSenha().isBlank()) {
+            senhaService.validar(dto.getSenha());
+            cuidador.setSenha(passwordEncoder.encode(dto.getSenha()));
+        }
+
+        if (dto.getInstituicaoId() != null) {
+            Instituicao instituicao = instituicaoRepository.findById(dto.getInstituicaoId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Instituição", dto.getInstituicaoId().longValue()));
+            cuidador.setInstituicao(instituicao);
+        }
+
+        if (dto.getContato() != null) {
+            Contato contato = cuidador.getContato();
+            if (contato == null) {
+                contato = new Contato();
+                contato.setCuidador(cuidador);
+                cuidador.setContato(contato);
+            }
+
+            if (dto.getContato().getDdd() != null) {
+                contato.setDdd(dto.getContato().getDdd());
+            }
+            if (dto.getContato().getTelefone() != null) {
+                contato.setTelefone(dto.getContato().getTelefone());
+            }
+        }
     }
 
     private String limparDocumento(String valor) {

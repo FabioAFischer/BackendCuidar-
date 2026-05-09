@@ -60,6 +60,11 @@ public class CuidadorController {
         return ResponseEntity.ok(service.atualizar(id, dto));
     }
 
+    @PutMapping("/reativar/{id}")
+    public ResponseEntity<CuidadorDTO> reativar(@PathVariable Integer id, @RequestBody(required = false) CuidadorDTO dto) {
+        return ResponseEntity.ok(service.reativar(id, dto));
+    }
+
     @DeleteMapping("/deletar/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Integer id) {
         service.inativar(id);
