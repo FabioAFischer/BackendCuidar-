@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.demo.exceptions.BusinessException;
 import com.example.demo.services.AuthService;
 
 @RestController
@@ -26,4 +27,16 @@ public class AuthController {
     public ResponseEntity<?> login(@RequestBody Map<String, String> dados) {
         return ResponseEntity.ok(authService.login(dados));
     }
+
+    @PostMapping("/verificar-2fa")
+    public ResponseEntity<?> verificar2fa(@RequestBody Map<String, String> dados) {
+        String email = dados.get("email");
+        String codigo = dados.get("codigo");
+
+        if (email == null || codigo == null) {
+            throw new BusinessException("Email e código são obrigatórios");
+        }
+
+    return ResponseEntity.ok(authService.verificar2fa(email, codigo));
+}
 }

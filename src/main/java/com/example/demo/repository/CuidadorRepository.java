@@ -23,4 +23,6 @@ public interface CuidadorRepository extends JpaRepository<Cuidador, Integer> {
 
     Page<Cuidador> findByStatus(Status status, Pageable pageable);
 
+    Optional<Cuidador> findByEmail(String email);
+
 }
