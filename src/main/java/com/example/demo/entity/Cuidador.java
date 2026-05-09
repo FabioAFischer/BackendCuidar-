@@ -39,10 +39,6 @@ public class Cuidador extends Usuario {
 
     @NotBlank
     @Column(length = 300, nullable = false)
-    private String login;
-
-    @NotBlank
-    @Column(length = 300, nullable = false)
     private String senha;
 
     @OneToOne(mappedBy = "cuidador", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

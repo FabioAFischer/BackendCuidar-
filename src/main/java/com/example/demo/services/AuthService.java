@@ -55,12 +55,12 @@ public class AuthService {
             throw new BusinessException("Dados de login não informados");
         }
 
-        String identificador = primeiroValor(dados, "identificador", "cpfCnpj", "cpf", "cnpj", "login");
+        String identificador = primeiroValor(dados, "identificador", "cpfCnpj", "cpf", "cnpj");
         String senha = primeiroValor(dados, "senha", "password");
         Perfil perfil = parsePerfil(dados.get("perfil"));
 
         if (identificador == null || identificador.isBlank()) {
-            throw new BusinessException("Informe CPF, CNPJ ou login");
+            throw new BusinessException("Informe CPF ou CNPJ");
         }
 
         if (senha == null || senha.isBlank()) {
@@ -135,7 +135,6 @@ public class AuthService {
             case ADMINISTRADOR -> administradorRepository.findByCpf(documento)
                     .orElseThrow(() -> new UnauthorizedException("Credenciais inválidas"));
             case CUIDADOR -> cuidadorRepository.findByCpf(documento)
-                    .or(() -> cuidadorRepository.findByLogin(identificador))
                     .orElseThrow(() -> new UnauthorizedException("Credenciais inválidas"));
             case INSTITUICAO -> instituicaoRepository.findByCnpj(documento)
                     .orElseThrow(() -> new UnauthorizedException("Credenciais inválidas"));

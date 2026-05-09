@@ -27,7 +27,6 @@ public class CuidadorMapper {
         dto.setNome(cuidador.getNome());
         dto.setCpf(cuidador.getCpf());
         dto.setEmail(cuidador.getEmail());
-        dto.setLogin(cuidador.getLogin());
 
         if (cuidador.getInstituicao() != null) {
             dto.setInstituicaoId(cuidador.getInstituicao().getId());
@@ -56,7 +55,6 @@ public class CuidadorMapper {
         cuidador.setNome(dto.getNome());
         cuidador.setCpf(dto.getCpf());
         cuidador.setEmail(dto.getEmail());
-        cuidador.setLogin(dto.getLogin());
         cuidador.setSenha(dto.getSenha());
 
         if (dto.getInstituicaoId() != null) {
