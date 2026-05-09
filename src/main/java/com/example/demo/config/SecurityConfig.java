@@ -37,6 +37,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(
                                 "/auth/login",
+                                "/auth/verificar-2fa",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**")
                         .permitAll()

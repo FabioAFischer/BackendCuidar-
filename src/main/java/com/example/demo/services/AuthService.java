@@ -28,17 +28,21 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
+    private final TwoFactorService twoFactorService;
+
     public AuthService(
             AdministradorRepository administradorRepository,
             CuidadorRepository cuidadorRepository,
             InstituicaoRepository instituicaoRepository,
             PasswordEncoder passwordEncoder,
-            JwtService jwtService) {
+            JwtService jwtService,
+            TwoFactorService twoFactorService) {
         this.administradorRepository = administradorRepository;
         this.cuidadorRepository = cuidadorRepository;
         this.instituicaoRepository = instituicaoRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
+        this.twoFactorService = twoFactorService;
     }
 
     public Map<String, Object> login(Map<String, String> dados) {
@@ -69,6 +73,40 @@ public class AuthService {
             throw new UnauthorizedException("Usuário inativo");
         }
 
+        if (perfil == Perfil.CUIDADOR || perfil == Perfil.INSTITUICAO) {
+            String email = emailDoUsuario(usuario);
+            twoFactorService.enviarCodigo(email);
+
+            Map<String, Object> resposta = new HashMap<>();
+            resposta.put("requer2fa", true);
+            resposta.put("email", mascararEmail(email));
+            return resposta;
+        }
+
+        return gerarRespostaLogin(usuario);
+    }
+
+    public Map<String, Object> verificar2fa(String email, String codigo) {
+        twoFactorService.validarCodigo(email, codigo);
+
+        Usuario usuario = buscarUsuarioPorEmail(email);
+        return gerarRespostaLogin(usuario);
+    }
+
+    private String emailDoUsuario(Usuario usuario) {
+        if (usuario instanceof Cuidador cuidador) return cuidador.getEmail();
+        if (usuario instanceof Instituicao instituicao) return instituicao.getEmail();
+        throw new BusinessException("Perfil não suporta 2FA");
+    }
+
+    private Usuario buscarUsuarioPorEmail(String email) {
+        return cuidadorRepository.findByEmail(email)
+                .map(u -> (Usuario) u)
+                .or(() -> instituicaoRepository.findByEmail(email).map(u -> (Usuario) u))
+                .orElseThrow(() -> new UnauthorizedException("Usuário não encontrado"));
+    }
+
+    private Map<String, Object> gerarRespostaLogin(Usuario usuario) {
         Map<String, Object> resposta = new HashMap<>();
         resposta.put("id", usuario.getId());
         resposta.put("nome", usuario.getNome());
@@ -76,8 +114,13 @@ public class AuthService {
         resposta.put("token", jwtService.gerarToken(usuario));
         resposta.put("tipo", "Bearer");
         resposta.put("autenticado", true);
-
         return resposta;
+    }
+
+    private String mascararEmail(String email) {
+        int at = email.indexOf("@");
+        if (at <= 2) return email;
+        return email.substring(0, 2) + "***" + email.substring(at);
     }
 
     private Usuario buscarUsuario(Perfil perfil, String identificador) {
