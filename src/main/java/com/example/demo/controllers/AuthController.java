@@ -39,4 +39,35 @@ public class AuthController {
 
     return ResponseEntity.ok(authService.verificar2fa(email, codigo));
 }
+
+@PostMapping("/recuperar-senha")
+public ResponseEntity<?> recuperarSenha(@RequestBody Map<String, String> dados) {
+    String identificador = dados.get("identificador");
+    return ResponseEntity.ok(authService.recuperarSenha(identificador));
+}
+
+@PostMapping("/verificar-recuperacao")
+public ResponseEntity<?> verificarRecuperacao(@RequestBody Map<String, String> dados) {
+    String email = dados.get("email");
+    String codigo = dados.get("codigo");
+
+    if (email == null || codigo == null) {
+        throw new BusinessException("Email e código são obrigatórios");
+    }
+
+    return ResponseEntity.ok(authService.verificarRecuperacao(email, codigo));
+}
+
+@PostMapping("/nova-senha")
+public ResponseEntity<?> novaSenha(@RequestBody Map<String, String> dados) {
+    String email = dados.get("email");
+    String novaSenha = dados.get("novaSenha");
+
+    if (email == null || novaSenha == null) {
+        throw new BusinessException("Email e nova senha são obrigatórios");
+    }
+
+    authService.novaSenha(email, novaSenha);
+    return ResponseEntity.ok(Map.of("message", "Senha alterada com sucesso"));
+}
 }
