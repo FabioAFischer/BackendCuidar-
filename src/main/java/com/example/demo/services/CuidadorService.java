@@ -41,6 +41,18 @@ public class CuidadorService {
         return repository.findByStatus(Status.ATIVO, pageable).map(CuidadorMapper::toDTO);
     }
 
+    public Page<CuidadorDTO> listarAtivosPorInstituicao(Integer instituicaoId, String cpf, Pageable pageable) {
+        String cpfLimpo = limparDocumento(cpf);
+
+        if (cpfLimpo == null) {
+            return repository.findByStatusAndInstituicaoId(Status.ATIVO, instituicaoId, pageable)
+                    .map(CuidadorMapper::toDTO);
+        }
+
+        return repository.findByStatusAndInstituicaoIdAndCpf(Status.ATIVO, instituicaoId, cpfLimpo, pageable)
+                .map(CuidadorMapper::toDTO);
+    }
+
     public CuidadorDTO buscarPorId(Integer id) {
         Cuidador cuidador = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Cuidador", id.longValue()));
@@ -110,5 +122,13 @@ public class CuidadorService {
         cuidador.setStatus(Status.INATIVO);
         cuidador.setData_atualizacao(LocalDateTime.now());
         repository.save(cuidador);
+    }
+
+    private String limparDocumento(String valor) {
+        if (valor == null || valor.isBlank()) {
+            return null;
+        }
+
+        return valor.replaceAll("\\D", "");
     }
 }
