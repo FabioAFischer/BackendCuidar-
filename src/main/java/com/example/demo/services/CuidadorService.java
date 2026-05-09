@@ -52,6 +52,7 @@ public class CuidadorService {
         return repository.findByStatus(Status.ATIVO, pageable).map(CuidadorMapper::toDTO);
     }
 
+<<<<<<< HEAD
     private boolean usuarioLogadoPossuiPerfil(Authentication authentication, String perfil) {
         return authentication != null
                 && authentication.getAuthorities().stream()
@@ -67,6 +68,18 @@ public class CuidadorService {
         }
 
         throw new BusinessException("Usuário autenticado inválido");
+=======
+    public Page<CuidadorDTO> listarAtivosPorInstituicao(Integer instituicaoId, String cpf, Pageable pageable) {
+        String cpfLimpo = limparDocumento(cpf);
+
+        if (cpfLimpo == null) {
+            return repository.findByStatusAndInstituicaoId(Status.ATIVO, instituicaoId, pageable)
+                    .map(CuidadorMapper::toDTO);
+        }
+
+        return repository.findByStatusAndInstituicaoIdAndCpf(Status.ATIVO, instituicaoId, cpfLimpo, pageable)
+                .map(CuidadorMapper::toDTO);
+>>>>>>> 350e333 (Filtra cuidadores por instituicao e CPF)
     }
 
     public CuidadorDTO buscarPorId(Integer id) {
@@ -138,5 +151,13 @@ public class CuidadorService {
         cuidador.setStatus(Status.INATIVO);
         cuidador.setData_atualizacao(LocalDateTime.now());
         repository.save(cuidador);
+    }
+
+    private String limparDocumento(String valor) {
+        if (valor == null || valor.isBlank()) {
+            return null;
+        }
+
+        return valor.replaceAll("\\D", "");
     }
 }
