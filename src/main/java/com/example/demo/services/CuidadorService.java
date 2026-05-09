@@ -4,9 +4,6 @@ import java.time.LocalDateTime;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -41,32 +38,19 @@ public class CuidadorService {
     }
 
     public Page<CuidadorDTO> listarAtivos(Pageable pageable) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (usuarioLogadoPossuiPerfil(authentication, "ROLE_INSTITUICAO")) {
-            Integer instituicaoId = usuarioIdAutenticado(authentication);
-            return repository.findByInstituicaoIdAndStatus(instituicaoId, Status.ATIVO, pageable)
-                    .map(CuidadorMapper::toDTO);
-        }
-
         return repository.findByStatus(Status.ATIVO, pageable).map(CuidadorMapper::toDTO);
     }
 
-    private boolean usuarioLogadoPossuiPerfil(Authentication authentication, String perfil) {
-        return authentication != null
-                && authentication.getAuthorities().stream()
-                        .map(GrantedAuthority::getAuthority)
-                        .anyMatch(perfil::equals);
-    }
+    public Page<CuidadorDTO> listarAtivosPorInstituicao(Integer instituicaoId, String cpf, Pageable pageable) {
+        String cpfLimpo = limparDocumento(cpf);
 
-    private Integer usuarioIdAutenticado(Authentication authentication) {
-        Object principal = authentication.getPrincipal();
-
-        if (principal instanceof Integer id) {
-            return id;
+        if (cpfLimpo == null) {
+            return repository.findByStatusAndInstituicaoId(Status.ATIVO, instituicaoId, pageable)
+                    .map(CuidadorMapper::toDTO);
         }
 
-        throw new BusinessException("Usuário autenticado inválido");
+        return repository.findByStatusAndInstituicaoIdAndCpf(Status.ATIVO, instituicaoId, cpfLimpo, pageable)
+                .map(CuidadorMapper::toDTO);
     }
 
     public CuidadorDTO buscarPorId(Integer id) {
@@ -138,5 +122,13 @@ public class CuidadorService {
         cuidador.setStatus(Status.INATIVO);
         cuidador.setData_atualizacao(LocalDateTime.now());
         repository.save(cuidador);
+    }
+
+    private String limparDocumento(String valor) {
+        if (valor == null || valor.isBlank()) {
+            return null;
+        }
+
+        return valor.replaceAll("\\D", "");
     }
 }
