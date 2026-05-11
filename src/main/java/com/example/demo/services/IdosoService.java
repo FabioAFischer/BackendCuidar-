@@ -45,6 +45,15 @@ public class IdosoService {
         return IdosoMapper.toDTO(idoso);
     }
 
+    public IdosoDTO buscarPorCpf(String cpf) {
+        String cpfLimpo = cpf == null ? "" : cpf.replaceAll("\\D", "");
+
+        Idoso idoso = repository.findByCpf(cpfLimpo)
+                .orElseThrow(() -> new ResourceNotFoundException("Idoso não encontrado com CPF informado"));
+
+        return IdosoMapper.toDTO(idoso);
+    }
+
     public IdosoDTO criar(IdosoDTO dto) {
         Optional<Idoso> idosoExistente = repository.findByCpf(dto.getCpf());
 
