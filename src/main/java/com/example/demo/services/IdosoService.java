@@ -46,16 +46,14 @@ public class IdosoService {
     }
 
     public IdosoDTO buscarPorCpf(String cpf) {
-        String cpfLimpo = cpf == null ? "" : cpf.replaceAll("\\D", "");
-
-        Idoso idoso = repository.findByCpf(cpfLimpo)
+        Idoso idoso = buscarEntidadePorCpf(cpf)
                 .orElseThrow(() -> new ResourceNotFoundException("Idoso não encontrado com CPF informado"));
 
         return IdosoMapper.toDTO(idoso);
     }
 
     public IdosoDTO criar(IdosoDTO dto) {
-        Optional<Idoso> idosoExistente = repository.findByCpf(dto.getCpf());
+        Optional<Idoso> idosoExistente = buscarEntidadePorCpf(dto.getCpf());
 
         if (idosoExistente.isPresent() && idosoExistente.get().getStatus() == Status.ATIVO) {
             throw new BusinessException("Já existe um idoso ativo com esse CPF");
@@ -147,5 +145,18 @@ public class IdosoService {
         }
 
         throw new BusinessException("Contato é obrigatório");
+    }
+
+    private Optional<Idoso> buscarEntidadePorCpf(String cpf) {
+        String cpfLimpo = limparDocumento(cpf);
+        return cpfLimpo == null ? Optional.empty() : repository.findByCpf(cpfLimpo);
+    }
+
+    private String limparDocumento(String valor) {
+        if (valor == null || valor.isBlank()) {
+            return null;
+        }
+
+        return valor.replaceAll("\\D", "");
     }
 }
