@@ -40,6 +40,11 @@ public class IdosoController {
         return ResponseEntity.ok(service.buscarPorId(id));
     }
 
+    @GetMapping("/trazerdados/{cpf}")
+    public ResponseEntity<IdosoDTO> buscarPorCpf(@PathVariable String cpf) {
+        return ResponseEntity.ok(service.buscarPorCpf(cpf));
+    }
+
     @PostMapping("/cadastrar")
     public ResponseEntity<IdosoDTO> criar(@RequestBody IdosoDTO dto) {
         IdosoDTO criada = service.criar(dto);
