@@ -1,5 +1,7 @@
 package com.example.demo.services;
 
+import java.time.LocalDateTime;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -33,11 +35,11 @@ public class PrescricaoService {
     }
 
     public Page<PrescricaoDTO> listarAtivas(Pageable pageable) {
-        return repository.findByStatus(Status.ATIVO, pageable).map(PrescricaoMapper::toDTO);
+        return repository.findAtivasNaoVencidas(Status.ATIVO, LocalDateTime.now(), pageable).map(PrescricaoMapper::toDTO);
     }
 
     public Page<PrescricaoDTO> listarPorIdoso(Integer idosoId, Pageable pageable) {
-        return repository.findByIdosoIdAndStatus(idosoId, Status.ATIVO, pageable).map(PrescricaoMapper::toDTO);
+        return repository.findAtivasNaoVencidasPorIdoso(idosoId, Status.ATIVO, LocalDateTime.now(), pageable).map(PrescricaoMapper::toDTO);
     }
 
     public PrescricaoDTO buscarPorId(int id) {
