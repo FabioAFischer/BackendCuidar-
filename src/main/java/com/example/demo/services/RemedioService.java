@@ -6,22 +6,27 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.demo.dtos.RemedioDTO;
+import com.example.demo.entity.Prescricao;
 import com.example.demo.entity.Remedio;
 import com.example.demo.enums.Status;
 import com.example.demo.exceptions.BusinessException;
 import com.example.demo.exceptions.ResourceNotFoundException;
 import com.example.demo.mappers.RemedioMapper;
+import com.example.demo.repository.PrescricaoRepository;
 import com.example.demo.repository.RemedioRepository;
 
 @Service
 public class RemedioService {
 
     private final RemedioRepository repository;
+    private final PrescricaoRepository prescricaoRepository;
 
-    public RemedioService(RemedioRepository repository) {
+    public RemedioService(RemedioRepository repository, PrescricaoRepository prescricaoRepository) {
         this.repository = repository;
+        this.prescricaoRepository = prescricaoRepository;
     }
 
     public Page<RemedioDTO> listarAtivas(Pageable pageable) {
@@ -63,9 +68,14 @@ public class RemedioService {
         return RemedioMapper.toDTO(repository.save(remedio));
     }
 
+    @Transactional
     public void inativar(int id) {
         Remedio remedio = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Remédio", (long) id));
+        for (Prescricao prescricao : prescricaoRepository.findByRemedioIdAndStatus(id, Status.ATIVO)) {
+            prescricao.setStatus(Status.INATIVO);
+        }
+
         remedio.setStatus(Status.INATIVO);
         repository.save(remedio);
     }

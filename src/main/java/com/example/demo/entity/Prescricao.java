@@ -59,7 +59,7 @@ public class Prescricao {
 
     @NotNull(message = "Campo vazio")
     private Boolean necessario_jejum;
-    private String istrucao;
+    private String instrucao;
 
     @NotNull(message = "Campo intervalo vazio")
     private Double intervalo;

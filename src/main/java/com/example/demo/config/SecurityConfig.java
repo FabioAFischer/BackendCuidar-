@@ -49,6 +49,7 @@ public class SecurityConfig {
                         .requestMatchers("/cuidador/**").hasAnyRole("CUIDADOR", "INSTITUICAO")
                         .requestMatchers("/idoso/**").hasAnyRole("CUIDADOR", "INSTITUICAO")
                         .requestMatchers("/remedio/**").hasRole("CUIDADOR")
+                        .requestMatchers("/prescricao/**").hasRole("CUIDADOR")
                         .requestMatchers("/contato/**").authenticated()
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
