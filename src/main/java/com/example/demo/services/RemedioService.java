@@ -1,6 +1,8 @@
 // RemedioService.java
 package com.example.demo.services;
 
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -33,9 +35,19 @@ public class RemedioService {
     }
 
     public RemedioDTO criar(RemedioDTO dto) {
-        if (repository.existsByNome(dto.getNome())) {
-            throw new BusinessException("Já existe um remédio com esse nome");
+        Optional<Remedio> remedioExistente = repository.findByNome(dto.getNome());
+
+        if (remedioExistente.isPresent() && remedioExistente.get().getStatus() == Status.ATIVO) {
+            throw new BusinessException("Já existe um remédio ativo com esse nome");
         }
+
+        if (remedioExistente.isPresent()) {
+            Remedio remedio = remedioExistente.get();
+            RemedioMapper.updateEntity(remedio, dto);
+            remedio.setStatus(Status.ATIVO);
+            return RemedioMapper.toDTO(repository.save(remedio));
+        }
+
         return RemedioMapper.toDTO(repository.save(RemedioMapper.toEntity(dto)));
     }
 
