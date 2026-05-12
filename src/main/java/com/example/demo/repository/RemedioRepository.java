@@ -13,6 +13,7 @@ public interface RemedioRepository extends JpaRepository<Remedio, Integer> {
 
     Page<Remedio> findByStatus(Status status, Pageable pageable);
 
-    boolean existsByNome(String nome);
+    Optional<Remedio> findByNome(String nome);
+
 
 }
