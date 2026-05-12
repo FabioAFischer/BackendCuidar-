@@ -1,6 +1,7 @@
 package com.example.demo.repository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,6 +14,8 @@ import com.example.demo.enums.Status;
 
 @Repository
 public interface PrescricaoRepository extends JpaRepository<Prescricao, Integer> {
+
+    List<Prescricao> findByRemedioIdAndStatus(Integer remedioId, Status status);
 
     @Query("""
             select p
