@@ -12,8 +12,9 @@ import com.example.demo.entity.Instituicao;
 import com.example.demo.entity.Usuario;
 import com.example.demo.enums.Perfil;
 import com.example.demo.enums.Status;
-import com.example.demo.exceptions.BusinessException;
+import com.example.demo.exceptions.InvalidRequestException;
 import com.example.demo.exceptions.ResourceNotFoundException;
+import com.example.demo.exceptions.UnsupportedProfileException;
 import com.example.demo.exceptions.UnauthorizedException;
 import com.example.demo.repository.AdministradorRepository;
 import com.example.demo.repository.CuidadorRepository;
@@ -52,7 +53,7 @@ public class AuthService {
 
     public Map<String, Object> login(Map<String, String> dados) {
         if (dados == null) {
-            throw new BusinessException("Dados de login não informados");
+            throw new InvalidRequestException("Dados de login não informados");
         }
 
         String identificador = primeiroValor(dados, "identificador", "cpfCnpj", "cpf", "cnpj");
@@ -60,11 +61,11 @@ public class AuthService {
         Perfil perfil = parsePerfil(dados.get("perfil"));
 
         if (identificador == null || identificador.isBlank()) {
-            throw new BusinessException("Informe CPF ou CNPJ");
+            throw new InvalidRequestException("Informe CPF ou CNPJ");
         }
 
         if (senha == null || senha.isBlank()) {
-            throw new BusinessException("Informe a senha");
+            throw new InvalidRequestException("Informe a senha");
         }
 
         Usuario usuario = buscarUsuario(perfil, identificador);
@@ -107,7 +108,7 @@ public class AuthService {
     private String emailDoUsuario(Usuario usuario) {
         if (usuario instanceof Cuidador cuidador) return cuidador.getEmail();
         if (usuario instanceof Instituicao instituicao) return instituicao.getEmail();
-        throw new BusinessException("Perfil não suporta 2FA");
+        throw new UnsupportedProfileException("Perfil nao suporta 2FA");
     }
 
     private Usuario buscarUsuarioPorEmail(String email) {
@@ -125,7 +126,7 @@ public class AuthService {
             case INSTITUICAO -> instituicaoRepository.findByEmail(email)
                     .map(u -> (Usuario) u)
                     .orElseThrow(() -> new UnauthorizedException("Usuário não encontrado"));
-            default -> throw new BusinessException("Perfil não suporta 2FA");
+            default -> throw new UnsupportedProfileException("Perfil nao suporta 2FA");
         };
     }
 
@@ -156,7 +157,7 @@ public class AuthService {
                     .orElseThrow(() -> new UnauthorizedException("Credenciais inválidas"));
             case INSTITUICAO -> instituicaoRepository.findByCnpj(documento)
                     .orElseThrow(() -> new UnauthorizedException("Credenciais inválidas"));
-            default -> throw new BusinessException("Perfil não permitido para login");
+            default -> throw new UnsupportedProfileException("Perfil nao permitido para login");
         };
     }
 
@@ -165,18 +166,18 @@ public class AuthService {
         if (usuario instanceof Cuidador cuidador) return cuidador.getSenha();
         if (usuario instanceof Instituicao instituicao) return instituicao.getSenha();
 
-        throw new BusinessException("Perfil não permitido para login");
+        throw new UnsupportedProfileException("Perfil nao permitido para login");
     }
 
     private Perfil parsePerfil(String perfil) {
         if (perfil == null || perfil.isBlank()) {
-            throw new BusinessException("Informe o perfil");
+            throw new InvalidRequestException("Informe o perfil");
         }
 
         try {
             return Perfil.valueOf(perfil.trim().toUpperCase());
         } catch (IllegalArgumentException e) {
-            throw new BusinessException("Perfil inválido");
+            throw new InvalidRequestException("Perfil inválido");
         }
     }
 
@@ -194,7 +195,7 @@ public class AuthService {
 
     public Map<String, Object> recuperarSenha(String identificador) {
     if (identificador == null || identificador.isBlank()) {
-        throw new BusinessException("Informe o CPF ou CNPJ");
+        throw new InvalidRequestException("Informe o CPF ou CNPJ");
     }
 
     String documento = limparDocumento(identificador);
@@ -238,6 +239,6 @@ public void novaSenha(String email, String novaSenha) {
         return;
     }
 
-    throw new BusinessException("Perfil não suporta recuperação de senha");
+    throw new UnsupportedProfileException("Perfil nao suporta recuperacao de senha");
 }
 }

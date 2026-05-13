@@ -8,7 +8,8 @@ import com.example.demo.dtos.VinculoDTO;
 import com.example.demo.entity.Cuidador;
 import com.example.demo.entity.Idoso;
 import com.example.demo.entity.Vinculo;
-import com.example.demo.exceptions.BusinessException;
+import com.example.demo.exceptions.DuplicateResourceException;
+import com.example.demo.exceptions.InvalidRequestException;
 import com.example.demo.exceptions.ResourceNotFoundException;
 import com.example.demo.mappers.VinculoMapper;
 import com.example.demo.repository.CuidadorRepository;
@@ -51,11 +52,11 @@ public class VinculoService {
 
     public VinculoDTO criar(VinculoDTO dto) {
         if (dto.getIdosoId() == null || dto.getCuidadorId() == null) {
-            throw new BusinessException("Idoso e Cuidador são obrigatórios para criar um vínculo");
+            throw new InvalidRequestException("Idoso e Cuidador são obrigatórios para criar um vínculo");
         }
 
         if (repository.existsByIdosoIdAndCuidadorId(dto.getIdosoId(), dto.getCuidadorId())) {
-            throw new BusinessException("Já existe um vínculo entre este idoso e este cuidador");
+            throw new DuplicateResourceException("Já existe um vínculo entre este idoso e este cuidador");
         }
 
         Idoso idoso = idosoRepository.findById(dto.getIdosoId())

@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.demo.exceptions.BusinessException;
+import com.example.demo.exceptions.InvalidRequestException;
 import com.example.demo.services.AuthService;
 
 @RestController
@@ -35,7 +35,7 @@ public class AuthController {
         String perfil = dados.get("perfil");
 
         if (email == null || codigo == null) {
-            throw new BusinessException("Email e código são obrigatórios");
+            throw new InvalidRequestException("Email e código são obrigatórios");
         }
 
     return ResponseEntity.ok(authService.verificar2fa(email, codigo, perfil));
@@ -53,7 +53,7 @@ public ResponseEntity<?> verificarRecuperacao(@RequestBody Map<String, String> d
     String codigo = dados.get("codigo");
 
     if (email == null || codigo == null) {
-        throw new BusinessException("Email e código são obrigatórios");
+        throw new InvalidRequestException("Email e código são obrigatórios");
     }
 
     return ResponseEntity.ok(authService.verificarRecuperacao(email, codigo));
@@ -65,7 +65,7 @@ public ResponseEntity<?> novaSenha(@RequestBody Map<String, String> dados) {
     String novaSenha = dados.get("novaSenha");
 
     if (email == null || novaSenha == null) {
-        throw new BusinessException("Email e nova senha são obrigatórios");
+        throw new InvalidRequestException("Email e nova senha são obrigatórios");
     }
 
     authService.novaSenha(email, novaSenha);

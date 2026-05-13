@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import com.example.demo.dtos.InstituicaoDTO;
 import com.example.demo.entity.Instituicao;
 import com.example.demo.enums.Status;
-import com.example.demo.exceptions.BusinessException;
+import com.example.demo.exceptions.DuplicateResourceException;
 import com.example.demo.exceptions.ResourceNotFoundException;
 import com.example.demo.mappers.InstituicaoMapper;
 import com.example.demo.repository.InstituicaoRepository;
@@ -42,7 +42,7 @@ public class InstituicaoService {
 
     public InstituicaoDTO criar(InstituicaoDTO dto) {
         if (repository.existsByCnpj(dto.getCnpj())) {
-            throw new BusinessException("Já existe uma instituição com esse CNPJ");
+            throw new DuplicateResourceException("Já existe uma instituição com esse CNPJ");
         }
         Instituicao instituicao = InstituicaoMapper.toEntity(dto);
         senhaService.validar(dto.getSenha());
@@ -55,7 +55,7 @@ public class InstituicaoService {
                 .orElseThrow(() -> new ResourceNotFoundException("Instituição", id.longValue()));
 
         if (!instituicao.getCnpj().equals(dto.getCnpj()) && repository.existsByCnpj(dto.getCnpj())) {
-            throw new BusinessException("CNPJ já está em uso");
+            throw new DuplicateResourceException("CNPJ já está em uso");
         }
 
         instituicao.setNome(dto.getNome());

@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.demo.entity.CodigoVerificacao;
-import com.example.demo.exceptions.BusinessException;
+import com.example.demo.exceptions.VerificationCodeException;
 import com.example.demo.repository.CodigoVerificacaoRepository;
 
 @Service
@@ -41,14 +41,14 @@ public class TwoFactorService {
     public void validarCodigo(String email, String codigo) {
         CodigoVerificacao verificacao = repository
                 .findTopByEmailAndUsadoFalseOrderByExpiracaoDesc(email)
-                .orElseThrow(() -> new BusinessException("Nenhum código ativo encontrado para este email"));
+                .orElseThrow(() -> new VerificationCodeException("Nenhum codigo ativo encontrado para este email"));
 
         if (verificacao.getExpiracao().isBefore(LocalDateTime.now())) {
-            throw new BusinessException("Código expirado, solicite um novo");
+            throw new VerificationCodeException("Codigo expirado, solicite um novo");
         }
 
         if (!verificacao.getCodigo().equals(codigo)) {
-            throw new BusinessException("Código inválido");
+            throw new VerificationCodeException("Codigo invalido");
         }
 
         verificacao.setUsado(true);
