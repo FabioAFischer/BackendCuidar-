@@ -36,6 +36,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String token = extrairToken(request);
 
+        if (rotaPublica(request)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         if (token != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             try {
                 jwtService.validarToken(token);
@@ -76,5 +81,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         return authorization.substring(7);
+    }
+
+    private boolean rotaPublica(HttpServletRequest request) {
+        String path = request.getServletPath();
+
+        return "OPTIONS".equalsIgnoreCase(request.getMethod())
+                || path.equals("/auth/login")
+                || path.equals("/auth/verificar-2fa")
+                || path.equals("/auth/recuperar-senha")
+                || path.equals("/auth/verificar-recuperacao")
+                || path.equals("/auth/nova-senha")
+                || path.startsWith("/swagger-ui/")
+                || path.startsWith("/v3/api-docs/");
     }
 }
