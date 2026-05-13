@@ -5,8 +5,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static com.example.demo.support.TestDataFactory.administrador;
+import static com.example.demo.support.TestDataFactory.cuidador;
+import static com.example.demo.support.TestDataFactory.dadosLogin;
+import static com.example.demo.support.TestDataFactory.instituicaoAuth;
 
-import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
 
@@ -20,7 +23,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import com.example.demo.entity.Administrador;
 import com.example.demo.entity.Cuidador;
 import com.example.demo.entity.Instituicao;
-import com.example.demo.enums.Perfil;
 import com.example.demo.enums.Status;
 import com.example.demo.exceptions.BusinessException;
 import com.example.demo.exceptions.UnauthorizedException;
@@ -68,7 +70,7 @@ class AuthServiceTest {
 
         assertEquals(1, resposta.get("id"));
         assertEquals("Admin", resposta.get("nome"));
-        assertEquals(Perfil.ADMINISTRADOR, resposta.get("perfil"));
+        assertEquals(administrador.getPerfil(), resposta.get("perfil"));
         assertEquals("token-admin", resposta.get("token"));
         assertEquals("Bearer", resposta.get("tipo"));
         assertEquals(true, resposta.get("autenticado"));
@@ -90,7 +92,7 @@ class AuthServiceTest {
 
     @Test
     void deveExigirMfaParaInstituicao() {
-        Instituicao instituicao = instituicao();
+        Instituicao instituicao = instituicaoAuth();
 
         when(instituicaoRepository.findByCnpj("12345678000199")).thenReturn(Optional.of(instituicao));
         when(passwordEncoder.matches("senha", "hash")).thenReturn(true);
@@ -186,51 +188,5 @@ class AuthServiceTest {
         verify(twoFactorService).validarCodigo("cuidador@email.com", "123456");
         assertTrue((Boolean) resposta.get("valido"));
         assertEquals("cuidador@email.com", resposta.get("email"));
-    }
-
-    private Map<String, String> dadosLogin(String identificador, String senha, String perfil) {
-        return Map.of(
-                "identificador", identificador,
-                "senha", senha,
-                "perfil", perfil);
-    }
-
-    private Administrador administrador() {
-        Administrador administrador = new Administrador();
-        administrador.setId(1);
-        administrador.setNome("Admin");
-        administrador.setCpf("12345678901");
-        administrador.setEmail("admin@email.com");
-        administrador.setSenha("hash");
-        administrador.setPerfil(Perfil.ADMINISTRADOR);
-        administrador.setStatus(Status.ATIVO);
-        administrador.setData_criacao(LocalDateTime.now());
-        return administrador;
-    }
-
-    private Cuidador cuidador() {
-        Cuidador cuidador = new Cuidador();
-        cuidador.setId(2);
-        cuidador.setNome("Cuidador");
-        cuidador.setCpf("12345678901");
-        cuidador.setEmail("cuidador@email.com");
-        cuidador.setSenha("hash");
-        cuidador.setPerfil(Perfil.CUIDADOR);
-        cuidador.setStatus(Status.ATIVO);
-        cuidador.setData_criacao(LocalDateTime.now());
-        return cuidador;
-    }
-
-    private Instituicao instituicao() {
-        Instituicao instituicao = new Instituicao();
-        instituicao.setId(3);
-        instituicao.setNome("Instituicao");
-        instituicao.setCnpj("12345678000199");
-        instituicao.setEmail("instituicao@email.com");
-        instituicao.setSenha("hash");
-        instituicao.setPerfil(Perfil.INSTITUICAO);
-        instituicao.setStatus(Status.ATIVO);
-        instituicao.setData_criacao(LocalDateTime.now());
-        return instituicao;
     }
 }

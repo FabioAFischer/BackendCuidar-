@@ -5,8 +5,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static com.example.demo.support.TestDataFactory.contato;
+import static com.example.demo.support.TestDataFactory.idoso;
+import static com.example.demo.support.TestDataFactory.idosoDTO;
+import static com.example.demo.support.TestDataFactory.instituicao;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -16,12 +19,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.example.demo.dtos.ContatoDTO;
 import com.example.demo.dtos.IdosoDTO;
 import com.example.demo.entity.Contato;
 import com.example.demo.entity.Idoso;
-import com.example.demo.entity.Instituicao;
-import com.example.demo.enums.Perfil;
 import com.example.demo.enums.Status;
 import com.example.demo.exceptions.BusinessException;
 import com.example.demo.exceptions.ResourceNotFoundException;
@@ -33,7 +33,7 @@ import com.example.demo.repository.InstituicaoRepository;
 class IdosoServiceTest {
 
     @Mock
-    private IdosoRepository repository;
+    private IdosoRepository idosoRepository;
 
     @Mock
     private InstituicaoRepository instituicaoRepository;
@@ -49,10 +49,10 @@ class IdosoServiceTest {
         IdosoDTO dto = idosoDTO();
         Contato contatoSalvo = contato(5, "11", "999999999");
 
-        when(repository.findByCpf("12345678901")).thenReturn(Optional.empty());
+        when(idosoRepository.findByCpf("12345678901")).thenReturn(Optional.empty());
         when(instituicaoRepository.findById(10)).thenReturn(Optional.of(instituicao()));
         when(contatoRepository.save(any(Contato.class))).thenReturn(contatoSalvo);
-        when(repository.save(any(Idoso.class))).thenAnswer(invocation -> {
+        when(idosoRepository.save(any(Idoso.class))).thenAnswer(invocation -> {
             Idoso idoso = invocation.getArgument(0);
             idoso.setId(1);
             return idoso;
@@ -72,7 +72,7 @@ class IdosoServiceTest {
     void deveBloquearCriacaoComCpfAtivoDuplicado() {
         Idoso existente = idoso(1, "Maria", "12345678901", Status.ATIVO);
 
-        when(repository.findByCpf("12345678901")).thenReturn(Optional.of(existente));
+        when(idosoRepository.findByCpf("12345678901")).thenReturn(Optional.of(existente));
 
         assertThrows(BusinessException.class, () -> service.criar(idosoDTO()));
     }
@@ -83,10 +83,10 @@ class IdosoServiceTest {
         Idoso existente = idoso(1, "Maria Antiga", "12345678901", Status.INATIVO);
         Contato contatoSalvo = contato(5, "11", "999999999");
 
-        when(repository.findByCpf("12345678901")).thenReturn(Optional.of(existente));
+        when(idosoRepository.findByCpf("12345678901")).thenReturn(Optional.of(existente));
         when(instituicaoRepository.findById(10)).thenReturn(Optional.of(instituicao()));
         when(contatoRepository.save(any(Contato.class))).thenReturn(contatoSalvo);
-        when(repository.save(existente)).thenReturn(existente);
+        when(idosoRepository.save(existente)).thenReturn(existente);
 
         IdosoDTO resultado = service.criar(dto);
 
@@ -98,7 +98,7 @@ class IdosoServiceTest {
 
     @Test
     void deveFalharAoCriarComInstituicaoInexistente() {
-        when(repository.findByCpf("12345678901")).thenReturn(Optional.empty());
+        when(idosoRepository.findByCpf("12345678901")).thenReturn(Optional.empty());
         when(instituicaoRepository.findById(10)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> service.criar(idosoDTO()));
@@ -109,7 +109,7 @@ class IdosoServiceTest {
         IdosoDTO dto = idosoDTO();
         dto.getContato().setTelefone(null);
 
-        when(repository.findByCpf("12345678901")).thenReturn(Optional.empty());
+        when(idosoRepository.findByCpf("12345678901")).thenReturn(Optional.empty());
         when(instituicaoRepository.findById(10)).thenReturn(Optional.of(instituicao()));
 
         assertThrows(BusinessException.class, () -> service.criar(dto));
@@ -121,7 +121,7 @@ class IdosoServiceTest {
         dto.setContato(null);
         dto.setContatoId(null);
 
-        when(repository.findByCpf("12345678901")).thenReturn(Optional.empty());
+        when(idosoRepository.findByCpf("12345678901")).thenReturn(Optional.empty());
         when(instituicaoRepository.findById(10)).thenReturn(Optional.of(instituicao()));
 
         assertThrows(BusinessException.class, () -> service.criar(dto));
@@ -135,16 +135,16 @@ class IdosoServiceTest {
         dto.setContatoId(5);
         Idoso existente = idoso(1, "Maria", "12345678901", Status.ATIVO);
 
-        when(repository.findById(1)).thenReturn(Optional.of(existente));
+        when(idosoRepository.findById(1)).thenReturn(Optional.of(existente));
         when(instituicaoRepository.findById(10)).thenReturn(Optional.of(instituicao()));
         when(contatoRepository.findById(5)).thenReturn(Optional.of(contato(5, "11", "999999999")));
-        when(repository.save(existente)).thenReturn(existente);
+        when(idosoRepository.save(existente)).thenReturn(existente);
 
         IdosoDTO resultado = service.atualizar(1, dto);
 
         assertEquals("Maria Atualizada", resultado.getNome());
         assertEquals(5, resultado.getContatoId());
-        verify(repository).save(existente);
+        verify(idosoRepository).save(existente);
     }
 
     @Test
@@ -153,8 +153,8 @@ class IdosoServiceTest {
         dto.setCpf("10987654321");
         Idoso existente = idoso(1, "Maria", "12345678901", Status.ATIVO);
 
-        when(repository.findById(1)).thenReturn(Optional.of(existente));
-        when(repository.existsByCpf("10987654321")).thenReturn(true);
+        when(idosoRepository.findById(1)).thenReturn(Optional.of(existente));
+        when(idosoRepository.existsByCpf("10987654321")).thenReturn(true);
 
         assertThrows(BusinessException.class, () -> service.atualizar(1, dto));
     }
@@ -163,66 +163,19 @@ class IdosoServiceTest {
     void deveInativarIdoso() {
         Idoso existente = idoso(1, "Maria", "12345678901", Status.ATIVO);
 
-        when(repository.findById(1)).thenReturn(Optional.of(existente));
+        when(idosoRepository.findById(1)).thenReturn(Optional.of(existente));
 
         service.inativar(1);
 
         ArgumentCaptor<Idoso> captor = ArgumentCaptor.forClass(Idoso.class);
-        verify(repository).save(captor.capture());
+        verify(idosoRepository).save(captor.capture());
         assertEquals(Status.INATIVO, captor.getValue().getStatus());
     }
 
     @Test
     void deveFalharAoBuscarIdosoInexistente() {
-        when(repository.findById(99)).thenReturn(Optional.empty());
+        when(idosoRepository.findById(99)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> service.buscarPorId(99));
-    }
-
-    private IdosoDTO idosoDTO() {
-        IdosoDTO dto = new IdosoDTO();
-        dto.setNome("Maria");
-        dto.setCpf("12345678901");
-        dto.setObservacoes("Alergia a dipirona");
-        dto.setInstituicaoId(10);
-        dto.setContato(contatoDTO());
-        return dto;
-    }
-
-    private ContatoDTO contatoDTO() {
-        ContatoDTO dto = new ContatoDTO();
-        dto.setDdd("11");
-        dto.setTelefone("999999999");
-        return dto;
-    }
-
-    private Idoso idoso(int id, String nome, String cpf, Status status) {
-        Idoso idoso = new Idoso();
-        idoso.setId(id);
-        idoso.setNome(nome);
-        idoso.setCpf(cpf);
-        idoso.setObservacoes("Alergia a dipirona");
-        idoso.setInstituicao(instituicao());
-        idoso.setContato(contato(5, "11", "999999999"));
-        idoso.setData_criacao(LocalDateTime.now());
-        idoso.setPerfil(Perfil.IDOSO);
-        idoso.setStatus(status);
-        return idoso;
-    }
-
-    private Instituicao instituicao() {
-        Instituicao instituicao = new Instituicao();
-        instituicao.setId(10);
-        instituicao.setNome("Instituicao Bom Cuidado");
-        instituicao.setStatus(Status.ATIVO);
-        return instituicao;
-    }
-
-    private Contato contato(Integer id, String ddd, String telefone) {
-        Contato contato = new Contato();
-        contato.setId(id);
-        contato.setDdd(ddd);
-        contato.setTelefone(telefone);
-        return contato;
     }
 }

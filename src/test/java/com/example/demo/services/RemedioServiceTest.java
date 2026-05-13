@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static com.example.demo.support.TestDataFactory.remedio;
+import static com.example.demo.support.TestDataFactory.remedioDTO;
 
 import java.util.List;
 import java.util.Optional;
@@ -29,7 +31,7 @@ import com.example.demo.repository.RemedioRepository;
 class RemedioServiceTest {
 
     @Mock
-    private RemedioRepository repository;
+    private RemedioRepository remedioRepository;
 
     @Mock
     private PrescricaoRepository prescricaoRepository;
@@ -42,8 +44,8 @@ class RemedioServiceTest {
         RemedioDTO dto = remedioDTO("Dipirona", "Tomar com agua", null);
         Remedio salvo = remedio(1, "Dipirona", "Tomar com agua", Status.ATIVO);
 
-        when(repository.findByNome("Dipirona")).thenReturn(Optional.empty());
-        when(repository.save(any(Remedio.class))).thenReturn(salvo);
+        when(remedioRepository.findByNome("Dipirona")).thenReturn(Optional.empty());
+        when(remedioRepository.save(any(Remedio.class))).thenReturn(salvo);
 
         RemedioDTO resultado = service.criar(dto);
 
@@ -57,7 +59,7 @@ class RemedioServiceTest {
         RemedioDTO dto = remedioDTO("Dipirona", null, null);
         Remedio existente = remedio(1, "Dipirona", null, Status.ATIVO);
 
-        when(repository.findByNome("Dipirona")).thenReturn(Optional.of(existente));
+        when(remedioRepository.findByNome("Dipirona")).thenReturn(Optional.of(existente));
 
         assertThrows(BusinessException.class, () -> service.criar(dto));
     }
@@ -67,21 +69,21 @@ class RemedioServiceTest {
         RemedioDTO dto = remedioDTO("Dipirona", "Nova observacao", null);
         Remedio existente = remedio(1, "Dipirona", "Antiga observacao", Status.INATIVO);
 
-        when(repository.findByNome("Dipirona")).thenReturn(Optional.of(existente));
-        when(repository.save(existente)).thenReturn(existente);
+        when(remedioRepository.findByNome("Dipirona")).thenReturn(Optional.of(existente));
+        when(remedioRepository.save(existente)).thenReturn(existente);
 
         RemedioDTO resultado = service.criar(dto);
 
         assertEquals(Status.ATIVO, resultado.getStatus());
         assertEquals("Nova observacao", resultado.getObservacao());
-        verify(repository).save(existente);
+        verify(remedioRepository).save(existente);
     }
 
     @Test
     void deveBuscarRemedioPorId() {
         Remedio remedio = remedio(1, "Dipirona", null, Status.ATIVO);
 
-        when(repository.findById(1)).thenReturn(Optional.of(remedio));
+        when(remedioRepository.findById(1)).thenReturn(Optional.of(remedio));
 
         RemedioDTO resultado = service.buscarPorId(1);
 
@@ -91,7 +93,7 @@ class RemedioServiceTest {
 
     @Test
     void deveFalharAoBuscarRemedioInexistente() {
-        when(repository.findById(99)).thenReturn(Optional.empty());
+        when(remedioRepository.findById(99)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> service.buscarPorId(99));
     }
@@ -101,8 +103,8 @@ class RemedioServiceTest {
         RemedioDTO dto = remedioDTO("Paracetamol", null, Status.ATIVO);
         Remedio remedio = remedio(1, "Dipirona", null, Status.ATIVO);
 
-        when(repository.findById(1)).thenReturn(Optional.of(remedio));
-        when(repository.existsByNome("Paracetamol")).thenReturn(true);
+        when(remedioRepository.findById(1)).thenReturn(Optional.of(remedio));
+        when(remedioRepository.existsByNome("Paracetamol")).thenReturn(true);
 
         assertThrows(BusinessException.class, () -> service.atualizar(1, dto));
     }
@@ -113,31 +115,14 @@ class RemedioServiceTest {
         Prescricao prescricao = new Prescricao();
         prescricao.setStatus(Status.ATIVO);
 
-        when(repository.findById(1)).thenReturn(Optional.of(remedio));
+        when(remedioRepository.findById(1)).thenReturn(Optional.of(remedio));
         when(prescricaoRepository.findByRemedioIdAndStatus(1, Status.ATIVO)).thenReturn(List.of(prescricao));
 
         service.inativar(1);
 
         ArgumentCaptor<Remedio> captor = ArgumentCaptor.forClass(Remedio.class);
-        verify(repository).save(captor.capture());
+        verify(remedioRepository).save(captor.capture());
         assertEquals(Status.INATIVO, captor.getValue().getStatus());
         assertEquals(Status.INATIVO, prescricao.getStatus());
-    }
-
-    private RemedioDTO remedioDTO(String nome, String observacao, Status status) {
-        RemedioDTO dto = new RemedioDTO();
-        dto.setNome(nome);
-        dto.setObservacao(observacao);
-        dto.setStatus(status);
-        return dto;
-    }
-
-    private Remedio remedio(int id, String nome, String observacao, Status status) {
-        Remedio remedio = new Remedio();
-        remedio.setId(id);
-        remedio.setNome(nome);
-        remedio.setObservacao(observacao);
-        remedio.setStatus(status);
-        return remedio;
     }
 }
