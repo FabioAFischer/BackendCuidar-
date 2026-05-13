@@ -2,14 +2,13 @@ package com.example.demo.services;
 
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import com.example.demo.exceptions.EmailSendingException;
+
 import jakarta.mail.internet.MimeMessage;
-import lombok.extern.slf4j.Slf4j;
 
 @Service
-@Slf4j
 public class EmailService {
 
     private final JavaMailSender mailSender;
@@ -18,7 +17,6 @@ public class EmailService {
         this.mailSender = mailSender;
     }
 
-    @Async
     public void enviarCodigoVerificacao(String destinatario, String codigo) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
@@ -31,7 +29,7 @@ public class EmailService {
 
             mailSender.send(message);
         } catch (Exception e) {
-            log.error("Falha ao enviar email para {}: {}", destinatario, e.getMessage());
+            throw new EmailSendingException();
         }
     }
 
