@@ -32,12 +32,13 @@ public class AuthController {
     public ResponseEntity<?> verificar2fa(@RequestBody Map<String, String> dados) {
         String email = dados.get("email");
         String codigo = dados.get("codigo");
+        String perfil = dados.get("perfil");
 
         if (email == null || codigo == null) {
             throw new BusinessException("Email e código são obrigatórios");
         }
 
-    return ResponseEntity.ok(authService.verificar2fa(email, codigo));
+    return ResponseEntity.ok(authService.verificar2fa(email, codigo, perfil));
 }
 
 @PostMapping("/recuperar-senha")

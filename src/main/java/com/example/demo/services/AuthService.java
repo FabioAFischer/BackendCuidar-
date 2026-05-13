@@ -98,6 +98,12 @@ public class AuthService {
         return gerarRespostaLogin(usuario);
     }
 
+    public Map<String, Object> verificar2fa(String email, String codigo, String perfil) {
+        Usuario usuario = buscarUsuarioPorEmail(email, parsePerfil(perfil));
+        twoFactorService.validarCodigo(email, codigo);
+        return gerarRespostaLogin(usuario);
+    }
+
     private String emailDoUsuario(Usuario usuario) {
         if (usuario instanceof Cuidador cuidador) return cuidador.getEmail();
         if (usuario instanceof Instituicao instituicao) return instituicao.getEmail();
@@ -109,6 +115,18 @@ public class AuthService {
                 .map(u -> (Usuario) u)
                 .or(() -> instituicaoRepository.findByEmail(email).map(u -> (Usuario) u))
                 .orElseThrow(() -> new UnauthorizedException("Usuário não encontrado"));
+    }
+
+    private Usuario buscarUsuarioPorEmail(String email, Perfil perfil) {
+        return switch (perfil) {
+            case CUIDADOR -> cuidadorRepository.findByEmail(email)
+                    .map(u -> (Usuario) u)
+                    .orElseThrow(() -> new UnauthorizedException("Usuário não encontrado"));
+            case INSTITUICAO -> instituicaoRepository.findByEmail(email)
+                    .map(u -> (Usuario) u)
+                    .orElseThrow(() -> new UnauthorizedException("Usuário não encontrado"));
+            default -> throw new BusinessException("Perfil não suporta 2FA");
+        };
     }
 
     private Map<String, Object> gerarRespostaLogin(Usuario usuario) {
