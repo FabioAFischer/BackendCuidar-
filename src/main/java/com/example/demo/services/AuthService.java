@@ -12,9 +12,9 @@ import com.example.demo.entity.Instituicao;
 import com.example.demo.entity.Usuario;
 import com.example.demo.enums.Perfil;
 import com.example.demo.enums.Status;
-import com.example.demo.exceptions.BusinessException;
 import com.example.demo.exceptions.InvalidRequestException;
 import com.example.demo.exceptions.ResourceNotFoundException;
+import com.example.demo.exceptions.UnsupportedProfileException;
 import com.example.demo.exceptions.UnauthorizedException;
 import com.example.demo.repository.AdministradorRepository;
 import com.example.demo.repository.CuidadorRepository;
@@ -108,7 +108,7 @@ public class AuthService {
     private String emailDoUsuario(Usuario usuario) {
         if (usuario instanceof Cuidador cuidador) return cuidador.getEmail();
         if (usuario instanceof Instituicao instituicao) return instituicao.getEmail();
-        throw new BusinessException("Perfil não suporta 2FA");
+        throw new UnsupportedProfileException("Perfil nao suporta 2FA");
     }
 
     private Usuario buscarUsuarioPorEmail(String email) {
@@ -126,7 +126,7 @@ public class AuthService {
             case INSTITUICAO -> instituicaoRepository.findByEmail(email)
                     .map(u -> (Usuario) u)
                     .orElseThrow(() -> new UnauthorizedException("Usuário não encontrado"));
-            default -> throw new BusinessException("Perfil não suporta 2FA");
+            default -> throw new UnsupportedProfileException("Perfil nao suporta 2FA");
         };
     }
 
@@ -157,7 +157,7 @@ public class AuthService {
                     .orElseThrow(() -> new UnauthorizedException("Credenciais inválidas"));
             case INSTITUICAO -> instituicaoRepository.findByCnpj(documento)
                     .orElseThrow(() -> new UnauthorizedException("Credenciais inválidas"));
-            default -> throw new BusinessException("Perfil não permitido para login");
+            default -> throw new UnsupportedProfileException("Perfil nao permitido para login");
         };
     }
 
@@ -166,7 +166,7 @@ public class AuthService {
         if (usuario instanceof Cuidador cuidador) return cuidador.getSenha();
         if (usuario instanceof Instituicao instituicao) return instituicao.getSenha();
 
-        throw new BusinessException("Perfil não permitido para login");
+        throw new UnsupportedProfileException("Perfil nao permitido para login");
     }
 
     private Perfil parsePerfil(String perfil) {
@@ -239,6 +239,6 @@ public void novaSenha(String email, String novaSenha) {
         return;
     }
 
-    throw new BusinessException("Perfil não suporta recuperação de senha");
+    throw new UnsupportedProfileException("Perfil nao suporta recuperacao de senha");
 }
 }
