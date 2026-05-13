@@ -11,7 +11,7 @@ import com.example.demo.dtos.ContatoDTO;
 import com.example.demo.entity.Contato;
 import com.example.demo.entity.Cuidador;
 import com.example.demo.entity.Idoso;
-import com.example.demo.exceptions.BusinessException;
+import com.example.demo.exceptions.ResourceInUseException;
 import com.example.demo.exceptions.ResourceNotFoundException;
 import com.example.demo.mappers.ContatoMapper;
 import com.example.demo.repository.ContatoRepository;
@@ -84,7 +84,7 @@ public class ContatoService {
                 .orElseThrow(() -> new ResourceNotFoundException("Contato", id.longValue()));
 
         if (contato.getCuidador() != null || (contato.getIdosos() != null && !contato.getIdosos().isEmpty())) {
-            throw new BusinessException("Contato vinculado a usuário não pode ser deletado");
+            throw new ResourceInUseException("Contato vinculado a usuario nao pode ser deletado");
         }
 
         contatoRepository.delete(contato);
