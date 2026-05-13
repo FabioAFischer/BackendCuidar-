@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.demo.entity.Usuario;
 import com.example.demo.enums.Perfil;
+import com.example.demo.exceptions.InvalidTokenException;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -47,10 +48,18 @@ public class JwtService {
 
     public boolean tokenValido(String token) {
         try {
-            claims(token);
+            validarToken(token);
             return true;
-        } catch (JwtException | IllegalArgumentException exception) {
+        } catch (InvalidTokenException exception) {
             return false;
+        }
+    }
+
+    public void validarToken(String token) {
+        try {
+            claims(token);
+        } catch (JwtException | IllegalArgumentException exception) {
+            throw new InvalidTokenException();
         }
     }
 

@@ -1,6 +1,7 @@
 package com.example.demo.security;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.example.demo.enums.Perfil;
+import com.example.demo.exceptions.InvalidTokenException;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -34,9 +36,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String token = extrairToken(request);
 
-        if (token != null
-                && SecurityContextHolder.getContext().getAuthentication() == null
-                && jwtService.tokenValido(token)) {
+        if (token != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            try {
+                jwtService.validarToken(token);
+            } catch (InvalidTokenException exception) {
+                escreverErroToken(response, exception);
+                return;
+            }
+
             Integer usuarioId = jwtService.getUsuarioId(token);
             Perfil perfil = jwtService.getPerfil(token);
 
@@ -50,6 +57,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private void escreverErroToken(HttpServletResponse response, InvalidTokenException exception) throws IOException {
+        response.setStatus(exception.getStatus().value());
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().write("""
+                {"code":"%s","message":"%s","timestamp":"%s"}
+                """.formatted(exception.getErrorCode(), exception.getMessage(), LocalDateTime.now()));
     }
 
     private String extrairToken(HttpServletRequest request) {
