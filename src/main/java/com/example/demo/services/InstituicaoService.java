@@ -29,9 +29,10 @@ public class InstituicaoService {
         this.senhaService = senhaService;
     }
 
-    public Page<InstituicaoDTO> listarAtivas(Pageable pageable) {
-        return repository.findByStatus(Status.ATIVO, pageable).map(InstituicaoMapper::toDTO);
-    }
+    public Page<InstituicaoDTO> listarTodas(Pageable pageable) {
+    return repository.findAll(pageable)
+            .map(InstituicaoMapper::toDTO);
+}
 
     public InstituicaoDTO buscarPorId(Integer id) {
         Instituicao instituicao = repository.findById(id)
@@ -80,4 +81,14 @@ public class InstituicaoService {
         instituicao.setData_atualizacao(LocalDateTime.now());
         repository.save(instituicao);
     }
+
+    public void ativar(Integer id) {
+    Instituicao instituicao = repository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Instituição", id.longValue()));
+
+    instituicao.setStatus(Status.ATIVO);
+    instituicao.setData_atualizacao(LocalDateTime.now());
+
+    repository.save(instituicao);
+}
 }

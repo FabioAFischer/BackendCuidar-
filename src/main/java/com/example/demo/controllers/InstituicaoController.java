@@ -5,7 +5,16 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.dtos.InstituicaoDTO;
 import com.example.demo.services.InstituicaoService;
@@ -30,7 +39,7 @@ public class InstituicaoController {
     @GetMapping("/listar_todas")
     public ResponseEntity<Page<InstituicaoDTO>> listarTodas(
             @PageableDefault(size = 10, sort = "nome") Pageable pageable) {
-        return ResponseEntity.ok(service.listarAtivas(pageable));
+        return ResponseEntity.ok(service.listarTodas(pageable));
     }
 
     @Operation(
@@ -68,6 +77,16 @@ public class InstituicaoController {
     @DeleteMapping("/deletar/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Integer id) {
         service.inativar(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Operation(
+    summary = "Reativar instituição",
+    description = "Realiza a reativação lógica de uma instituição"
+    )
+    @PatchMapping("/ativar/{id}")
+    public ResponseEntity<Void> ativar(@PathVariable Integer id) {
+        service.ativar(id);
         return ResponseEntity.noContent().build();
     }
 }

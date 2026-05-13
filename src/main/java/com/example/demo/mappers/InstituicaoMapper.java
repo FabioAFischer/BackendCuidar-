@@ -20,6 +20,7 @@ public class InstituicaoMapper {
         }
 
         InstituicaoDTO dto = new InstituicaoDTO();
+
         dto.setId(instituicao.getId());
         dto.setNome(instituicao.getNome());
         dto.setCnpj(instituicao.getCnpj());
@@ -28,6 +29,7 @@ public class InstituicaoMapper {
         dto.setUf(instituicao.getUf());
         dto.setNumero(instituicao.getNumero());
         dto.setCep(instituicao.getCep());
+        dto.setStatus(instituicao.getStatus());
 
         return dto;
     }
