@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import com.example.demo.dtos.AdministradorDTO;
 import com.example.demo.entity.Administrador;
 import com.example.demo.enums.Status;
-import com.example.demo.exceptions.BusinessException;
+import com.example.demo.exceptions.DuplicateResourceException;
 import com.example.demo.exceptions.ResourceNotFoundException;
 import com.example.demo.mappers.AdministradorMapper;
 import com.example.demo.repository.AdministradorRepository;
@@ -43,7 +43,7 @@ public class AdministradorService {
 
     public AdministradorDTO criar(AdministradorDTO dto) {
         if (repository.existsByCpf(dto.getCpf())) {
-            throw new BusinessException("Já existe um administrador com esse CPF");
+            throw new DuplicateResourceException("Já existe um administrador com esse CPF");
         }
 
         Administrador administrador = AdministradorMapper.toEntity(dto);
@@ -60,7 +60,7 @@ public class AdministradorService {
 
         if (!administrador.getCpf().equals(dto.getCpf())
                 && repository.existsByCpf(dto.getCpf())) {
-            throw new BusinessException("CPF já está em uso");
+            throw new DuplicateResourceException("CPF já está em uso");
         }
 
         AdministradorMapper.updateEntity(administrador, dto);

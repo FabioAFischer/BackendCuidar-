@@ -13,6 +13,7 @@ import com.example.demo.entity.Cuidador;
 import com.example.demo.entity.Instituicao;
 import com.example.demo.enums.Status;
 import com.example.demo.exceptions.BusinessException;
+import com.example.demo.exceptions.DuplicateResourceException;
 import com.example.demo.exceptions.ResourceNotFoundException;
 import com.example.demo.mappers.CuidadorMapper;
 import com.example.demo.repository.CuidadorRepository;
@@ -62,7 +63,7 @@ public class CuidadorService {
 
     public CuidadorDTO criar(CuidadorDTO dto) {
         if (repository.existsByCpf(dto.getCpf())) {
-            throw new BusinessException("Já existe um cuidador com esse CPF");
+            throw new DuplicateResourceException("Já existe um cuidador com esse CPF");
         }
 
         if (dto.getContato() == null) {
@@ -85,7 +86,7 @@ public class CuidadorService {
                 .orElseThrow(() -> new ResourceNotFoundException("Cuidador", id.longValue()));
 
         if (!cuidador.getCpf().equals(dto.getCpf()) && repository.existsByCpf(dto.getCpf())) {
-            throw new BusinessException("CPF já está em uso");
+            throw new DuplicateResourceException("CPF já está em uso");
         }
 
         Instituicao instituicao = instituicaoRepository.findById(dto.getInstituicaoId())
@@ -146,7 +147,7 @@ public class CuidadorService {
 
         if (dto.getCpf() != null && !dto.getCpf().equals(cuidador.getCpf())) {
             if (repository.existsByCpf(dto.getCpf())) {
-                throw new BusinessException("CPF já está em uso");
+                throw new DuplicateResourceException("CPF já está em uso");
             }
             cuidador.setCpf(dto.getCpf());
         }

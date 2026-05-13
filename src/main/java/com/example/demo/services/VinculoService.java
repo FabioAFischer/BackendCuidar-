@@ -9,6 +9,7 @@ import com.example.demo.entity.Cuidador;
 import com.example.demo.entity.Idoso;
 import com.example.demo.entity.Vinculo;
 import com.example.demo.exceptions.BusinessException;
+import com.example.demo.exceptions.DuplicateResourceException;
 import com.example.demo.exceptions.ResourceNotFoundException;
 import com.example.demo.mappers.VinculoMapper;
 import com.example.demo.repository.CuidadorRepository;
@@ -55,7 +56,7 @@ public class VinculoService {
         }
 
         if (repository.existsByIdosoIdAndCuidadorId(dto.getIdosoId(), dto.getCuidadorId())) {
-            throw new BusinessException("Já existe um vínculo entre este idoso e este cuidador");
+            throw new DuplicateResourceException("Já existe um vínculo entre este idoso e este cuidador");
         }
 
         Idoso idoso = idosoRepository.findById(dto.getIdosoId())

@@ -12,7 +12,7 @@ import com.example.demo.dtos.RemedioDTO;
 import com.example.demo.entity.Prescricao;
 import com.example.demo.entity.Remedio;
 import com.example.demo.enums.Status;
-import com.example.demo.exceptions.BusinessException;
+import com.example.demo.exceptions.DuplicateResourceException;
 import com.example.demo.exceptions.ResourceNotFoundException;
 import com.example.demo.mappers.RemedioMapper;
 import com.example.demo.repository.PrescricaoRepository;
@@ -43,7 +43,7 @@ public class RemedioService {
         Optional<Remedio> remedioExistente = repository.findByNome(dto.getNome());
 
         if (remedioExistente.isPresent() && remedioExistente.get().getStatus() == Status.ATIVO) {
-            throw new BusinessException("Já existe um remédio ativo com esse nome");
+            throw new DuplicateResourceException("Já existe um remédio ativo com esse nome");
         }
 
         if (remedioExistente.isPresent()) {
@@ -61,7 +61,7 @@ public class RemedioService {
                 .orElseThrow(() -> new ResourceNotFoundException("Remédio", (long) id));
 
         if (!remedio.getNome().equals(dto.getNome()) && repository.existsByNome(dto.getNome())) {
-            throw new BusinessException("Nome já está em uso");
+            throw new DuplicateResourceException("Nome já está em uso");
         }
 
         RemedioMapper.updateEntity(remedio, dto);
