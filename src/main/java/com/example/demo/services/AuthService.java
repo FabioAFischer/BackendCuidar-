@@ -13,6 +13,7 @@ import com.example.demo.entity.Usuario;
 import com.example.demo.enums.Perfil;
 import com.example.demo.enums.Status;
 import com.example.demo.exceptions.BusinessException;
+import com.example.demo.exceptions.InvalidRequestException;
 import com.example.demo.exceptions.ResourceNotFoundException;
 import com.example.demo.exceptions.UnauthorizedException;
 import com.example.demo.repository.AdministradorRepository;
@@ -52,7 +53,7 @@ public class AuthService {
 
     public Map<String, Object> login(Map<String, String> dados) {
         if (dados == null) {
-            throw new BusinessException("Dados de login não informados");
+            throw new InvalidRequestException("Dados de login não informados");
         }
 
         String identificador = primeiroValor(dados, "identificador", "cpfCnpj", "cpf", "cnpj");
@@ -60,11 +61,11 @@ public class AuthService {
         Perfil perfil = parsePerfil(dados.get("perfil"));
 
         if (identificador == null || identificador.isBlank()) {
-            throw new BusinessException("Informe CPF ou CNPJ");
+            throw new InvalidRequestException("Informe CPF ou CNPJ");
         }
 
         if (senha == null || senha.isBlank()) {
-            throw new BusinessException("Informe a senha");
+            throw new InvalidRequestException("Informe a senha");
         }
 
         Usuario usuario = buscarUsuario(perfil, identificador);
@@ -170,13 +171,13 @@ public class AuthService {
 
     private Perfil parsePerfil(String perfil) {
         if (perfil == null || perfil.isBlank()) {
-            throw new BusinessException("Informe o perfil");
+            throw new InvalidRequestException("Informe o perfil");
         }
 
         try {
             return Perfil.valueOf(perfil.trim().toUpperCase());
         } catch (IllegalArgumentException e) {
-            throw new BusinessException("Perfil inválido");
+            throw new InvalidRequestException("Perfil inválido");
         }
     }
 
@@ -194,7 +195,7 @@ public class AuthService {
 
     public Map<String, Object> recuperarSenha(String identificador) {
     if (identificador == null || identificador.isBlank()) {
-        throw new BusinessException("Informe o CPF ou CNPJ");
+        throw new InvalidRequestException("Informe o CPF ou CNPJ");
     }
 
     String documento = limparDocumento(identificador);

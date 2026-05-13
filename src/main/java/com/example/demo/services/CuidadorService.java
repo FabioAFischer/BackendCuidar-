@@ -12,8 +12,8 @@ import com.example.demo.entity.Contato;
 import com.example.demo.entity.Cuidador;
 import com.example.demo.entity.Instituicao;
 import com.example.demo.enums.Status;
-import com.example.demo.exceptions.BusinessException;
 import com.example.demo.exceptions.DuplicateResourceException;
+import com.example.demo.exceptions.InvalidRequestException;
 import com.example.demo.exceptions.ResourceNotFoundException;
 import com.example.demo.mappers.CuidadorMapper;
 import com.example.demo.repository.CuidadorRepository;
@@ -67,7 +67,7 @@ public class CuidadorService {
         }
 
         if (dto.getContato() == null) {
-            throw new BusinessException("O contato do cuidador deve ser informado");
+            throw new InvalidRequestException("O contato do cuidador deve ser informado");
         }
 
         Instituicao instituicao = instituicaoRepository.findById(dto.getInstituicaoId())

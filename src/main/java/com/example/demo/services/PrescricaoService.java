@@ -11,7 +11,7 @@ import com.example.demo.entity.Idoso;
 import com.example.demo.entity.Prescricao;
 import com.example.demo.entity.Remedio;
 import com.example.demo.enums.Status;
-import com.example.demo.exceptions.BusinessException;
+import com.example.demo.exceptions.InvalidRequestException;
 import com.example.demo.exceptions.ResourceNotFoundException;
 import com.example.demo.mappers.PrescricaoMapper;
 import com.example.demo.repository.IdosoRepository;
@@ -88,23 +88,23 @@ public class PrescricaoService {
 
     private void validar(PrescricaoDTO dto) {
         if (dto == null) {
-            throw new BusinessException("Dados da prescricao nao informados");
+            throw new InvalidRequestException("Dados da prescricao nao informados");
         }
 
         if (dto.getRemedioId() == null) {
-            throw new BusinessException("Remedio e obrigatorio");
+            throw new InvalidRequestException("Remedio e obrigatorio");
         }
 
         if (dto.getIdosoId() == null) {
-            throw new BusinessException("Idoso e obrigatorio");
+            throw new InvalidRequestException("Idoso e obrigatorio");
         }
 
         if (dto.getDosagem() == null || dto.getDosagem().isBlank()) {
-            throw new BusinessException("Dosagem e obrigatoria");
+            throw new InvalidRequestException("Dosagem e obrigatoria");
         }
 
         if (dto.getIntervalo() == null || dto.getIntervalo() <= 0) {
-            throw new BusinessException("Intervalo deve ser maior que zero");
+            throw new InvalidRequestException("Intervalo deve ser maior que zero");
         }
     }
 }

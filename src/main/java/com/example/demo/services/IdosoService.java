@@ -13,8 +13,8 @@ import com.example.demo.entity.Contato;
 import com.example.demo.entity.Idoso;
 import com.example.demo.entity.Instituicao;
 import com.example.demo.enums.Status;
-import com.example.demo.exceptions.BusinessException;
 import com.example.demo.exceptions.DuplicateResourceException;
+import com.example.demo.exceptions.InvalidRequestException;
 import com.example.demo.exceptions.ResourceNotFoundException;
 import com.example.demo.mappers.ContatoMapper;
 import com.example.demo.mappers.IdosoMapper;
@@ -103,7 +103,7 @@ public class IdosoService {
                 contato = contatoRepository.save(contato);
             } else {
                 if (contatoDTO.getDdd() == null || contatoDTO.getTelefone() == null) {
-                    throw new BusinessException("Dados de contato incompletos");
+                    throw new InvalidRequestException("Dados de contato incompletos");
                 }
                 contato = ContatoMapper.toEntity(contatoDTO, null, java.util.List.of());
                 contato = contatoRepository.save(contato);
@@ -134,7 +134,7 @@ public class IdosoService {
 
         if (contatoDTO != null) {
             if (contatoDTO.getDdd() == null || contatoDTO.getTelefone() == null) {
-                throw new BusinessException("Dados de contato incompletos");
+                throw new InvalidRequestException("Dados de contato incompletos");
             }
             Contato contato = ContatoMapper.toEntity(contatoDTO, null, java.util.List.of());
             return contatoRepository.save(contato);
@@ -145,7 +145,7 @@ public class IdosoService {
                     .orElseThrow(() -> new ResourceNotFoundException("Contato", dto.getContatoId().longValue()));
         }
 
-        throw new BusinessException("Contato é obrigatório");
+        throw new InvalidRequestException("Contato é obrigatório");
     }
 
     private Optional<Idoso> buscarEntidadePorCpf(String cpf) {
