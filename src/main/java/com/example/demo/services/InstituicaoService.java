@@ -81,4 +81,14 @@ public class InstituicaoService {
         instituicao.setData_atualizacao(LocalDateTime.now());
         repository.save(instituicao);
     }
+
+    public void ativar(Integer id) {
+    Instituicao instituicao = repository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Instituição", id.longValue()));
+
+    instituicao.setStatus(Status.ATIVO);
+    instituicao.setData_atualizacao(LocalDateTime.now());
+
+    repository.save(instituicao);
+}
 }

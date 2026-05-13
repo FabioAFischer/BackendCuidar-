@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -76,6 +77,16 @@ public class InstituicaoController {
     @DeleteMapping("/deletar/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Integer id) {
         service.inativar(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Operation(
+    summary = "Reativar instituição",
+    description = "Realiza a reativação lógica de uma instituição"
+    )
+    @PatchMapping("/ativar/{id}")
+    public ResponseEntity<Void> ativar(@PathVariable Integer id) {
+        service.ativar(id);
         return ResponseEntity.noContent().build();
     }
 }
