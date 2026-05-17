@@ -39,6 +39,11 @@ public class IdosoService {
         return repository.findByStatus(Status.ATIVO, pageable).map(IdosoMapper::toDTO);
     }
 
+    public Page<IdosoDTO> listarAtivosPorInstituicao(Integer instituicaoId, Pageable pageable) {
+        return repository.findByStatusAndInstituicaoId(Status.ATIVO, instituicaoId, pageable)
+                .map(IdosoMapper::toDTO);
+    }
+
     public IdosoDTO buscarPorId(Integer id) {
         Idoso idoso = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Idoso", id.longValue()));

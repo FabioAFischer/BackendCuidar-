@@ -19,4 +19,6 @@ public interface IdosoRepository extends JpaRepository<Idoso, Integer> {
 
     Page<Idoso> findByStatus(Status status, Pageable pageable);
 
+    Page<Idoso> findByStatusAndInstituicaoId(Status status, Integer instituicaoId, Pageable pageable);
+
 }
