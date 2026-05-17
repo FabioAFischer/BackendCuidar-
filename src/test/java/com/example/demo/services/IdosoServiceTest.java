@@ -10,8 +10,12 @@ import static com.example.demo.support.TestDataFactory.idoso;
 import static com.example.demo.support.TestDataFactory.idosoDTO;
 import static com.example.demo.support.TestDataFactory.instituicao;
 
+import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -43,6 +47,22 @@ class IdosoServiceTest {
 
     @InjectMocks
     private IdosoService service;
+
+    @Test
+    void deveListarIdososAtivosPorInstituicao() {
+        Pageable pageable = PageRequest.of(0, 10);
+        Idoso idosoDaInstituicao = idoso(1, "Maria", "12345678901", Status.ATIVO);
+
+        when(idosoRepository.findByStatusAndInstituicaoId(Status.ATIVO, 10, pageable))
+                .thenReturn(new PageImpl<>(List.of(idosoDaInstituicao)));
+
+        var resultado = service.listarAtivosPorInstituicao(10, pageable);
+
+        assertEquals(1, resultado.getTotalElements());
+        assertEquals("Maria", resultado.getContent().get(0).getNome());
+        assertEquals(10, resultado.getContent().get(0).getInstituicaoId());
+        verify(idosoRepository).findByStatusAndInstituicaoId(Status.ATIVO, 10, pageable);
+    }
 
     @Test
     void deveCriarIdosoComContatoNovo() {
