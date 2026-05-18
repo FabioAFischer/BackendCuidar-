@@ -1,5 +1,7 @@
 package com.example.demo.services;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -10,6 +12,8 @@ import jakarta.mail.internet.MimeMessage;
 
 @Service
 public class EmailService {
+
+    private static final Logger logger = LoggerFactory.getLogger(EmailService.class);
 
     private final JavaMailSender mailSender;
 
@@ -29,6 +33,7 @@ public class EmailService {
 
             mailSender.send(message);
         } catch (Exception e) {
+            logger.error("Falha ao enviar codigo de verificacao para {}", destinatario, e);
             throw new EmailSendingException();
         }
     }
