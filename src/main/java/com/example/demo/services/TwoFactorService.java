@@ -3,10 +3,12 @@ package com.example.demo.services;
 import java.time.LocalDateTime;
 import java.util.Random;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.demo.entity.CodigoVerificacao;
+import com.example.demo.events.Codigo2faGeradoEvent;
 import com.example.demo.exceptions.VerificationCodeException;
 import com.example.demo.repository.CodigoVerificacaoRepository;
 
@@ -14,11 +16,11 @@ import com.example.demo.repository.CodigoVerificacaoRepository;
 public class TwoFactorService {
 
     private final CodigoVerificacaoRepository repository;
-    private final EmailService emailService;
+    private final ApplicationEventPublisher publisher;
 
-    public TwoFactorService(CodigoVerificacaoRepository repository, EmailService emailService) {
+    public TwoFactorService(CodigoVerificacaoRepository repository, ApplicationEventPublisher publisher) {
         this.repository = repository;
-        this.emailService = emailService;
+        this.publisher = publisher;
     }
 
     @Transactional
@@ -34,7 +36,7 @@ public class TwoFactorService {
         verificacao.setUsado(false);
 
         repository.save(verificacao);
-        emailService.enviarCodigoVerificacao(email, codigo);
+        publisher.publishEvent(new Codigo2faGeradoEvent(email, codigo));
     }
 
     @Transactional
