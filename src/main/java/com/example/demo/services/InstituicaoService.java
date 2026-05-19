@@ -2,6 +2,7 @@
 package com.example.demo.services;
 
 import java.time.LocalDateTime;
+import java.util.Locale;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,6 +16,7 @@ import com.example.demo.exceptions.DuplicateResourceException;
 import com.example.demo.exceptions.ResourceNotFoundException;
 import com.example.demo.mappers.InstituicaoMapper;
 import com.example.demo.repository.InstituicaoRepository;
+import com.example.demo.utils.TextoUtils;
 
 @Service
 public class InstituicaoService {
@@ -41,7 +43,8 @@ public class InstituicaoService {
     }
 
     public InstituicaoDTO criar(InstituicaoDTO dto) {
-        if (repository.existsByCnpj(dto.getCnpj())) {
+        String cnpjLimpo = limparDocumento(dto.getCnpj());
+        if (repository.existsByCnpj(cnpjLimpo)) {
             throw new DuplicateResourceException("Já existe uma instituição com esse CNPJ");
         }
         Instituicao instituicao = InstituicaoMapper.toEntity(dto);
@@ -54,21 +57,22 @@ public class InstituicaoService {
         Instituicao instituicao = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Instituição", id.longValue()));
 
-        if (!instituicao.getCnpj().equals(dto.getCnpj()) && repository.existsByCnpj(dto.getCnpj())) {
+        String cnpjLimpo = limparDocumento(dto.getCnpj());
+        if (!instituicao.getCnpj().equals(cnpjLimpo) && repository.existsByCnpj(cnpjLimpo)) {
             throw new DuplicateResourceException("CNPJ já está em uso");
         }
 
-        instituicao.setNome(dto.getNome());
-        instituicao.setCnpj(dto.getCnpj());
-        instituicao.setEmail(dto.getEmail());
+        instituicao.setNome(TextoUtils.paraBanco(dto.getNome()));
+        instituicao.setCnpj(cnpjLimpo);
+        instituicao.setEmail(normalizarEmail(dto.getEmail()));
         if (dto.getSenha() != null && !dto.getSenha().isBlank()) {
             senhaService.validar(dto.getSenha());
             instituicao.setSenha(passwordEncoder.encode(dto.getSenha()));
         }
-        instituicao.setBairro(dto.getBairro());
-        instituicao.setUf(dto.getUf());
+        instituicao.setBairro(TextoUtils.paraBanco(dto.getBairro()));
+        instituicao.setUf(TextoUtils.paraBanco(dto.getUf()));
         instituicao.setNumero(dto.getNumero());
-        instituicao.setCep(dto.getCep());
+        instituicao.setCep(limparDocumento(dto.getCep()));
         instituicao.setData_atualizacao(LocalDateTime.now());
 
         return InstituicaoMapper.toDTO(repository.save(instituicao));
@@ -91,4 +95,20 @@ public class InstituicaoService {
 
     repository.save(instituicao);
 }
+
+    private String limparDocumento(String valor) {
+        if (valor == null || valor.isBlank()) {
+            return null;
+        }
+
+        return valor.replaceAll("\\D", "");
+    }
+
+    private String normalizarEmail(String valor) {
+        if (valor == null || valor.isBlank()) {
+            return null;
+        }
+
+        return valor.trim().toLowerCase(Locale.ROOT);
+    }
 }
