@@ -1,7 +1,6 @@
 package com.example.demo.services;
 
 import java.time.LocalDateTime;
-import java.util.Locale;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -98,7 +97,7 @@ public class CuidadorService {
 
         cuidador.setNome(TextoUtils.paraBanco(dto.getNome()));
         cuidador.setCpf(cpfLimpo);
-        cuidador.setEmail(normalizarEmail(dto.getEmail()));
+        cuidador.setEmail(dto.getEmail());
         if (dto.getSenha() != null && !dto.getSenha().isBlank()) {
             senhaService.validar(dto.getSenha());
             cuidador.setSenha(passwordEncoder.encode(dto.getSenha()));
@@ -113,8 +112,8 @@ public class CuidadorService {
                 contato.setCuidador(cuidador);
                 cuidador.setContato(contato);
             }
-            contato.setDdd(dto.getContato().getDdd());
-            contato.setTelefone(dto.getContato().getTelefone());
+            contato.setDdd(TextoUtils.limparNumero(dto.getContato().getDdd()));
+            contato.setTelefone(TextoUtils.limparNumero(dto.getContato().getTelefone()));
         }
 
         return CuidadorMapper.toDTO(repository.save(cuidador));
@@ -158,7 +157,7 @@ public class CuidadorService {
         }
 
         if (dto.getEmail() != null) {
-            cuidador.setEmail(normalizarEmail(dto.getEmail()));
+            cuidador.setEmail(dto.getEmail());
         }
 
         if (dto.getSenha() != null && !dto.getSenha().isBlank()) {
@@ -181,10 +180,10 @@ public class CuidadorService {
             }
 
             if (dto.getContato().getDdd() != null) {
-                contato.setDdd(dto.getContato().getDdd());
+                contato.setDdd(TextoUtils.limparNumero(dto.getContato().getDdd()));
             }
             if (dto.getContato().getTelefone() != null) {
-                contato.setTelefone(dto.getContato().getTelefone());
+                contato.setTelefone(TextoUtils.limparNumero(dto.getContato().getTelefone()));
             }
         }
     }
@@ -195,13 +194,5 @@ public class CuidadorService {
         }
 
         return valor.replaceAll("\\D", "");
-    }
-
-    private String normalizarEmail(String valor) {
-        if (valor == null || valor.isBlank()) {
-            return null;
-        }
-
-        return valor.trim().toLowerCase(Locale.ROOT);
     }
 }

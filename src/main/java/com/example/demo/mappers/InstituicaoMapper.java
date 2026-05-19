@@ -3,7 +3,6 @@ package com.example.demo.mappers;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 import com.example.demo.dtos.InstituicaoDTO;
 import com.example.demo.entity.Instituicao;
@@ -45,7 +44,7 @@ public class InstituicaoMapper {
         
         instituicao.setNome(TextoUtils.paraBanco(dto.getNome()));
         instituicao.setCnpj(limparDocumento(dto.getCnpj()));
-        instituicao.setEmail(normalizarEmail(dto.getEmail()));
+        instituicao.setEmail(dto.getEmail());
         instituicao.setSenha(dto.getSenha());
         instituicao.setBairro(TextoUtils.paraBanco(dto.getBairro()));
         instituicao.setUf(TextoUtils.paraBanco(dto.getUf()));
@@ -79,13 +78,5 @@ public class InstituicaoMapper {
         }
 
         return valor.replaceAll("\\D", "");
-    }
-
-    private static String normalizarEmail(String valor) {
-        if (valor == null || valor.isBlank()) {
-            return null;
-        }
-
-        return valor.trim().toLowerCase(Locale.ROOT);
     }
 }

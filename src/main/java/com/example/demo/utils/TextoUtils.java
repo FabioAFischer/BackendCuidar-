@@ -44,6 +44,18 @@ public final class TextoUtils {
         return resultado.toString();
     }
 
+    public static String limparDocumento(String valor) {
+        if (valor == null || valor.isBlank()) {
+            return null;
+        }
+
+        return valor.replaceAll("\\D", "");
+    }
+
+    public static String limparNumero(String valor) {
+        return limparDocumento(valor);
+    }
+
     private static String removerAcentos(String valor) {
         String textoNormalizado = Normalizer.normalize(valor, Normalizer.Form.NFD);
         return textoNormalizado.replaceAll("\\p{M}", "");

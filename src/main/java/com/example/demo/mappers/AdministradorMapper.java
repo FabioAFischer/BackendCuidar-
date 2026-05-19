@@ -3,7 +3,6 @@ package com.example.demo.mappers;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 import com.example.demo.dtos.AdministradorDTO;
 import com.example.demo.entity.Administrador;
@@ -39,7 +38,7 @@ public class AdministradorMapper {
 
         administrador.setNome(TextoUtils.paraBanco(dto.getNome()));
         administrador.setCpf(limparDocumento(dto.getCpf()));
-        administrador.setEmail(normalizarEmail(dto.getEmail()));
+        administrador.setEmail(dto.getEmail());
         administrador.setSenha(dto.getSenha());
 
         administrador.setData_criacao(LocalDateTime.now());
@@ -56,7 +55,7 @@ public class AdministradorMapper {
 
         administrador.setNome(TextoUtils.paraBanco(dto.getNome()));
         administrador.setCpf(limparDocumento(dto.getCpf()));
-        administrador.setEmail(normalizarEmail(dto.getEmail()));
+        administrador.setEmail(dto.getEmail());
         administrador.setData_atualizacao(LocalDateTime.now());
     }
 
@@ -89,13 +88,5 @@ public class AdministradorMapper {
         }
 
         return valor.replaceAll("\\D", "");
-    }
-
-    private static String normalizarEmail(String valor) {
-        if (valor == null || valor.isBlank()) {
-            return null;
-        }
-
-        return valor.trim().toLowerCase(Locale.ROOT);
     }
 }

@@ -3,7 +3,6 @@ package com.example.demo.mappers;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 import com.example.demo.dtos.ContatoDTO;
 import com.example.demo.dtos.CuidadorDTO;
@@ -57,7 +56,7 @@ public class CuidadorMapper {
 
         cuidador.setNome(TextoUtils.paraBanco(dto.getNome()));
         cuidador.setCpf(limparDocumento(dto.getCpf()));
-        cuidador.setEmail(normalizarEmail(dto.getEmail()));
+        cuidador.setEmail(dto.getEmail());
         cuidador.setSenha(dto.getSenha());
 
         if (dto.getInstituicaoId() != null) {
@@ -69,8 +68,8 @@ public class CuidadorMapper {
         if (dto.getContato() != null) {
             Contato contato = new Contato();
             // setId removido — o id é gerado pelo banco
-            contato.setDdd(dto.getContato().getDdd());
-            contato.setTelefone(dto.getContato().getTelefone());
+            contato.setDdd(TextoUtils.limparNumero(dto.getContato().getDdd()));
+            contato.setTelefone(TextoUtils.limparNumero(dto.getContato().getTelefone()));
             contato.setCuidador(cuidador);
             cuidador.setContato(contato);
         }
@@ -102,13 +101,5 @@ public class CuidadorMapper {
         }
 
         return valor.replaceAll("\\D", "");
-    }
-
-    private static String normalizarEmail(String valor) {
-        if (valor == null || valor.isBlank()) {
-            return null;
-        }
-
-        return valor.trim().toLowerCase(Locale.ROOT);
     }
 }

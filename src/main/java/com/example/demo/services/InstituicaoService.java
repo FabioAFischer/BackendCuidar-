@@ -2,7 +2,6 @@
 package com.example.demo.services;
 
 import java.time.LocalDateTime;
-import java.util.Locale;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -64,7 +63,7 @@ public class InstituicaoService {
 
         instituicao.setNome(TextoUtils.paraBanco(dto.getNome()));
         instituicao.setCnpj(cnpjLimpo);
-        instituicao.setEmail(normalizarEmail(dto.getEmail()));
+        instituicao.setEmail(dto.getEmail());
         if (dto.getSenha() != null && !dto.getSenha().isBlank()) {
             senhaService.validar(dto.getSenha());
             instituicao.setSenha(passwordEncoder.encode(dto.getSenha()));
@@ -102,13 +101,5 @@ public class InstituicaoService {
         }
 
         return valor.replaceAll("\\D", "");
-    }
-
-    private String normalizarEmail(String valor) {
-        if (valor == null || valor.isBlank()) {
-            return null;
-        }
-
-        return valor.trim().toLowerCase(Locale.ROOT);
     }
 }
