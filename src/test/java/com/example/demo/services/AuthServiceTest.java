@@ -24,7 +24,7 @@ import com.example.demo.entity.Administrador;
 import com.example.demo.entity.Cuidador;
 import com.example.demo.entity.Instituicao;
 import com.example.demo.enums.Status;
-import com.example.demo.exceptions.BusinessException;
+import com.example.demo.exceptions.InvalidRequestException;
 import com.example.demo.exceptions.UnauthorizedException;
 import com.example.demo.repository.AdministradorRepository;
 import com.example.demo.repository.CuidadorRepository;
@@ -131,14 +131,14 @@ class AuthServiceTest {
     void deveFalharLoginSemPerfil() {
         Map<String, String> dados = dadosLogin("12345678901", "senha", "");
 
-        assertThrows(BusinessException.class, () -> service.login(dados));
+        assertThrows(InvalidRequestException.class, () -> service.login(dados));
     }
 
     @Test
     void deveFalharLoginComPerfilInvalido() {
         Map<String, String> dados = dadosLogin("12345678901", "senha", "INVALIDO");
 
-        assertThrows(BusinessException.class, () -> service.login(dados));
+        assertThrows(InvalidRequestException.class, () -> service.login(dados));
     }
 
     @Test

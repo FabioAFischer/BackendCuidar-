@@ -1,14 +1,15 @@
 package com.example.demo.utils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import org.junit.jupiter.api.Test;
 
 class TextoUtilsTest {
 
     @Test
     void deveNormalizarTextoParaBanco() {
-        assertEquals("JOSE DA SILVA", TextoUtils.paraBanco("  José da Silva  "));
-        assertEquals("REMEDIO DORFLEX", TextoUtils.paraBanco("Remédio Dórflex"));
+        assertEquals("JOSE DA SILVA", TextoUtils.paraBanco("  Jos\u00e9 da Silva  "));
+        assertEquals("REMEDIO DORFLEX", TextoUtils.paraBanco("Rem\u00e9dio D\u00f3rflex"));
     }
 
     @Test

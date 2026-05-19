@@ -24,7 +24,7 @@ import com.example.demo.entity.Idoso;
 import com.example.demo.entity.Prescricao;
 import com.example.demo.entity.Remedio;
 import com.example.demo.enums.Status;
-import com.example.demo.exceptions.BusinessException;
+import com.example.demo.exceptions.InvalidRequestException;
 import com.example.demo.exceptions.ResourceNotFoundException;
 import com.example.demo.repository.IdosoRepository;
 import com.example.demo.repository.PrescricaoRepository;
@@ -81,7 +81,7 @@ class PrescricaoServiceTest {
 
         PrescricaoDTO resultado = service.atualizar(1, dto);
 
-        assertEquals("2 comprimidos", resultado.getDosagem());
+        assertEquals("2 Comprimidos", resultado.getDosagem());
         verify(prescricaoRepository).save(existente);
     }
 
@@ -100,7 +100,7 @@ class PrescricaoServiceTest {
 
     @Test
     void deveFalharAoCriarComDtoNulo() {
-        assertThrows(BusinessException.class, () -> service.criar(null));
+        assertThrows(InvalidRequestException.class, () -> service.criar(null));
     }
 
     @Test
@@ -108,7 +108,7 @@ class PrescricaoServiceTest {
         PrescricaoDTO dto = prescricaoDTO();
         dto.setRemedioId(null);
 
-        assertThrows(BusinessException.class, () -> service.criar(dto));
+        assertThrows(InvalidRequestException.class, () -> service.criar(dto));
     }
 
     @Test
@@ -116,7 +116,7 @@ class PrescricaoServiceTest {
         PrescricaoDTO dto = prescricaoDTO();
         dto.setIdosoId(null);
 
-        assertThrows(BusinessException.class, () -> service.criar(dto));
+        assertThrows(InvalidRequestException.class, () -> service.criar(dto));
     }
 
     @Test
@@ -124,7 +124,7 @@ class PrescricaoServiceTest {
         PrescricaoDTO dto = prescricaoDTO();
         dto.setDosagem(" ");
 
-        assertThrows(BusinessException.class, () -> service.criar(dto));
+        assertThrows(InvalidRequestException.class, () -> service.criar(dto));
     }
 
     @Test
@@ -132,7 +132,7 @@ class PrescricaoServiceTest {
         PrescricaoDTO dto = prescricaoDTO();
         dto.setIntervalo(0.0);
 
-        assertThrows(BusinessException.class, () -> service.criar(dto));
+        assertThrows(InvalidRequestException.class, () -> service.criar(dto));
     }
 
     @Test

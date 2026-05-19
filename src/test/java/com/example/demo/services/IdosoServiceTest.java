@@ -27,7 +27,8 @@ import com.example.demo.dtos.IdosoDTO;
 import com.example.demo.entity.Contato;
 import com.example.demo.entity.Idoso;
 import com.example.demo.enums.Status;
-import com.example.demo.exceptions.BusinessException;
+import com.example.demo.exceptions.DuplicateResourceException;
+import com.example.demo.exceptions.InvalidRequestException;
 import com.example.demo.exceptions.ResourceNotFoundException;
 import com.example.demo.repository.ContatoRepository;
 import com.example.demo.repository.IdosoRepository;
@@ -94,7 +95,7 @@ class IdosoServiceTest {
 
         when(idosoRepository.findByCpf("12345678901")).thenReturn(Optional.of(existente));
 
-        assertThrows(BusinessException.class, () -> service.criar(idosoDTO()));
+        assertThrows(DuplicateResourceException.class, () -> service.criar(idosoDTO()));
     }
 
     @Test
@@ -132,7 +133,7 @@ class IdosoServiceTest {
         when(idosoRepository.findByCpf("12345678901")).thenReturn(Optional.empty());
         when(instituicaoRepository.findById(10)).thenReturn(Optional.of(instituicao()));
 
-        assertThrows(BusinessException.class, () -> service.criar(dto));
+        assertThrows(InvalidRequestException.class, () -> service.criar(dto));
     }
 
     @Test
@@ -144,7 +145,7 @@ class IdosoServiceTest {
         when(idosoRepository.findByCpf("12345678901")).thenReturn(Optional.empty());
         when(instituicaoRepository.findById(10)).thenReturn(Optional.of(instituicao()));
 
-        assertThrows(BusinessException.class, () -> service.criar(dto));
+        assertThrows(InvalidRequestException.class, () -> service.criar(dto));
     }
 
     @Test
@@ -176,7 +177,7 @@ class IdosoServiceTest {
         when(idosoRepository.findById(1)).thenReturn(Optional.of(existente));
         when(idosoRepository.existsByCpf("10987654321")).thenReturn(true);
 
-        assertThrows(BusinessException.class, () -> service.atualizar(1, dto));
+        assertThrows(DuplicateResourceException.class, () -> service.atualizar(1, dto));
     }
 
     @Test
