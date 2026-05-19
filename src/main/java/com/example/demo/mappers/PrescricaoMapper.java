@@ -7,6 +7,7 @@ import com.example.demo.entity.Idoso;
 import com.example.demo.entity.Prescricao;
 import com.example.demo.entity.Remedio;
 import com.example.demo.enums.Status;
+import com.example.demo.utils.TextoUtils;
 
 public class PrescricaoMapper {
 
@@ -19,15 +20,15 @@ public class PrescricaoMapper {
         dto.setId(prescricao.getId());
         dto.setRemedioId(prescricao.getRemedio() != null ? prescricao.getRemedio().getId() : null);
         dto.setIdosoId(prescricao.getIdoso() != null ? prescricao.getIdoso().getId() : null);
-        dto.setRemedioNome(prescricao.getRemedio() != null ? prescricao.getRemedio().getNome() : null);
-        dto.setIdosoNome(prescricao.getIdoso() != null ? prescricao.getIdoso().getNome() : null);
+        dto.setRemedioNome(prescricao.getRemedio() != null ? TextoUtils.paraExibicao(prescricao.getRemedio().getNome()) : null);
+        dto.setIdosoNome(prescricao.getIdoso() != null ? TextoUtils.paraExibicao(prescricao.getIdoso().getNome()) : null);
         dto.setDataCriacao(prescricao.getData_criacao());
         dto.setDataFim(prescricao.getData_fim());
         dto.setStatus(prescricao.getStatus());
         dto.setNecessarioJejum(prescricao.getNecessario_jejum());
-        dto.setInstrucao(prescricao.getInstrucao());
+        dto.setInstrucao(TextoUtils.paraExibicao(prescricao.getInstrucao()));
         dto.setIntervalo(prescricao.getIntervalo());
-        dto.setDosagem(prescricao.getDosagem());
+        dto.setDosagem(TextoUtils.paraExibicao(prescricao.getDosagem()));
 
         return dto;
     }
@@ -54,9 +55,9 @@ public class PrescricaoMapper {
         prescricao.setIdoso(idoso);
         prescricao.setData_fim(dto.getDataFim());
         prescricao.setNecessario_jejum(Boolean.TRUE.equals(dto.getNecessarioJejum()));
-        prescricao.setInstrucao(dto.getInstrucao());
+        prescricao.setInstrucao(TextoUtils.paraBanco(dto.getInstrucao()));
         prescricao.setIntervalo(dto.getIntervalo());
-        prescricao.setDosagem(dto.getDosagem());
+        prescricao.setDosagem(TextoUtils.paraBanco(dto.getDosagem()));
 
         if (dto.getStatus() != null) {
             prescricao.setStatus(dto.getStatus());
