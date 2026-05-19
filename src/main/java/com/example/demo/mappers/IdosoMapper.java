@@ -46,7 +46,7 @@ public class IdosoMapper {
         Idoso idoso = new Idoso();
        
         idoso.setNome(TextoUtils.paraBanco(dto.getNome()));
-        idoso.setCpf(dto.getCpf());
+        idoso.setCpf(limparDocumento(dto.getCpf()));
         idoso.setObservacoes(TextoUtils.paraBanco(dto.getObservacoes()));
 
         if (dto.getInstituicaoId() != null) {
@@ -86,7 +86,7 @@ public class IdosoMapper {
         if (dto == null || idoso == null) return;
 
         idoso.setNome(TextoUtils.paraBanco(dto.getNome()));
-        idoso.setCpf(dto.getCpf());
+        idoso.setCpf(limparDocumento(dto.getCpf()));
         idoso.setObservacoes(TextoUtils.paraBanco(dto.getObservacoes()));
 
         if (instituicao != null) {
@@ -102,5 +102,13 @@ public class IdosoMapper {
             contato.setId(dto.getContatoId());
             idoso.setContato(contato);
         }
+    }
+
+    private static String limparDocumento(String valor) {
+        if (valor == null || valor.isBlank()) {
+            return null;
+        }
+
+        return valor.replaceAll("\\D", "");
     }
 }
