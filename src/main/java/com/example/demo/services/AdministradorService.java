@@ -42,7 +42,8 @@ public class AdministradorService {
     }
 
     public AdministradorDTO criar(AdministradorDTO dto) {
-        if (repository.existsByCpf(dto.getCpf())) {
+        String cpfLimpo = limparDocumento(dto.getCpf());
+        if (repository.existsByCpf(cpfLimpo)) {
             throw new DuplicateResourceException("Já existe um administrador com esse CPF");
         }
 
@@ -58,8 +59,9 @@ public class AdministradorService {
         Administrador administrador = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Administrador", id.longValue()));
 
-        if (!administrador.getCpf().equals(dto.getCpf())
-                && repository.existsByCpf(dto.getCpf())) {
+        String cpfLimpo = limparDocumento(dto.getCpf());
+        if (!administrador.getCpf().equals(cpfLimpo)
+                && repository.existsByCpf(cpfLimpo)) {
             throw new DuplicateResourceException("CPF já está em uso");
         }
 
@@ -79,5 +81,13 @@ public class AdministradorService {
 
         AdministradorMapper.inativarEntity(administrador);
         repository.save(administrador);
+    }
+
+    private String limparDocumento(String valor) {
+        if (valor == null || valor.isBlank()) {
+            return null;
+        }
+
+        return valor.replaceAll("\\D", "");
     }
 }
