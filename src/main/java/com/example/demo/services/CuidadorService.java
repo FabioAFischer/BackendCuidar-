@@ -1,6 +1,7 @@
 package com.example.demo.services;
 
 import java.time.LocalDateTime;
+import java.util.Locale;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,6 +19,7 @@ import com.example.demo.exceptions.ResourceNotFoundException;
 import com.example.demo.mappers.CuidadorMapper;
 import com.example.demo.repository.CuidadorRepository;
 import com.example.demo.repository.InstituicaoRepository;
+import com.example.demo.utils.TextoUtils;
 
 @Service
 public class CuidadorService {
@@ -62,7 +64,8 @@ public class CuidadorService {
     }
 
     public CuidadorDTO criar(CuidadorDTO dto) {
-        if (repository.existsByCpf(dto.getCpf())) {
+        String cpfLimpo = limparDocumento(dto.getCpf());
+        if (repository.existsByCpf(cpfLimpo)) {
             throw new DuplicateResourceException("Já existe um cuidador com esse CPF");
         }
 
@@ -85,16 +88,17 @@ public class CuidadorService {
         Cuidador cuidador = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Cuidador", id.longValue()));
 
-        if (!cuidador.getCpf().equals(dto.getCpf()) && repository.existsByCpf(dto.getCpf())) {
+        String cpfLimpo = limparDocumento(dto.getCpf());
+        if (!cuidador.getCpf().equals(cpfLimpo) && repository.existsByCpf(cpfLimpo)) {
             throw new DuplicateResourceException("CPF já está em uso");
         }
 
         Instituicao instituicao = instituicaoRepository.findById(dto.getInstituicaoId())
                 .orElseThrow(() -> new ResourceNotFoundException("Instituição", dto.getInstituicaoId().longValue()));
 
-        cuidador.setNome(dto.getNome());
-        cuidador.setCpf(dto.getCpf());
-        cuidador.setEmail(dto.getEmail());
+        cuidador.setNome(TextoUtils.paraBanco(dto.getNome()));
+        cuidador.setCpf(cpfLimpo);
+        cuidador.setEmail(normalizarEmail(dto.getEmail()));
         if (dto.getSenha() != null && !dto.getSenha().isBlank()) {
             senhaService.validar(dto.getSenha());
             cuidador.setSenha(passwordEncoder.encode(dto.getSenha()));
@@ -142,18 +146,19 @@ public class CuidadorService {
         }
 
         if (dto.getNome() != null) {
-            cuidador.setNome(dto.getNome());
+            cuidador.setNome(TextoUtils.paraBanco(dto.getNome()));
         }
 
-        if (dto.getCpf() != null && !dto.getCpf().equals(cuidador.getCpf())) {
-            if (repository.existsByCpf(dto.getCpf())) {
+        String cpfLimpo = limparDocumento(dto.getCpf());
+        if (cpfLimpo != null && !cpfLimpo.equals(cuidador.getCpf())) {
+            if (repository.existsByCpf(cpfLimpo)) {
                 throw new DuplicateResourceException("CPF já está em uso");
             }
-            cuidador.setCpf(dto.getCpf());
+            cuidador.setCpf(cpfLimpo);
         }
 
         if (dto.getEmail() != null) {
-            cuidador.setEmail(dto.getEmail());
+            cuidador.setEmail(normalizarEmail(dto.getEmail()));
         }
 
         if (dto.getSenha() != null && !dto.getSenha().isBlank()) {
@@ -190,5 +195,13 @@ public class CuidadorService {
         }
 
         return valor.replaceAll("\\D", "");
+    }
+
+    private String normalizarEmail(String valor) {
+        if (valor == null || valor.isBlank()) {
+            return null;
+        }
+
+        return valor.trim().toLowerCase(Locale.ROOT);
     }
 }
