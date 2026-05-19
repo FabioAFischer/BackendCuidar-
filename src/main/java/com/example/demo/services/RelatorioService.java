@@ -19,6 +19,7 @@ import com.example.demo.enums.Status;
 import com.example.demo.repository.CuidadorRepository;
 import com.example.demo.repository.IdosoRepository;
 import com.example.demo.repository.InstituicaoRepository;
+import com.example.demo.utils.TextoUtils;
 
 @Service
 public class RelatorioService {
@@ -55,10 +56,10 @@ public class RelatorioService {
         List<ItemInstituicaoDTO> items = lista.stream()
                 .map(i -> new ItemInstituicaoDTO(
                         i.getId(),
-                        i.getNome(),
+                        TextoUtils.paraExibicao(i.getNome()),
                         i.getCnpj(),
                         i.getEmail(),
-                        i.getUf(),
+                        TextoUtils.paraExibicao(i.getUf()),
                         i.getStatus().name()))
                 .toList();
 
@@ -72,11 +73,11 @@ public class RelatorioService {
         List<ItemCuidadorDTO> items = lista.stream()
                 .map(c -> new ItemCuidadorDTO(
                         c.getId(),
-                        c.getNome(),
+                        TextoUtils.paraExibicao(c.getNome()),
                         c.getEmail(),
                         c.getCpf(),
                         c.getStatus().name(),
-                        c.getInstituicao() != null ? c.getInstituicao().getNome() : null))
+                        c.getInstituicao() != null ? TextoUtils.paraExibicao(c.getInstituicao().getNome()) : null))
                 .toList();
 
         return new SecaoCuidadorDTO(lista.size(), ativos, inativos, items);
@@ -89,7 +90,7 @@ public class RelatorioService {
         List<ItemIdosoDTO> items = lista.stream()
                 .map(i -> new ItemIdosoDTO(
                         i.getId(),
-                        i.getNome(),
+                        TextoUtils.paraExibicao(i.getNome()),
                         i.getCpf(),
                         i.getStatus().name()))
                 .toList();
