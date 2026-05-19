@@ -6,6 +6,7 @@ import com.example.demo.dtos.VinculoDTO;
 import com.example.demo.entity.Cuidador;
 import com.example.demo.entity.Idoso;
 import com.example.demo.entity.Vinculo;
+import com.example.demo.utils.TextoUtils;
 
 public class VinculoMapper {
 
@@ -20,12 +21,12 @@ public class VinculoMapper {
 
         if (vinculo.getIdoso() != null) {
             dto.setIdosoId(vinculo.getIdoso().getId());
-            dto.setNomeIdoso(vinculo.getIdoso().getNome());
+            dto.setNomeIdoso(TextoUtils.paraExibicao(vinculo.getIdoso().getNome()));
         }
 
         if (vinculo.getCuidador() != null) {
             dto.setCuidadorId(vinculo.getCuidador().getId());
-            dto.setNomeCuidador(vinculo.getCuidador().getNome());
+            dto.setNomeCuidador(TextoUtils.paraExibicao(vinculo.getCuidador().getNome()));
         }
 
         return dto;

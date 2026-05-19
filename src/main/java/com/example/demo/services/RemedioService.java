@@ -17,6 +17,7 @@ import com.example.demo.exceptions.ResourceNotFoundException;
 import com.example.demo.mappers.RemedioMapper;
 import com.example.demo.repository.PrescricaoRepository;
 import com.example.demo.repository.RemedioRepository;
+import com.example.demo.utils.TextoUtils;
 
 @Service
 public class RemedioService {
@@ -40,7 +41,8 @@ public class RemedioService {
     }
 
     public RemedioDTO criar(RemedioDTO dto) {
-        Optional<Remedio> remedioExistente = repository.findByNome(dto.getNome());
+        String nomeNormalizado = TextoUtils.paraBanco(dto.getNome());
+        Optional<Remedio> remedioExistente = repository.findByNome(nomeNormalizado);
 
         if (remedioExistente.isPresent() && remedioExistente.get().getStatus() == Status.ATIVO) {
             throw new DuplicateResourceException("Já existe um remédio ativo com esse nome");
@@ -60,7 +62,8 @@ public class RemedioService {
         Remedio remedio = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Remédio", (long) id));
 
-        if (!remedio.getNome().equals(dto.getNome()) && repository.existsByNome(dto.getNome())) {
+        String nomeNormalizado = TextoUtils.paraBanco(dto.getNome());
+        if (!remedio.getNome().equals(nomeNormalizado) && repository.existsByNome(nomeNormalizado)) {
             throw new DuplicateResourceException("Nome já está em uso");
         }
 

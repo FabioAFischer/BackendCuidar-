@@ -22,7 +22,7 @@ import com.example.demo.dtos.RemedioDTO;
 import com.example.demo.entity.Prescricao;
 import com.example.demo.entity.Remedio;
 import com.example.demo.enums.Status;
-import com.example.demo.exceptions.BusinessException;
+import com.example.demo.exceptions.DuplicateResourceException;
 import com.example.demo.exceptions.ResourceNotFoundException;
 import com.example.demo.repository.PrescricaoRepository;
 import com.example.demo.repository.RemedioRepository;
@@ -42,9 +42,9 @@ class RemedioServiceTest {
     @Test
     void deveCriarRemedioNovo() {
         RemedioDTO dto = remedioDTO("Dipirona", "Tomar com agua", null);
-        Remedio salvo = remedio(1, "Dipirona", "Tomar com agua", Status.ATIVO);
+        Remedio salvo = remedio(1, "DIPIRONA", "TOMAR COM AGUA", Status.ATIVO);
 
-        when(remedioRepository.findByNome("Dipirona")).thenReturn(Optional.empty());
+        when(remedioRepository.findByNome("DIPIRONA")).thenReturn(Optional.empty());
         when(remedioRepository.save(any(Remedio.class))).thenReturn(salvo);
 
         RemedioDTO resultado = service.criar(dto);
@@ -57,31 +57,31 @@ class RemedioServiceTest {
     @Test
     void deveBloquearCriacaoDeRemedioAtivoDuplicado() {
         RemedioDTO dto = remedioDTO("Dipirona", null, null);
-        Remedio existente = remedio(1, "Dipirona", null, Status.ATIVO);
+        Remedio existente = remedio(1, "DIPIRONA", null, Status.ATIVO);
 
-        when(remedioRepository.findByNome("Dipirona")).thenReturn(Optional.of(existente));
+        when(remedioRepository.findByNome("DIPIRONA")).thenReturn(Optional.of(existente));
 
-        assertThrows(BusinessException.class, () -> service.criar(dto));
+        assertThrows(DuplicateResourceException.class, () -> service.criar(dto));
     }
 
     @Test
     void deveReativarRemedioInativoAoCriarComMesmoNome() {
         RemedioDTO dto = remedioDTO("Dipirona", "Nova observacao", null);
-        Remedio existente = remedio(1, "Dipirona", "Antiga observacao", Status.INATIVO);
+        Remedio existente = remedio(1, "DIPIRONA", "ANTIGA OBSERVACAO", Status.INATIVO);
 
-        when(remedioRepository.findByNome("Dipirona")).thenReturn(Optional.of(existente));
+        when(remedioRepository.findByNome("DIPIRONA")).thenReturn(Optional.of(existente));
         when(remedioRepository.save(existente)).thenReturn(existente);
 
         RemedioDTO resultado = service.criar(dto);
 
         assertEquals(Status.ATIVO, resultado.getStatus());
-        assertEquals("Nova observacao", resultado.getObservacao());
+        assertEquals("Nova Observacao", resultado.getObservacao());
         verify(remedioRepository).save(existente);
     }
 
     @Test
     void deveBuscarRemedioPorId() {
-        Remedio remedio = remedio(1, "Dipirona", null, Status.ATIVO);
+        Remedio remedio = remedio(1, "DIPIRONA", null, Status.ATIVO);
 
         when(remedioRepository.findById(1)).thenReturn(Optional.of(remedio));
 
@@ -101,12 +101,12 @@ class RemedioServiceTest {
     @Test
     void deveBloquearAtualizacaoComNomeJaEmUso() {
         RemedioDTO dto = remedioDTO("Paracetamol", null, Status.ATIVO);
-        Remedio remedio = remedio(1, "Dipirona", null, Status.ATIVO);
+        Remedio remedio = remedio(1, "DIPIRONA", null, Status.ATIVO);
 
         when(remedioRepository.findById(1)).thenReturn(Optional.of(remedio));
-        when(remedioRepository.existsByNome("Paracetamol")).thenReturn(true);
+        when(remedioRepository.existsByNome("PARACETAMOL")).thenReturn(true);
 
-        assertThrows(BusinessException.class, () -> service.atualizar(1, dto));
+        assertThrows(DuplicateResourceException.class, () -> service.atualizar(1, dto));
     }
 
     @Test

@@ -18,6 +18,7 @@ import com.example.demo.exceptions.ResourceNotFoundException;
 import com.example.demo.mappers.CuidadorMapper;
 import com.example.demo.repository.CuidadorRepository;
 import com.example.demo.repository.InstituicaoRepository;
+import com.example.demo.utils.TextoUtils;
 
 @Service
 public class CuidadorService {
@@ -62,7 +63,8 @@ public class CuidadorService {
     }
 
     public CuidadorDTO criar(CuidadorDTO dto) {
-        if (repository.existsByCpf(dto.getCpf())) {
+        String cpfLimpo = limparDocumento(dto.getCpf());
+        if (repository.existsByCpf(cpfLimpo)) {
             throw new DuplicateResourceException("Já existe um cuidador com esse CPF");
         }
 
@@ -85,15 +87,16 @@ public class CuidadorService {
         Cuidador cuidador = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Cuidador", id.longValue()));
 
-        if (!cuidador.getCpf().equals(dto.getCpf()) && repository.existsByCpf(dto.getCpf())) {
+        String cpfLimpo = limparDocumento(dto.getCpf());
+        if (!cuidador.getCpf().equals(cpfLimpo) && repository.existsByCpf(cpfLimpo)) {
             throw new DuplicateResourceException("CPF já está em uso");
         }
 
         Instituicao instituicao = instituicaoRepository.findById(dto.getInstituicaoId())
                 .orElseThrow(() -> new ResourceNotFoundException("Instituição", dto.getInstituicaoId().longValue()));
 
-        cuidador.setNome(dto.getNome());
-        cuidador.setCpf(dto.getCpf());
+        cuidador.setNome(TextoUtils.paraBanco(dto.getNome()));
+        cuidador.setCpf(cpfLimpo);
         cuidador.setEmail(dto.getEmail());
         if (dto.getSenha() != null && !dto.getSenha().isBlank()) {
             senhaService.validar(dto.getSenha());
@@ -109,8 +112,8 @@ public class CuidadorService {
                 contato.setCuidador(cuidador);
                 cuidador.setContato(contato);
             }
-            contato.setDdd(dto.getContato().getDdd());
-            contato.setTelefone(dto.getContato().getTelefone());
+            contato.setDdd(TextoUtils.limparNumero(dto.getContato().getDdd()));
+            contato.setTelefone(TextoUtils.limparNumero(dto.getContato().getTelefone()));
         }
 
         return CuidadorMapper.toDTO(repository.save(cuidador));
@@ -142,14 +145,15 @@ public class CuidadorService {
         }
 
         if (dto.getNome() != null) {
-            cuidador.setNome(dto.getNome());
+            cuidador.setNome(TextoUtils.paraBanco(dto.getNome()));
         }
 
-        if (dto.getCpf() != null && !dto.getCpf().equals(cuidador.getCpf())) {
-            if (repository.existsByCpf(dto.getCpf())) {
+        String cpfLimpo = limparDocumento(dto.getCpf());
+        if (cpfLimpo != null && !cpfLimpo.equals(cuidador.getCpf())) {
+            if (repository.existsByCpf(cpfLimpo)) {
                 throw new DuplicateResourceException("CPF já está em uso");
             }
-            cuidador.setCpf(dto.getCpf());
+            cuidador.setCpf(cpfLimpo);
         }
 
         if (dto.getEmail() != null) {
@@ -176,10 +180,10 @@ public class CuidadorService {
             }
 
             if (dto.getContato().getDdd() != null) {
-                contato.setDdd(dto.getContato().getDdd());
+                contato.setDdd(TextoUtils.limparNumero(dto.getContato().getDdd()));
             }
             if (dto.getContato().getTelefone() != null) {
-                contato.setTelefone(dto.getContato().getTelefone());
+                contato.setTelefone(TextoUtils.limparNumero(dto.getContato().getTelefone()));
             }
         }
     }

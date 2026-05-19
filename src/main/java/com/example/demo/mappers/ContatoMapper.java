@@ -39,8 +39,8 @@ public class ContatoMapper {
 
         Contato contato = new Contato();
         
-        contato.setDdd(dto.getDdd());
-        contato.setTelefone(dto.getTelefone());
+        contato.setDdd(limparNumero(dto.getDdd()));
+        contato.setTelefone(limparNumero(dto.getTelefone()));
         contato.setCuidador(cuidador);
         contato.setIdosos(idosos);
 
@@ -50,9 +50,17 @@ public class ContatoMapper {
     public static void atualizarContato(Contato contato, ContatoDTO dto, Cuidador cuidador, List<Idoso> idosos) {
         if (dto == null) return;
 
-        contato.setDdd(dto.getDdd());
-        contato.setTelefone(dto.getTelefone());
+        contato.setDdd(limparNumero(dto.getDdd()));
+        contato.setTelefone(limparNumero(dto.getTelefone()));
         contato.setCuidador(cuidador);
         contato.setIdosos(idosos);
+    }
+
+    private static String limparNumero(String valor) {
+        if (valor == null || valor.isBlank()) {
+            return null;
+        }
+
+        return valor.replaceAll("\\D", "");
     }
 }
