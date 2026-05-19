@@ -3,6 +3,7 @@ package com.example.demo.mappers;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import com.example.demo.dtos.ContatoDTO;
 import com.example.demo.dtos.CuidadorDTO;
@@ -11,6 +12,7 @@ import com.example.demo.entity.Cuidador;
 import com.example.demo.entity.Instituicao;
 import com.example.demo.enums.Perfil;
 import com.example.demo.enums.Status;
+import com.example.demo.utils.TextoUtils;
 
 public class CuidadorMapper {
 
@@ -24,7 +26,7 @@ public class CuidadorMapper {
 
         CuidadorDTO dto = new CuidadorDTO();
         dto.setId(cuidador.getId());
-        dto.setNome(cuidador.getNome());
+        dto.setNome(TextoUtils.paraExibicao(cuidador.getNome()));
         dto.setCpf(cuidador.getCpf());
         dto.setEmail(cuidador.getEmail());
         dto.setStatus(cuidador.getStatus());
@@ -53,9 +55,9 @@ public class CuidadorMapper {
 
         Cuidador cuidador = new Cuidador();
 
-        cuidador.setNome(dto.getNome());
-        cuidador.setCpf(dto.getCpf());
-        cuidador.setEmail(dto.getEmail());
+        cuidador.setNome(TextoUtils.paraBanco(dto.getNome()));
+        cuidador.setCpf(limparDocumento(dto.getCpf()));
+        cuidador.setEmail(normalizarEmail(dto.getEmail()));
         cuidador.setSenha(dto.getSenha());
 
         if (dto.getInstituicaoId() != null) {
@@ -92,5 +94,21 @@ public class CuidadorMapper {
         }
 
         return lista;
+    }
+
+    private static String limparDocumento(String valor) {
+        if (valor == null || valor.isBlank()) {
+            return null;
+        }
+
+        return valor.replaceAll("\\D", "");
+    }
+
+    private static String normalizarEmail(String valor) {
+        if (valor == null || valor.isBlank()) {
+            return null;
+        }
+
+        return valor.trim().toLowerCase(Locale.ROOT);
     }
 }
