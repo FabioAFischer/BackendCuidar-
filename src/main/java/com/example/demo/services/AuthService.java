@@ -92,15 +92,9 @@ public class AuthService {
         return gerarRespostaLogin(usuario);
     }
 
-    public Map<String, Object> verificar2fa(String email, String codigo) {
-        twoFactorService.validarCodigo(email, codigo);
-
-        Usuario usuario = buscarUsuarioPorEmail(email);
-        return gerarRespostaLogin(usuario);
-    }
-
-    public Map<String, Object> verificar2fa(String email, String codigo, String perfil) {
-        Usuario usuario = buscarUsuarioPorEmail(email, parsePerfil(perfil));
+    public Map<String, Object> verificar2fa(String identificador, String codigo, String perfil) {
+        Usuario usuario = buscarUsuario(parsePerfil(perfil), identificador);
+        String email = emailDoUsuario(usuario);
         twoFactorService.validarCodigo(email, codigo);
         return gerarRespostaLogin(usuario);
     }

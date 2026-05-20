@@ -145,10 +145,10 @@ class AuthServiceTest {
     void deveVerificarMfaDeCuidadorEGerarToken() {
         Cuidador cuidador = cuidador();
 
-        when(cuidadorRepository.findByEmail("cuidador@email.com")).thenReturn(Optional.of(cuidador));
+        when(cuidadorRepository.findByCpf("12345678901")).thenReturn(Optional.of(cuidador));
         when(jwtService.gerarToken(cuidador)).thenReturn("token-cuidador");
 
-        Map<String, Object> resposta = service.verificar2fa("cuidador@email.com", "123456", "CUIDADOR");
+        Map<String, Object> resposta = service.verificar2fa("123.456.789-01", "123456", "CUIDADOR");
 
         verify(twoFactorService).validarCodigo("cuidador@email.com", "123456");
         assertEquals("token-cuidador", resposta.get("token"));
