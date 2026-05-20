@@ -4,10 +4,12 @@ import java.time.LocalDateTime;
 import java.util.Map;
 
 import com.example.demo.dtos.ContatoDTO;
+import com.example.demo.dtos.AlertasDTO;
 import com.example.demo.dtos.IdosoDTO;
 import com.example.demo.dtos.PrescricaoDTO;
 import com.example.demo.dtos.RemedioDTO;
 import com.example.demo.entity.Administrador;
+import com.example.demo.entity.Alertas;
 import com.example.demo.entity.Contato;
 import com.example.demo.entity.Cuidador;
 import com.example.demo.entity.Idoso;
@@ -16,6 +18,8 @@ import com.example.demo.entity.Prescricao;
 import com.example.demo.entity.Remedio;
 import com.example.demo.enums.Perfil;
 import com.example.demo.enums.Status;
+import com.example.demo.enums.StatusAlertas;
+import com.example.demo.enums.TipoAlerta;
 
 public final class TestDataFactory {
 
@@ -64,6 +68,25 @@ public final class TestDataFactory {
         prescricao.setIntervalo(8.0);
         prescricao.setDosagem("1 comprimido");
         return prescricao;
+    }
+
+    public static AlertasDTO alertaDTO() {
+        AlertasDTO dto = new AlertasDTO();
+        dto.setIdosoId(20);
+        dto.setTipoAlerta(TipoAlerta.REMEDIO);
+        dto.setDataAgendada(LocalDateTime.now().plusHours(2));
+        return dto;
+    }
+
+    public static Alertas alerta(int id, Idoso idoso, StatusAlertas statusAlertas) {
+        Alertas alerta = new Alertas();
+        alerta.setId(id);
+        alerta.setIdoso(idoso);
+        alerta.setTipoAlerta(TipoAlerta.REMEDIO);
+        alerta.setStatusAlertas(statusAlertas);
+        alerta.setData_criacao(LocalDateTime.now());
+        alerta.setData_agendade(LocalDateTime.now().plusHours(2));
+        return alerta;
     }
 
     public static Remedio remedio() {
