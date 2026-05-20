@@ -30,45 +30,53 @@ public class AuthController {
 
     @PostMapping("/verificar-2fa")
     public ResponseEntity<?> verificar2fa(@RequestBody Map<String, String> dados) {
-        String email = dados.get("email");
+        String identificador = primeiroValor(dados, "identificador", "cpfCnpj", "cpf", "cnpj");
         String codigo = dados.get("codigo");
         String perfil = dados.get("perfil");
 
-        if (email == null || codigo == null) {
-            throw new InvalidRequestException("Email e código são obrigatórios");
+        if (identificador == null || codigo == null || perfil == null) {
+            throw new InvalidRequestException("Identificador, perfil e codigo sao obrigatorios");
         }
 
-    return ResponseEntity.ok(authService.verificar2fa(email, codigo, perfil));
-}
-
-@PostMapping("/recuperar-senha")
-public ResponseEntity<?> recuperarSenha(@RequestBody Map<String, String> dados) {
-    String identificador = dados.get("identificador");
-    return ResponseEntity.ok(authService.recuperarSenha(identificador));
-}
-
-@PostMapping("/verificar-recuperacao")
-public ResponseEntity<?> verificarRecuperacao(@RequestBody Map<String, String> dados) {
-    String email = dados.get("email");
-    String codigo = dados.get("codigo");
-
-    if (email == null || codigo == null) {
-        throw new InvalidRequestException("Email e código são obrigatórios");
+        return ResponseEntity.ok(authService.verificar2fa(identificador, codigo, perfil));
     }
 
-    return ResponseEntity.ok(authService.verificarRecuperacao(email, codigo));
-}
-
-@PostMapping("/nova-senha")
-public ResponseEntity<?> novaSenha(@RequestBody Map<String, String> dados) {
-    String email = dados.get("email");
-    String novaSenha = dados.get("novaSenha");
-
-    if (email == null || novaSenha == null) {
-        throw new InvalidRequestException("Email e nova senha são obrigatórios");
+    @PostMapping("/recuperar-senha")
+    public ResponseEntity<?> recuperarSenha(@RequestBody Map<String, String> dados) {
+        String identificador = dados.get("identificador");
+        return ResponseEntity.ok(authService.recuperarSenha(identificador));
     }
 
-    authService.novaSenha(email, novaSenha);
-    return ResponseEntity.ok(Map.of("message", "Senha alterada com sucesso"));
-}
+    @PostMapping("/verificar-recuperacao")
+    public ResponseEntity<?> verificarRecuperacao(@RequestBody Map<String, String> dados) {
+        String email = dados.get("email");
+        String codigo = dados.get("codigo");
+
+        if (email == null || codigo == null) {
+            throw new InvalidRequestException("Email e codigo sao obrigatorios");
+        }
+
+        return ResponseEntity.ok(authService.verificarRecuperacao(email, codigo));
+    }
+
+    @PostMapping("/nova-senha")
+    public ResponseEntity<?> novaSenha(@RequestBody Map<String, String> dados) {
+        String email = dados.get("email");
+        String novaSenha = dados.get("novaSenha");
+
+        if (email == null || novaSenha == null) {
+            throw new InvalidRequestException("Email e nova senha sao obrigatorios");
+        }
+
+        authService.novaSenha(email, novaSenha);
+        return ResponseEntity.ok(Map.of("message", "Senha alterada com sucesso"));
+    }
+
+    private String primeiroValor(Map<String, String> dados, String... chaves) {
+        for (String chave : chaves) {
+            String valor = dados.get(chave);
+            if (valor != null && !valor.isBlank()) return valor;
+        }
+        return null;
+    }
 }
