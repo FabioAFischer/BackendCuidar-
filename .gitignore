@@ -34,3 +34,7 @@ build/
 .env
 src/main/resources/application.properties
 .env
+
+### Ignorando  application.properties e .env ###
+
+
