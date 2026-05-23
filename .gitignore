@@ -38,3 +38,4 @@ src/main/resources/application.properties
 ### Ignorando  application.properties e .env ###
 
 
+src/main/resources/application.properties
