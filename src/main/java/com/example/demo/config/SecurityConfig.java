@@ -38,7 +38,7 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/auth/login",
                                 "/auth/verificar-2fa",
-                                "/auth/reenviar-codigo"
+                                "/auth/reenviar-codigo",
                                 "/swagger-ui/**",
                                 "/auth/recuperar-senha",
                                 "/auth/verificar-recuperacao",
