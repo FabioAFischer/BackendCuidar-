@@ -79,4 +79,16 @@ public class AuthController {
         }
         return null;
     }
+    
+    @PostMapping("/reenviar-codigo")
+    public ResponseEntity<?> reenviarCodigo(@RequestBody Map<String, String> dados) {
+        String identificador = primeiroValor(dados, "identificador", "cpfCnpj", "cpf", "cnpj");
+        String perfil = dados.get("perfil");
+
+        if (identificador == null || perfil == null) {
+            throw new InvalidRequestException("Identificador e perfil são obrigatórios");
+        }
+
+        return ResponseEntity.ok(authService.reenviarCodigo(identificador, perfil));
+    }
 }

@@ -235,4 +235,15 @@ public void novaSenha(String email, String novaSenha) {
 
     throw new UnsupportedProfileException("Perfil nao suporta recuperacao de senha");
 }
+
+public Map<String, Object> reenviarCodigo(String identificador, String perfil) {
+    Usuario usuario = buscarUsuario(parsePerfil(perfil), identificador);
+    String email = emailDoUsuario(usuario);
+    twoFactorService.enviarCodigo(email);
+
+    Map<String, Object> resposta = new HashMap<>();
+    resposta.put("email", mascararEmail(email));
+    resposta.put("mensagem", "Código reenviado com sucesso");
+    return resposta;
+}
 }
