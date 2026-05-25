@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static com.example.demo.support.TestDataFactory.cuidador;
 import static com.example.demo.support.TestDataFactory.remedio;
 import static com.example.demo.support.TestDataFactory.remedioDTO;
 
@@ -24,17 +25,23 @@ import com.example.demo.entity.Remedio;
 import com.example.demo.enums.Status;
 import com.example.demo.exceptions.DuplicateResourceException;
 import com.example.demo.exceptions.ResourceNotFoundException;
+import com.example.demo.repository.CuidadorRepository;
 import com.example.demo.repository.PrescricaoRepository;
 import com.example.demo.repository.RemedioRepository;
 
 @ExtendWith(MockitoExtension.class)
 class RemedioServiceTest {
 
+    private static final Integer CUIDADOR_ID = 2;
+
     @Mock
     private RemedioRepository remedioRepository;
 
     @Mock
     private PrescricaoRepository prescricaoRepository;
+
+    @Mock
+    private CuidadorRepository cuidadorRepository;
 
     @InjectMocks
     private RemedioService service;
@@ -44,10 +51,11 @@ class RemedioServiceTest {
         RemedioDTO dto = remedioDTO("Dipirona", "Tomar com agua", null);
         Remedio salvo = remedio(1, "DIPIRONA", "TOMAR COM AGUA", Status.ATIVO);
 
-        when(remedioRepository.findByNome("DIPIRONA")).thenReturn(Optional.empty());
+        when(remedioRepository.findByNomeAndCuidadorId("DIPIRONA", CUIDADOR_ID)).thenReturn(Optional.empty());
+        when(cuidadorRepository.findById(CUIDADOR_ID)).thenReturn(Optional.of(cuidador()));
         when(remedioRepository.save(any(Remedio.class))).thenReturn(salvo);
 
-        RemedioDTO resultado = service.criar(dto);
+        RemedioDTO resultado = service.criar(dto, CUIDADOR_ID);
 
         assertEquals(1, resultado.getId());
         assertEquals("Dipirona", resultado.getNome());
@@ -59,9 +67,9 @@ class RemedioServiceTest {
         RemedioDTO dto = remedioDTO("Dipirona", null, null);
         Remedio existente = remedio(1, "DIPIRONA", null, Status.ATIVO);
 
-        when(remedioRepository.findByNome("DIPIRONA")).thenReturn(Optional.of(existente));
+        when(remedioRepository.findByNomeAndCuidadorId("DIPIRONA", CUIDADOR_ID)).thenReturn(Optional.of(existente));
 
-        assertThrows(DuplicateResourceException.class, () -> service.criar(dto));
+        assertThrows(DuplicateResourceException.class, () -> service.criar(dto, CUIDADOR_ID));
     }
 
     @Test
@@ -69,10 +77,10 @@ class RemedioServiceTest {
         RemedioDTO dto = remedioDTO("Dipirona", "Nova observacao", null);
         Remedio existente = remedio(1, "DIPIRONA", "ANTIGA OBSERVACAO", Status.INATIVO);
 
-        when(remedioRepository.findByNome("DIPIRONA")).thenReturn(Optional.of(existente));
+        when(remedioRepository.findByNomeAndCuidadorId("DIPIRONA", CUIDADOR_ID)).thenReturn(Optional.of(existente));
         when(remedioRepository.save(existente)).thenReturn(existente);
 
-        RemedioDTO resultado = service.criar(dto);
+        RemedioDTO resultado = service.criar(dto, CUIDADOR_ID);
 
         assertEquals(Status.ATIVO, resultado.getStatus());
         assertEquals("Nova Observacao", resultado.getObservacao());
@@ -83,9 +91,9 @@ class RemedioServiceTest {
     void deveBuscarRemedioPorId() {
         Remedio remedio = remedio(1, "DIPIRONA", null, Status.ATIVO);
 
-        when(remedioRepository.findById(1)).thenReturn(Optional.of(remedio));
+        when(remedioRepository.findByIdAndCuidadorId(1, CUIDADOR_ID)).thenReturn(Optional.of(remedio));
 
-        RemedioDTO resultado = service.buscarPorId(1);
+        RemedioDTO resultado = service.buscarPorId(1, CUIDADOR_ID);
 
         assertEquals(1, resultado.getId());
         assertEquals("Dipirona", resultado.getNome());
@@ -93,9 +101,9 @@ class RemedioServiceTest {
 
     @Test
     void deveFalharAoBuscarRemedioInexistente() {
-        when(remedioRepository.findById(99)).thenReturn(Optional.empty());
+        when(remedioRepository.findByIdAndCuidadorId(99, CUIDADOR_ID)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> service.buscarPorId(99));
+        assertThrows(ResourceNotFoundException.class, () -> service.buscarPorId(99, CUIDADOR_ID));
     }
 
     @Test
@@ -103,10 +111,10 @@ class RemedioServiceTest {
         RemedioDTO dto = remedioDTO("Paracetamol", null, Status.ATIVO);
         Remedio remedio = remedio(1, "DIPIRONA", null, Status.ATIVO);
 
-        when(remedioRepository.findById(1)).thenReturn(Optional.of(remedio));
-        when(remedioRepository.existsByNome("PARACETAMOL")).thenReturn(true);
+        when(remedioRepository.findByIdAndCuidadorId(1, CUIDADOR_ID)).thenReturn(Optional.of(remedio));
+        when(remedioRepository.existsByNomeAndCuidadorId("PARACETAMOL", CUIDADOR_ID)).thenReturn(true);
 
-        assertThrows(DuplicateResourceException.class, () -> service.atualizar(1, dto));
+        assertThrows(DuplicateResourceException.class, () -> service.atualizar(1, dto, CUIDADOR_ID));
     }
 
     @Test
@@ -115,10 +123,10 @@ class RemedioServiceTest {
         Prescricao prescricao = new Prescricao();
         prescricao.setStatus(Status.ATIVO);
 
-        when(remedioRepository.findById(1)).thenReturn(Optional.of(remedio));
+        when(remedioRepository.findByIdAndCuidadorId(1, CUIDADOR_ID)).thenReturn(Optional.of(remedio));
         when(prescricaoRepository.findByRemedioIdAndStatus(1, Status.ATIVO)).thenReturn(List.of(prescricao));
 
-        service.inativar(1);
+        service.inativar(1, CUIDADOR_ID);
 
         ArgumentCaptor<Remedio> captor = ArgumentCaptor.forClass(Remedio.class);
         verify(remedioRepository).save(captor.capture());
