@@ -1,0 +1,34 @@
+name: Deploy Backend Oracle
+
+on:
+  push:
+    branches:
+      - develop
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy backend na Oracle
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.ORACLE_HOST }}
+          username: ${{ secrets.ORACLE_USER }}
+          key: ${{ secrets.ORACLE_SSH_KEY }}
+          port: ${{ secrets.ORACLE_PORT }}
+          script: |
+            set -e
+
+            echo "Atualizando backend..."
+            cd /opt/bomcuidado/backend
+            git fetch origin develop
+            git reset --hard origin/develop
+
+            echo "Rodando compose central..."
+            cd /opt/bomcuidado
+            docker compose up -d --build db backend
+
+            echo "Status:"
+            docker ps
