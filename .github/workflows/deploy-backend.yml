@@ -31,7 +31,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ghcr.io/slamenslamen5/backendcuidar:homolog
+          tags: ghcr.io/fabioafischer/backendcuidar:homolog
 
       - name: Deploy na Oracle
         uses: appleboy/ssh-action@v1.0.3
@@ -44,17 +44,16 @@ jobs:
           script: |
             set -e
 
-            echo "Entrando na pasta central do deploy..."
             cd /opt/bomcuidado
 
-            echo "Baixando nova imagem do backend..."
+            echo "Baixando imagem nova do backend..."
             docker compose pull backend
 
-            echo "Subindo backend com imagem nova..."
+            echo "Subindo backend..."
             docker compose up -d backend
 
             echo "Limpando imagens antigas..."
             docker image prune -f
 
-            echo "Status dos containers:"
+            echo "Status:"
             docker ps
