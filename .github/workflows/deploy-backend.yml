@@ -3,7 +3,7 @@ name: Deploy Backend Oracle
 on:
   push:
     branches:
-      - develop
+      - homolog
   workflow_dispatch:
 
 jobs:
@@ -23,8 +23,8 @@ jobs:
 
             echo "Atualizando backend..."
             cd /opt/bomcuidado/backend
-            git fetch origin develop
-            git reset --hard origin/develop
+            git fetch origin homolog
+            git reset --hard origin/homolog
 
             echo "Rodando compose central..."
             cd /opt/bomcuidado
