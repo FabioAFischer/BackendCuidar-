@@ -1,4 +1,4 @@
-name: Deploy Backend Oracle
+name: Build and Deploy Backend
 
 on:
   push:
@@ -6,31 +6,55 @@ on:
       - homolog
   workflow_dispatch:
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
     steps:
-      - name: Deploy backend na Oracle
+      - name: Baixar código do backend
+        uses: actions/checkout@v4
+
+      - name: Login no GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Buildar e publicar imagem do backend
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ghcr.io/slamenslamen5/backendcuidar:homolog
+
+      - name: Deploy na Oracle
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.ORACLE_HOST }}
           username: ${{ secrets.ORACLE_USER }}
           key: ${{ secrets.ORACLE_SSH_KEY }}
           port: ${{ secrets.ORACLE_PORT }}
-          command_timeout: 30m
+          command_timeout: 10m
           script: |
             set -e
 
-            echo "Atualizando backend..."
-            cd /opt/bomcuidado/backend
-            git fetch origin homolog
-            git reset --hard origin/homolog
-
-            echo "Rodando compose central..."
+            echo "Entrando na pasta central do deploy..."
             cd /opt/bomcuidado
-            docker compose up -d --build db backend
 
-            echo "Status:"
+            echo "Baixando nova imagem do backend..."
+            docker compose pull backend
+
+            echo "Subindo backend com imagem nova..."
+            docker compose up -d backend
+
+            echo "Limpando imagens antigas..."
+            docker image prune -f
+
+            echo "Status dos containers:"
             docker ps
