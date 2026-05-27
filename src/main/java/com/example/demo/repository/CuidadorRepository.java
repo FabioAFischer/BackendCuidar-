@@ -1,5 +1,6 @@
 package com.example.demo.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -24,5 +25,7 @@ public interface CuidadorRepository extends JpaRepository<Cuidador, Integer> {
     Page<Cuidador> findByStatusAndInstituicaoIdAndCpf(Status status, Integer instituicaoId, String cpf, Pageable pageable);
 
     Optional<Cuidador> findByEmail(String email);
+
+    List<Cuidador> findByInstituicaoId(Integer instituicaoId);
 
 }

@@ -88,4 +88,60 @@ public class RelatorioDTO {
         private String cpf;
         private String status;
     }
+
+    @Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public static class RelatorioInstituicaoDTO {
+    private LocalDateTime geradoEm;
+    private SecaoCuidadorInstituicaoDTO cuidadores;
+    private SecaoIdosoInstituicaoDTO idosos;
+}
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public static class SecaoCuidadorInstituicaoDTO {
+    private long total;
+    private long ativos;
+    private long inativos;
+    private List<ItemCuidadorInstituicaoDTO> lista;
+}
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public static class SecaoIdosoInstituicaoDTO {
+    private long total;
+    private long ativos;
+    private long inativos;
+    private List<ItemIdosoInstituicaoDTO> lista;
+}
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public static class ItemCuidadorInstituicaoDTO {
+    private Integer id;
+    private String nome;
+    private String email;
+    private String cpf;
+    private String status;
+}
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public static class ItemIdosoInstituicaoDTO {
+    private Integer id;
+    private String nome;
+    private String cpf;
+    private String observacoes;
+    private String status;
+}
 }
