@@ -9,13 +9,16 @@ import org.springframework.stereotype.Service;
 import com.example.demo.dtos.AlertasDTO;
 import com.example.demo.entity.Alertas;
 import com.example.demo.entity.Idoso;
+import com.example.demo.entity.Prescricao;
 import com.example.demo.enums.StatusAlertas;
+import com.example.demo.enums.TipoAlerta;
 import com.example.demo.exceptions.InvalidRequestException;
 import com.example.demo.exceptions.ResourceNotFoundException;
 import com.example.demo.exceptions.UnauthorizedException;
 import com.example.demo.mappers.AlertasMapper;
 import com.example.demo.repository.AlertasRepository;
 import com.example.demo.repository.IdosoRepository;
+import com.example.demo.repository.PrescricaoRepository;
 import com.example.demo.repository.VinculoRepository;
 
 @Service
@@ -23,14 +26,17 @@ public class AlertasService {
 
     private final AlertasRepository repository;
     private final IdosoRepository idosoRepository;
+    private final PrescricaoRepository prescricaoRepository;
     private final VinculoRepository vinculoRepository;
 
     public AlertasService(
             AlertasRepository repository,
             IdosoRepository idosoRepository,
+            PrescricaoRepository prescricaoRepository,
             VinculoRepository vinculoRepository) {
         this.repository = repository;
         this.idosoRepository = idosoRepository;
+        this.prescricaoRepository = prescricaoRepository;
         this.vinculoRepository = vinculoRepository;
     }
 
@@ -60,8 +66,9 @@ public class AlertasService {
 
         Idoso idoso = buscarIdoso(dto.getIdosoId());
         validarIdosoVinculado(idoso.getId(), cuidadorId);
+        Prescricao prescricao = buscarPrescricaoParaAlerta(dto, idoso);
 
-        return AlertasMapper.toDTO(repository.save(AlertasMapper.toEntity(dto, idoso)));
+        return AlertasMapper.toDTO(repository.save(AlertasMapper.toEntity(dto, idoso, prescricao)));
     }
 
     public AlertasDTO atualizar(int id, AlertasDTO dto, Integer cuidadorId) {
@@ -73,8 +80,9 @@ public class AlertasService {
 
         Idoso idoso = buscarIdoso(dto.getIdosoId());
         validarIdosoVinculado(idoso.getId(), cuidadorId);
+        Prescricao prescricao = buscarPrescricaoParaAlerta(dto, idoso);
 
-        AlertasMapper.updateEntity(alerta, dto, idoso);
+        AlertasMapper.updateEntity(alerta, dto, idoso, prescricao);
         return AlertasMapper.toDTO(repository.save(alerta));
     }
 
@@ -97,6 +105,25 @@ public class AlertasService {
     private Idoso buscarIdoso(Integer id) {
         return idosoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Idoso", id.longValue()));
+    }
+
+    private Prescricao buscarPrescricaoParaAlerta(AlertasDTO dto, Idoso idoso) {
+        if (dto.getTipoAlerta() != TipoAlerta.REMEDIO) {
+            return null;
+        }
+
+        if (dto.getPrescricaoId() == null) {
+            throw new InvalidRequestException("Prescricao e obrigatoria para alerta de remedio");
+        }
+
+        Prescricao prescricao = prescricaoRepository.findById(dto.getPrescricaoId())
+                .orElseThrow(() -> new ResourceNotFoundException("Prescricao", dto.getPrescricaoId().longValue()));
+
+        if (prescricao.getIdoso() == null || prescricao.getIdoso().getId() != idoso.getId()) {
+            throw new InvalidRequestException("Prescricao nao pertence ao idoso informado");
+        }
+
+        return prescricao;
     }
 
     private void validar(AlertasDTO dto) {
