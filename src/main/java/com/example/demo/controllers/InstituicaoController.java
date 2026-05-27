@@ -15,12 +15,9 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.security.core.Authentication;
 
 import com.example.demo.dtos.InstituicaoDTO;
-import com.example.demo.dtos.RelatorioDTO;
 import com.example.demo.services.InstituicaoService;
-import com.example.demo.services.RelatorioService;
 
 import io.swagger.v3.oas.annotations.Operation;
 
@@ -30,12 +27,10 @@ import io.swagger.v3.oas.annotations.Operation;
 public class InstituicaoController {
 
     private final InstituicaoService service;
-    private final RelatorioService relatorioService;
 
 
-    public InstituicaoController(InstituicaoService service, RelatorioService relatorioService) {
+    public InstituicaoController(InstituicaoService service) {
         this.service = service;
-        this.relatorioService = relatorioService;
     }
 
     @Operation(
@@ -96,10 +91,4 @@ public class InstituicaoController {
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "Relatório da instituição", description = "Retorna cuidadores e idosos vinculados à instituição autenticada")
-    @GetMapping("/relatorio")
-    public ResponseEntity<RelatorioDTO.RelatorioInstituicaoDTO> relatorio(Authentication authentication) {
-        Integer instituicaoId = (Integer) authentication.getPrincipal();
-        return ResponseEntity.ok(relatorioService.gerarInstituicao(instituicaoId));
-    }
 }
