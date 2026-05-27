@@ -20,6 +20,8 @@ public class AlertasDTO {
     private Integer id;
     private Integer idosoId;
     private String idosoNome;
+    private Integer prescricaoId;
+    private String remedioNome;
     private TipoAlerta tipoAlerta;
     private StatusAlertas statusAlertas;
     private LocalDateTime dataCriacao;
