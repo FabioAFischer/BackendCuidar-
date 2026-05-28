@@ -28,6 +28,7 @@ public class InstituicaoController {
 
     private final InstituicaoService service;
 
+
     public InstituicaoController(InstituicaoService service) {
         this.service = service;
     }
@@ -89,4 +90,5 @@ public class InstituicaoController {
         service.ativar(id);
         return ResponseEntity.noContent().build();
     }
+
 }
