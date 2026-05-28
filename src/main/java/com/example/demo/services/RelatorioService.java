@@ -7,15 +7,21 @@ import org.springframework.stereotype.Service;
 
 import com.example.demo.dtos.RelatorioDTO;
 import com.example.demo.dtos.RelatorioDTO.ItemCuidadorDTO;
+import com.example.demo.dtos.RelatorioDTO.ItemCuidadorInstituicaoDTO;
 import com.example.demo.dtos.RelatorioDTO.ItemIdosoDTO;
+import com.example.demo.dtos.RelatorioDTO.ItemIdosoInstituicaoDTO;
 import com.example.demo.dtos.RelatorioDTO.ItemInstituicaoDTO;
+import com.example.demo.dtos.RelatorioDTO.RelatorioInstituicaoDTO;
 import com.example.demo.dtos.RelatorioDTO.SecaoCuidadorDTO;
+import com.example.demo.dtos.RelatorioDTO.SecaoCuidadorInstituicaoDTO;
 import com.example.demo.dtos.RelatorioDTO.SecaoIdosoDTO;
+import com.example.demo.dtos.RelatorioDTO.SecaoIdosoInstituicaoDTO;
 import com.example.demo.dtos.RelatorioDTO.SecaoInstituicaoDTO;
 import com.example.demo.entity.Cuidador;
 import com.example.demo.entity.Idoso;
 import com.example.demo.entity.Instituicao;
 import com.example.demo.enums.Status;
+import com.example.demo.exceptions.ResourceNotFoundException;
 import com.example.demo.repository.CuidadorRepository;
 import com.example.demo.repository.IdosoRepository;
 import com.example.demo.repository.InstituicaoRepository;
@@ -36,6 +42,8 @@ public class RelatorioService {
         this.cuidadorRepository = cuidadorRepository;
         this.idosoRepository = idosoRepository;
     }
+
+    // ── Relatório do Administrador ──────────────────────────────────────────────
 
     public RelatorioDTO gerar() {
         List<Instituicao> instituicoes = instituicaoRepository.findAll();
@@ -96,5 +104,52 @@ public class RelatorioService {
                 .toList();
 
         return new SecaoIdosoDTO(lista.size(), ativos, inativos, items);
+    }
+
+    // ── Relatório da Instituição ────────────────────────────────────────────────
+
+    public RelatorioInstituicaoDTO gerarInstituicao(Integer instituicaoId) {
+        instituicaoRepository.findById(instituicaoId)
+                .orElseThrow(() -> new ResourceNotFoundException("Instituição", instituicaoId.longValue()));
+
+        List<Cuidador> cuidadores = cuidadorRepository.findByInstituicaoId(instituicaoId);
+        List<Idoso> idosos = idosoRepository.findByInstituicaoId(instituicaoId);
+
+        return new RelatorioInstituicaoDTO(
+                LocalDateTime.now(),
+                montarSecaoCuidadorInstituicao(cuidadores),
+                montarSecaoIdosoInstituicao(idosos));
+    }
+
+    private SecaoCuidadorInstituicaoDTO montarSecaoCuidadorInstituicao(List<Cuidador> lista) {
+        long ativos = lista.stream().filter(c -> c.getStatus() == Status.ATIVO).count();
+        long inativos = lista.stream().filter(c -> c.getStatus() == Status.INATIVO).count();
+
+        List<ItemCuidadorInstituicaoDTO> items = lista.stream()
+                .map(c -> new ItemCuidadorInstituicaoDTO(
+                        c.getId(),
+                        TextoUtils.paraExibicao(c.getNome()),
+                        c.getEmail(),
+                        c.getCpf(),
+                        c.getStatus().name()))
+                .toList();
+
+        return new SecaoCuidadorInstituicaoDTO(lista.size(), ativos, inativos, items);
+    }
+
+    private SecaoIdosoInstituicaoDTO montarSecaoIdosoInstituicao(List<Idoso> lista) {
+        long ativos = lista.stream().filter(i -> i.getStatus() == Status.ATIVO).count();
+        long inativos = lista.stream().filter(i -> i.getStatus() == Status.INATIVO).count();
+
+        List<ItemIdosoInstituicaoDTO> items = lista.stream()
+                .map(i -> new ItemIdosoInstituicaoDTO(
+                        i.getId(),
+                        TextoUtils.paraExibicao(i.getNome()),
+                        i.getCpf(),
+                        i.getObservacoes(),
+                        i.getStatus().name()))
+                .toList();
+
+        return new SecaoIdosoInstituicaoDTO(lista.size(), ativos, inativos, items);
     }
 }

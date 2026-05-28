@@ -14,8 +14,8 @@ import com.example.demo.enums.Perfil;
 import com.example.demo.enums.Status;
 import com.example.demo.exceptions.InvalidRequestException;
 import com.example.demo.exceptions.ResourceNotFoundException;
-import com.example.demo.exceptions.UnsupportedProfileException;
 import com.example.demo.exceptions.UnauthorizedException;
+import com.example.demo.exceptions.UnsupportedProfileException;
 import com.example.demo.repository.AdministradorRepository;
 import com.example.demo.repository.CuidadorRepository;
 import com.example.demo.repository.InstituicaoRepository;
@@ -132,6 +132,10 @@ public class AuthService {
         resposta.put("token", jwtService.gerarToken(usuario));
         resposta.put("tipo", "Bearer");
         resposta.put("autenticado", true);
+
+        if (usuario instanceof Cuidador c) resposta.put("email", c.getEmail());
+        else if (usuario instanceof Instituicao i) resposta.put("email", i.getEmail());
+
         return resposta;
     }
 

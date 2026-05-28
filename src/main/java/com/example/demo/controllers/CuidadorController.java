@@ -44,7 +44,7 @@ public class CuidadorController {
         return ResponseEntity.ok(service.listarAtivos(pageable));
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/listar/{id}")
     public ResponseEntity<CuidadorDTO> buscarPorId(@PathVariable Integer id) {
         return ResponseEntity.ok(service.buscarPorId(id));
     }
