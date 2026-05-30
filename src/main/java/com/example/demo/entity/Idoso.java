@@ -35,6 +35,9 @@ public class Idoso extends Usuario {
     @Column(length = 300)
     private String observacoes;
 
+    @Column(name = "senha_acesso_criptografada", length = 500)
+    private String senhaAcessoCriptografada;
+
     @NotNull(message = "Instituição é obrigatória")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "instituicao_id", nullable = false, foreignKey = @ForeignKey(name = "fk_idoso_instituicao"))

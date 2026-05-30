@@ -17,7 +17,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.dtos.IdosoDTO;
+import com.example.demo.exceptions.UnauthorizedException;
 import com.example.demo.services.IdosoService;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/idoso")
@@ -69,8 +71,26 @@ public class IdosoController {
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("/{id}/senha-acesso")
+    public ResponseEntity<Map<String, Object>> obterSenhaAcesso(
+            @PathVariable Integer id,
+            @RequestBody Map<String, String> dados,
+            Authentication authentication) {
+        if (!isCuidador(authentication)) {
+            throw new UnauthorizedException("Apenas cuidadores podem acessar a senha do idoso");
+        }
+
+        Integer cuidadorId = (Integer) authentication.getPrincipal();
+        return ResponseEntity.ok(service.obterSenhaAcesso(id, cuidadorId, dados.get("senha")));
+    }
+
     private boolean isInstituicao(Authentication authentication) {
         return authentication != null && authentication.getAuthorities().stream()
                 .anyMatch(authority -> "ROLE_INSTITUICAO".equals(authority.getAuthority()));
+    }
+
+    private boolean isCuidador(Authentication authentication) {
+        return authentication != null && authentication.getAuthorities().stream()
+                .anyMatch(authority -> "ROLE_CUIDADOR".equals(authority.getAuthority()));
     }
 }
