@@ -22,6 +22,8 @@ public class IdosoMapper {
         dto.setNome(TextoUtils.paraExibicao(idoso.getNome()));
         dto.setCpf(idoso.getCpf());
         dto.setObservacoes(TextoUtils.paraExibicao(idoso.getObservacoes()));
+        dto.setSenhaAcessoGerada(idoso.getSenhaAcessoCriptografada() != null
+                && !idoso.getSenhaAcessoCriptografada().isBlank());
 
         if (idoso.getInstituicao() != null) {
             dto.setInstituicaoId(idoso.getInstituicao().getId());
