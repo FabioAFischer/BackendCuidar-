@@ -31,6 +31,7 @@ import com.example.demo.exceptions.DuplicateResourceException;
 import com.example.demo.exceptions.InvalidRequestException;
 import com.example.demo.exceptions.ResourceNotFoundException;
 import com.example.demo.repository.ContatoRepository;
+import com.example.demo.repository.CuidadorRepository;
 import com.example.demo.repository.IdosoRepository;
 import com.example.demo.repository.InstituicaoRepository;
 
@@ -39,6 +40,9 @@ class IdosoServiceTest {
 
     @Mock
     private IdosoRepository idosoRepository;
+
+    @Mock
+    private CuidadorRepository cuidadorRepository;
 
     @Mock
     private InstituicaoRepository instituicaoRepository;
@@ -96,6 +100,16 @@ class IdosoServiceTest {
         when(idosoRepository.findByCpf("12345678901")).thenReturn(Optional.of(existente));
 
         assertThrows(DuplicateResourceException.class, () -> service.criar(idosoDTO()));
+    }
+
+
+    @Test
+    void deveBloquearCriacaoComCpfDeCuidador() {
+        IdosoDTO dto = idosoDTO();
+
+        when(cuidadorRepository.existsByCpf("12345678901")).thenReturn(true);
+
+        assertThrows(DuplicateResourceException.class, () -> service.criar(dto));
     }
 
     @Test
@@ -176,6 +190,20 @@ class IdosoServiceTest {
 
         when(idosoRepository.findById(1)).thenReturn(Optional.of(existente));
         when(idosoRepository.existsByCpf("10987654321")).thenReturn(true);
+
+        assertThrows(DuplicateResourceException.class, () -> service.atualizar(1, dto));
+    }
+
+
+    @Test
+    void deveBloquearAtualizacaoComCpfDeCuidador() {
+        IdosoDTO dto = idosoDTO();
+        dto.setCpf("10987654321");
+        Idoso existente = idoso(1, "Maria", "12345678901", Status.ATIVO);
+
+        when(idosoRepository.findById(1)).thenReturn(Optional.of(existente));
+        when(idosoRepository.existsByCpf("10987654321")).thenReturn(false);
+        when(cuidadorRepository.existsByCpf("10987654321")).thenReturn(true);
 
         assertThrows(DuplicateResourceException.class, () -> service.atualizar(1, dto));
     }
