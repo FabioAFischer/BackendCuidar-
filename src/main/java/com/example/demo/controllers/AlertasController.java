@@ -44,6 +44,17 @@ public class AlertasController {
     }
 
     @Operation(
+        summary = "Listar alertas do idoso autenticado",
+        description = "Retorna alertas nao cancelados do idoso autenticado no app"
+    )
+    @GetMapping("/me")
+    public ResponseEntity<Page<AlertasDTO>> listarMeusAlertas(
+            @PageableDefault(size = 20, sort = "data_agendade") Pageable pageable,
+            Authentication authentication) {
+        return ResponseEntity.ok(service.listarDoIdoso(getUsuarioId(authentication), pageable));
+    }
+
+    @Operation(
         summary = "Listar alertas por idoso",
         description = "Retorna alertas nao cancelados de um idoso vinculado ao cuidador autenticado"
     )
@@ -96,7 +107,20 @@ public class AlertasController {
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(
+        summary = "Confirmar alerta",
+        description = "Marca um alerta do idoso autenticado como realizado"
+    )
+    @PutMapping("/{id}/confirmar")
+    public ResponseEntity<AlertasDTO> confirmar(@PathVariable int id, Authentication authentication) {
+        return ResponseEntity.ok(service.confirmar(id, getUsuarioId(authentication)));
+    }
+
     private Integer getCuidadorId(Authentication authentication) {
+        return getUsuarioId(authentication);
+    }
+
+    private Integer getUsuarioId(Authentication authentication) {
         if (authentication == null || authentication.getPrincipal() == null) {
             return null;
         }
