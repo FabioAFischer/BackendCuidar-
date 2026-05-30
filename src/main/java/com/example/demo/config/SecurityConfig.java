@@ -43,6 +43,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(
                                 "/auth/login",
+                                "/auth/idoso/login",
                                 "/auth/verificar-2fa",
                                 "/auth/reenviar-codigo",
                                 "/swagger-ui/**",
