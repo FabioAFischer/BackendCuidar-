@@ -17,6 +17,7 @@ import com.example.demo.exceptions.InvalidRequestException;
 import com.example.demo.exceptions.ResourceNotFoundException;
 import com.example.demo.mappers.CuidadorMapper;
 import com.example.demo.repository.CuidadorRepository;
+import com.example.demo.repository.IdosoRepository;
 import com.example.demo.repository.InstituicaoRepository;
 import com.example.demo.utils.TextoUtils;
 
@@ -24,16 +25,19 @@ import com.example.demo.utils.TextoUtils;
 public class CuidadorService {
 
     private final CuidadorRepository repository;
+    private final IdosoRepository idosoRepository;
     private final InstituicaoRepository instituicaoRepository;
     private final PasswordEncoder passwordEncoder;
     private final SenhaService senhaService;
 
     public CuidadorService(
             CuidadorRepository repository,
+            IdosoRepository idosoRepository,
             InstituicaoRepository instituicaoRepository,
             PasswordEncoder passwordEncoder,
             SenhaService senhaService) {
         this.repository = repository;
+        this.idosoRepository = idosoRepository;
         this.instituicaoRepository = instituicaoRepository;
         this.passwordEncoder = passwordEncoder;
         this.senhaService = senhaService;
@@ -64,9 +68,7 @@ public class CuidadorService {
 
     public CuidadorDTO criar(CuidadorDTO dto) {
         String cpfLimpo = limparDocumento(dto.getCpf());
-        if (repository.existsByCpf(cpfLimpo)) {
-            throw new DuplicateResourceException("Já existe um cuidador com esse CPF");
-        }
+        validarCpfDisponivel(cpfLimpo);
 
         if (dto.getContato() == null) {
             throw new InvalidRequestException("O contato do cuidador deve ser informado");
@@ -88,8 +90,8 @@ public class CuidadorService {
                 .orElseThrow(() -> new ResourceNotFoundException("Cuidador", id.longValue()));
 
         String cpfLimpo = limparDocumento(dto.getCpf());
-        if (!cuidador.getCpf().equals(cpfLimpo) && repository.existsByCpf(cpfLimpo)) {
-            throw new DuplicateResourceException("CPF já está em uso");
+        if (!cuidador.getCpf().equals(cpfLimpo)) {
+            validarCpfDisponivel(cpfLimpo);
         }
 
         Instituicao instituicao = instituicaoRepository.findById(dto.getInstituicaoId())
@@ -150,9 +152,7 @@ public class CuidadorService {
 
         String cpfLimpo = limparDocumento(dto.getCpf());
         if (cpfLimpo != null && !cpfLimpo.equals(cuidador.getCpf())) {
-            if (repository.existsByCpf(cpfLimpo)) {
-                throw new DuplicateResourceException("CPF já está em uso");
-            }
+            validarCpfDisponivel(cpfLimpo);
             cuidador.setCpf(cpfLimpo);
         }
 
@@ -194,5 +194,11 @@ public class CuidadorService {
         }
 
         return valor.replaceAll("\\D", "");
+    }
+
+    private void validarCpfDisponivel(String cpf) {
+        if (repository.existsByCpf(cpf) || idosoRepository.existsByCpf(cpf)) {
+            throw new DuplicateResourceException("CPF já está em uso");
+        }
     }
 }
