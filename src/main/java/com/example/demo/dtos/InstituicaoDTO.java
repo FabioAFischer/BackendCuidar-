@@ -20,6 +20,7 @@ public class InstituicaoDTO {
     private String cnpj;
     private String email;
     private String senha;
+    private String rua;
     private String bairro;
     private String uf;
     private Integer numero;

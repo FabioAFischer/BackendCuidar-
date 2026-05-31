@@ -67,7 +67,9 @@ public class RelatorioService {
                         TextoUtils.paraExibicao(i.getNome()),
                         i.getCnpj(),
                         i.getEmail(),
-                        TextoUtils.paraExibicao(i.getUf()),
+                        TextoUtils.paraExibicao(i.getRua()),
+                        TextoUtils.paraExibicao(i.getBairro()),
+                        TextoUtils.paraUf(i.getUf()),
                         i.getStatus().name()))
                 .toList();
 
