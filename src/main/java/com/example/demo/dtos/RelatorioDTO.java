@@ -64,6 +64,8 @@ public class RelatorioDTO {
         private String nome;
         private String cnpj;
         private String email;
+        private String rua;
+        private String bairro;
         private String uf;
         private String status;
     }

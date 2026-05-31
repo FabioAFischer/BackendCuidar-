@@ -38,6 +38,9 @@ public class Instituicao extends Usuario {
     private String senha;
 
     @Column(length = 200)
+    private String rua;
+
+    @Column(length = 200)
     private String bairro;
 
     @Column(length = 2)
