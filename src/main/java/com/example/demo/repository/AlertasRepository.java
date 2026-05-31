@@ -40,4 +40,6 @@ public interface AlertasRepository extends JpaRepository<Alertas, Integer> {
             Integer cuidadorId,
             StatusAlertas status,
             Pageable pageable);
+
+    Page<Alertas> findByIdosoIdAndStatusAlertasNot(Integer idosoId, StatusAlertas status, Pageable pageable);
 }

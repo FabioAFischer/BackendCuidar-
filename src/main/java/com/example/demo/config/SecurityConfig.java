@@ -43,6 +43,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(
                                 "/auth/login",
+                                "/auth/idoso/login",
                                 "/auth/verificar-2fa",
                                 "/auth/reenviar-codigo",
                                 "/swagger-ui/**",
@@ -58,6 +59,8 @@ public class SecurityConfig {
                         .requestMatchers("/idoso/**").hasAnyRole("CUIDADOR", "INSTITUICAO")
                         .requestMatchers("/remedio/**").hasRole("CUIDADOR")
                         .requestMatchers("/prescricao/**").hasRole("CUIDADOR")
+                        .requestMatchers(HttpMethod.GET, "/alertas/me").hasRole("IDOSO")
+                        .requestMatchers(HttpMethod.PUT, "/alertas/*/confirmar").hasRole("IDOSO")
                         .requestMatchers("/alerta/**").hasRole("CUIDADOR")
                         .requestMatchers("/alertas/**").hasRole("CUIDADOR")
                         .requestMatchers("/contato/**").authenticated()

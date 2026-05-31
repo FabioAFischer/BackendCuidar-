@@ -177,6 +177,35 @@ public class IdosoService {
         repository.save(idoso);
     }
 
+    public Idoso autenticarPorSenhaAcesso(String cpf, String senhaAcesso) {
+        String cpfLimpo = limparDocumento(cpf);
+        if (cpfLimpo == null || cpfLimpo.length() != 11) {
+            throw new InvalidRequestException("Informe o CPF do idoso");
+        }
+
+        if (senhaAcesso == null || senhaAcesso.isBlank()) {
+            throw new InvalidRequestException("Informe a senha de acesso");
+        }
+
+        Idoso idoso = repository.findByCpf(cpfLimpo)
+                .orElseThrow(() -> new UnauthorizedException("Credenciais invalidas"));
+
+        if (idoso.getStatus() != Status.ATIVO) {
+            throw new UnauthorizedException("Usuario inativo");
+        }
+
+        if (idoso.getSenhaAcessoCriptografada() == null || idoso.getSenhaAcessoCriptografada().isBlank()) {
+            throw new UnauthorizedException("Senha de acesso ainda nao foi gerada");
+        }
+
+        String senhaSalva = descriptografarSenhaAcesso(idoso.getSenhaAcessoCriptografada());
+        if (!senhaSalva.equals(senhaAcesso.trim())) {
+            throw new UnauthorizedException("Credenciais invalidas");
+        }
+
+        return idoso;
+    }
+
     public Map<String, Object> obterSenhaAcesso(Integer idosoId, Integer cuidadorId, String senhaCuidador) {
         if (senhaCuidador == null || senhaCuidador.isBlank()) {
             throw new InvalidRequestException("Informe a senha do cuidador");
