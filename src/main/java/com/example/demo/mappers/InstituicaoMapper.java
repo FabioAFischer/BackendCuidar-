@@ -28,7 +28,7 @@ public class InstituicaoMapper {
         dto.setEmail(instituicao.getEmail());
         dto.setRua(TextoUtils.paraExibicao(instituicao.getRua()));
         dto.setBairro(TextoUtils.paraExibicao(instituicao.getBairro()));
-        dto.setUf(TextoUtils.paraExibicao(instituicao.getUf()));
+        dto.setUf(TextoUtils.paraUf(instituicao.getUf()));
         dto.setNumero(instituicao.getNumero());
         dto.setCep(instituicao.getCep());
         dto.setStatus(instituicao.getStatus());
