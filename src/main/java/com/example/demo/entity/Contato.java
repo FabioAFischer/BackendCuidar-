@@ -14,6 +14,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -34,10 +35,12 @@ public class Contato {
     private Integer id;
 
     @NotBlank(message = "Um DDD deve ser inserido")
+    @Pattern(regexp = "^\\d{2}$", message = "DDD deve conter exatamente 2 dígitos")
     @Column(length = 3, nullable = false)
     private String ddd;
 
     @NotBlank(message = "Um número de contato deve ser preenchido")
+    @Pattern(regexp = "^\\d{8,9}$", message = "Telefone deve conter 8 ou 9 dígitos")
     @Column(length = 15, nullable = false)
     private String telefone;
 
