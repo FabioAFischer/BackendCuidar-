@@ -9,19 +9,22 @@ import static com.example.demo.support.TestDataFactory.contato;
 import static com.example.demo.support.TestDataFactory.idoso;
 import static com.example.demo.support.TestDataFactory.idosoDTO;
 import static com.example.demo.support.TestDataFactory.instituicao;
+import static com.example.demo.support.TestDataFactory.cuidador;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.example.demo.dtos.IdosoDTO;
 import com.example.demo.entity.Contato;
@@ -30,10 +33,12 @@ import com.example.demo.enums.Status;
 import com.example.demo.exceptions.DuplicateResourceException;
 import com.example.demo.exceptions.InvalidRequestException;
 import com.example.demo.exceptions.ResourceNotFoundException;
+import com.example.demo.exceptions.UnauthorizedException;
 import com.example.demo.repository.ContatoRepository;
 import com.example.demo.repository.CuidadorRepository;
 import com.example.demo.repository.IdosoRepository;
 import com.example.demo.repository.InstituicaoRepository;
+import com.example.demo.repository.VinculoRepository;
 
 @ExtendWith(MockitoExtension.class)
 class IdosoServiceTest {
@@ -50,8 +55,25 @@ class IdosoServiceTest {
     @Mock
     private ContatoRepository contatoRepository;
 
-    @InjectMocks
+    @Mock
+    private VinculoRepository vinculoRepository;
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
     private IdosoService service;
+
+    @BeforeEach
+    void setUp() {
+        service = new IdosoService(
+                idosoRepository,
+                cuidadorRepository,
+                instituicaoRepository,
+                contatoRepository,
+                vinculoRepository,
+                passwordEncoder,
+                "segredo-de-teste-para-criptografia");
+    }
 
     @Test
     void deveListarIdososAtivosPorInstituicao() {
@@ -219,6 +241,37 @@ class IdosoServiceTest {
         ArgumentCaptor<Idoso> captor = ArgumentCaptor.forClass(Idoso.class);
         verify(idosoRepository).save(captor.capture());
         assertEquals(Status.INATIVO, captor.getValue().getStatus());
+    }
+
+    @Test
+    void deveAutenticarPorSenhaAcessoSemCpf() {
+        Idoso idoso = idoso(1, "Maria", "12345678901", Status.ATIVO);
+
+        when(cuidadorRepository.findById(2)).thenReturn(Optional.of(cuidador()));
+        when(passwordEncoder.matches("senhaCuidador", "hash")).thenReturn(true);
+        when(idosoRepository.findById(1)).thenReturn(Optional.of(idoso));
+        when(vinculoRepository.existsByIdosoIdAndCuidadorId(1, 2)).thenReturn(true);
+        when(idosoRepository.save(idoso)).thenReturn(idoso);
+
+        Map<String, Object> dadosSenha = service.obterSenhaAcesso(1, 2, "senhaCuidador");
+        String senhaAcesso = (String) dadosSenha.get("senha");
+
+        when(idosoRepository.findBySenhaAcessoCriptografadaIsNotNull()).thenReturn(List.of(idoso));
+
+        Idoso autenticado = service.autenticarPorSenhaAcesso(senhaAcesso);
+
+        assertEquals(1, autenticado.getId());
+        verify(idosoRepository).findBySenhaAcessoCriptografadaIsNotNull();
+    }
+
+    @Test
+    void deveFalharAutenticacaoPorSenhaAcessoInvalida() {
+        when(idosoRepository.findBySenhaAcessoCriptografadaIsNotNull()).thenReturn(List.of());
+
+        UnauthorizedException ex = assertThrows(UnauthorizedException.class,
+                () -> service.autenticarPorSenhaAcesso("senhaerrada"));
+
+        assertEquals("Senha de acesso inválida.", ex.getMessage());
     }
 
     @Test

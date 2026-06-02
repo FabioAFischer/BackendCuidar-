@@ -9,6 +9,7 @@ import static com.example.demo.support.TestDataFactory.administrador;
 import static com.example.demo.support.TestDataFactory.cuidador;
 import static com.example.demo.support.TestDataFactory.dadosLogin;
 import static com.example.demo.support.TestDataFactory.instituicaoAuth;
+import static com.example.demo.support.TestDataFactory.idoso;
 
 import java.util.Map;
 import java.util.Optional;
@@ -23,6 +24,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import com.example.demo.entity.Administrador;
 import com.example.demo.entity.Cuidador;
 import com.example.demo.entity.Instituicao;
+import com.example.demo.entity.Idoso;
 import com.example.demo.enums.Status;
 import com.example.demo.exceptions.InvalidRequestException;
 import com.example.demo.exceptions.UnauthorizedException;
@@ -54,6 +56,9 @@ class AuthServiceTest {
 
     @Mock
     private SenhaService senhaService;
+
+    @Mock
+    private IdosoService idosoService;
 
     @InjectMocks
     private AuthService service;
@@ -139,6 +144,29 @@ class AuthServiceTest {
         Map<String, String> dados = dadosLogin("12345678901", "senha", "INVALIDO");
 
         assertThrows(InvalidRequestException.class, () -> service.login(dados));
+    }
+
+    @Test
+    void deveLogarIdosoSomenteComSenhaAcesso() {
+        Idoso idoso = idoso(20, "Maria", "12345678901", Status.ATIVO);
+
+        when(idosoService.autenticarPorSenhaAcesso("BC-ABCDEFGH")).thenReturn(idoso);
+        when(jwtService.gerarToken(idoso)).thenReturn("token-idoso");
+
+        Map<String, Object> resposta = service.loginIdoso(Map.of("senhaAcesso", "BC-ABCDEFGH"));
+
+        assertEquals(20, resposta.get("id"));
+        assertEquals("Maria", resposta.get("nome"));
+        assertEquals(idoso.getPerfil(), resposta.get("perfil"));
+        assertEquals("token-idoso", resposta.get("token"));
+        assertEquals("Bearer", resposta.get("tipo"));
+        assertEquals(true, resposta.get("autenticado"));
+        verify(idosoService).autenticarPorSenhaAcesso("BC-ABCDEFGH");
+    }
+
+    @Test
+    void deveExigirSenhaAcessoNoLoginDoIdoso() {
+        assertThrows(InvalidRequestException.class, () -> service.loginIdoso(Map.of("cpf", "12345678901")));
     }
 
     @Test
