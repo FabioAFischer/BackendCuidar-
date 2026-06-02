@@ -107,10 +107,12 @@ public class AuthService {
             throw new InvalidRequestException("Dados de login nao informados");
         }
 
-        String cpf = primeiroValor(dados, "cpf", "identificador");
-        String senhaAcesso = primeiroValor(dados, "senhaAcesso", "senha", "codigo");
+        String senhaAcesso = dados.get("senhaAcesso");
+        if (senhaAcesso == null || senhaAcesso.isBlank()) {
+            throw new InvalidRequestException("Senha de acesso é obrigatória.");
+        }
 
-        return gerarRespostaLogin(idosoService.autenticarPorSenhaAcesso(cpf, senhaAcesso));
+        return gerarRespostaLogin(idosoService.autenticarPorSenhaAcesso(senhaAcesso));
     }
 
     private String emailDoUsuario(Usuario usuario) {
