@@ -19,6 +19,7 @@ import com.example.demo.dtos.ContatoDTO;
 import com.example.demo.services.ContatoService;
 
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/contato")
@@ -66,7 +67,7 @@ public class ContatoController {
         description = "Cria um novo contato com os dados informados"
     )
     @PostMapping("/cadastrar")
-    public ResponseEntity<ContatoDTO> criar(@RequestBody ContatoDTO dto) {
+    public ResponseEntity<ContatoDTO> criar(@Valid @RequestBody ContatoDTO dto) {
         ContatoDTO criado = service.criar(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(criado);
     }
@@ -76,7 +77,7 @@ public class ContatoController {
         description = "Atualiza os dados de um contato existente"
     )
     @PutMapping("/atualizar/{id}")
-    public ResponseEntity<ContatoDTO> atualizar(@PathVariable Integer id, @RequestBody ContatoDTO dto) {
+    public ResponseEntity<ContatoDTO> atualizar(@PathVariable Integer id, @Valid @RequestBody ContatoDTO dto) {
         return ResponseEntity.ok(service.atualizar(id, dto));
     }
 
