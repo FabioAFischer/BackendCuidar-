@@ -53,6 +53,12 @@ public class AlertasService {
                 .map(AlertasMapper::toDTO);
     }
 
+    public Page<AlertasDTO> listarDoIdoso(Integer idosoId, Pageable pageable) {
+        validarIdoso(idosoId);
+        return repository.findByIdosoIdAndStatusAlertasNot(idosoId, StatusAlertas.CANCELADO, pageable)
+                .map(AlertasMapper::toDTO);
+    }
+
     public AlertasDTO buscarPorId(int id, Integer cuidadorId) {
         validarCuidador(cuidadorId);
         Alertas alerta = buscarAlerta(id);
@@ -95,6 +101,23 @@ public class AlertasService {
         alerta.setStatusAlertas(StatusAlertas.CANCELADO);
         alerta.setData_atualizacao(LocalDateTime.now());
         repository.save(alerta);
+    }
+
+    public AlertasDTO confirmar(int id, Integer idosoId) {
+        validarIdoso(idosoId);
+
+        Alertas alerta = buscarAlerta(id);
+        if (alerta.getIdoso() == null || alerta.getIdoso().getId() != idosoId) {
+            throw new UnauthorizedException("Alerta nao pertence ao idoso autenticado");
+        }
+
+        if (alerta.getStatusAlertas() == StatusAlertas.CANCELADO) {
+            throw new InvalidRequestException("Alerta cancelado nao pode ser confirmado");
+        }
+
+        alerta.setStatusAlertas(StatusAlertas.REALIZADO);
+        alerta.setData_atualizacao(LocalDateTime.now());
+        return AlertasMapper.toDTO(repository.save(alerta));
     }
 
     private Alertas buscarAlerta(int id) {
@@ -147,6 +170,12 @@ public class AlertasService {
     private void validarCuidador(Integer cuidadorId) {
         if (cuidadorId == null) {
             throw new UnauthorizedException("Cuidador autenticado nao identificado");
+        }
+    }
+
+    private void validarIdoso(Integer idosoId) {
+        if (idosoId == null) {
+            throw new UnauthorizedException("Idoso autenticado nao identificado");
         }
     }
 

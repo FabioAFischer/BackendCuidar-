@@ -60,4 +60,11 @@ public final class TextoUtils {
         String textoNormalizado = Normalizer.normalize(valor, Normalizer.Form.NFD);
         return textoNormalizado.replaceAll("\\p{M}", "");
     }
+
+    public static String paraUf(String valor) {
+        if (valor == null) {
+            return null;
+        }
+        return valor.trim().toUpperCase(Locale.ROOT);
+    }
 }

@@ -3,6 +3,8 @@ package com.example.demo.dtos;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,6 +16,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class RelatorioDTO {
 
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "America/Sao_Paulo")
     private LocalDateTime geradoEm;
     private SecaoInstituicaoDTO instituicoes;
     private SecaoCuidadorDTO cuidadores;
@@ -61,6 +64,8 @@ public class RelatorioDTO {
         private String nome;
         private String cnpj;
         private String email;
+        private String rua;
+        private String bairro;
         private String uf;
         private String status;
     }
@@ -94,6 +99,7 @@ public class RelatorioDTO {
 @NoArgsConstructor
 @AllArgsConstructor
 public static class RelatorioInstituicaoDTO {
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "America/Sao_Paulo")
     private LocalDateTime geradoEm;
     private SecaoCuidadorInstituicaoDTO cuidadores;
     private SecaoIdosoInstituicaoDTO idosos;

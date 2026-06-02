@@ -29,6 +29,7 @@ public class AuthService {
     private final InstituicaoRepository instituicaoRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final IdosoService idosoService;
 
     private final TwoFactorService twoFactorService;
 
@@ -41,7 +42,8 @@ public class AuthService {
             PasswordEncoder passwordEncoder,
             JwtService jwtService,
             TwoFactorService twoFactorService,
-            SenhaService senhaService) {
+            SenhaService senhaService,
+            IdosoService idosoService) {
         this.administradorRepository = administradorRepository;
         this.cuidadorRepository = cuidadorRepository;
         this.instituicaoRepository = instituicaoRepository;
@@ -49,6 +51,7 @@ public class AuthService {
         this.jwtService = jwtService;
         this.twoFactorService = twoFactorService;
         this.senhaService = senhaService;
+        this.idosoService = idosoService;
     }
 
     public Map<String, Object> login(Map<String, String> dados) {
@@ -97,6 +100,17 @@ public class AuthService {
         String email = emailDoUsuario(usuario);
         twoFactorService.validarCodigo(email, codigo);
         return gerarRespostaLogin(usuario);
+    }
+
+    public Map<String, Object> loginIdoso(Map<String, String> dados) {
+        if (dados == null) {
+            throw new InvalidRequestException("Dados de login nao informados");
+        }
+
+        String cpf = primeiroValor(dados, "cpf", "identificador");
+        String senhaAcesso = primeiroValor(dados, "senhaAcesso", "senha", "codigo");
+
+        return gerarRespostaLogin(idosoService.autenticarPorSenhaAcesso(cpf, senhaAcesso));
     }
 
     private String emailDoUsuario(Usuario usuario) {
