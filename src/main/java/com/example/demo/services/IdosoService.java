@@ -2,6 +2,7 @@ package com.example.demo.services;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.List;
 import java.security.SecureRandom;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -177,33 +178,30 @@ public class IdosoService {
         repository.save(idoso);
     }
 
-    public Idoso autenticarPorSenhaAcesso(String cpf, String senhaAcesso) {
-        String cpfLimpo = limparDocumento(cpf);
-        if (cpfLimpo == null || cpfLimpo.length() != 11) {
-            throw new InvalidRequestException("Informe o CPF do idoso");
-        }
-
+    public Idoso autenticarPorSenhaAcesso(String senhaAcesso) {
         if (senhaAcesso == null || senhaAcesso.isBlank()) {
-            throw new InvalidRequestException("Informe a senha de acesso");
+            throw new InvalidRequestException("Senha de acesso é obrigatória.");
         }
 
-        Idoso idoso = repository.findByCpf(cpfLimpo)
-                .orElseThrow(() -> new UnauthorizedException("Credenciais invalidas"));
+        List<Idoso> idosos = repository.findBySenhaAcessoCriptografadaIsNotNull();
 
-        if (idoso.getStatus() != Status.ATIVO) {
-            throw new UnauthorizedException("Usuario inativo");
+        for (Idoso idoso : idosos) {
+            String senhaSalva = idoso.getSenhaAcessoCriptografada();
+            if (senhaSalva == null || senhaSalva.isBlank()) {
+                continue;
+            }
+
+            String senhaDescriptografada = descriptografarSenhaAcesso(senhaSalva);
+            if (senhaAcesso.trim().equals(senhaDescriptografada)) {
+                if (idoso.getStatus() != Status.ATIVO) {
+                    throw new UnauthorizedException("Senha de acesso inválida.");
+                }
+
+                return idoso;
+            }
         }
 
-        if (idoso.getSenhaAcessoCriptografada() == null || idoso.getSenhaAcessoCriptografada().isBlank()) {
-            throw new UnauthorizedException("Senha de acesso ainda nao foi gerada");
-        }
-
-        String senhaSalva = descriptografarSenhaAcesso(idoso.getSenhaAcessoCriptografada());
-        if (!senhaSalva.equals(senhaAcesso.trim())) {
-            throw new UnauthorizedException("Credenciais invalidas");
-        }
-
-        return idoso;
+        throw new UnauthorizedException("Senha de acesso inválida.");
     }
 
     public Map<String, Object> obterSenhaAcesso(Integer idosoId, Integer cuidadorId, String senhaCuidador) {
