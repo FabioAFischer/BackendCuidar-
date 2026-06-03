@@ -24,4 +24,6 @@ public interface IdosoRepository extends JpaRepository<Idoso, Integer> {
 
     List<Idoso> findByInstituicaoId(Integer instituicaoId);
 
+    List<Idoso> findBySenhaAcessoCriptografadaIsNotNull();
+
 }
