@@ -2,6 +2,8 @@ package com.example.demo.dtos;
 
 import java.time.LocalDate;
 
+import com.example.demo.enums.TipoVinculo;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,4 +23,5 @@ public class VinculoDTO {
     private Integer cuidadorId;
     private String nomeIdoso;
     private String nomeCuidador;
+    private TipoVinculo tipoVinculo;
 }

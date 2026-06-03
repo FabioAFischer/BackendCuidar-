@@ -2,8 +2,12 @@ package com.example.demo.entity;
 
 import java.time.LocalDate;
 
+import com.example.demo.enums.TipoVinculo;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
@@ -49,4 +53,9 @@ public class Vinculo {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "cuidador_id", nullable = false, foreignKey = @ForeignKey(name = "fk_vinculo_cuidador"))
     private Cuidador cuidador;
+
+    @NotNull(message = "Tipo de vínculo é obrigatório")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tipo_vinculo", nullable = false, length = 20)
+    private TipoVinculo tipoVinculo;
 }
