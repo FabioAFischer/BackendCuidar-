@@ -22,4 +22,8 @@ public interface VinculoRepository extends JpaRepository<Vinculo, Integer> {
     Optional<Vinculo> findByIdosoIdAndTipoVinculo(Integer idosoId, TipoVinculo tipoVinculo);
 
     boolean existsByIdosoIdAndTipoVinculo(Integer idosoId, TipoVinculo tipoVinculo);
+
+    boolean existsByIdosoId(Integer idosoId);
+
+    Optional<Vinculo> findFirstByIdosoIdAndIdNot(Integer idosoId, Integer id);
 }

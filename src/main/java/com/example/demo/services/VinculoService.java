@@ -63,7 +63,10 @@ public class VinculoService {
             throw new DuplicateResourceException("Já existe um vínculo entre este idoso e este cuidador");
         }
 
-        if (TipoVinculo.EMERGENCIA.equals(dto.getTipoVinculo()) &&
+        boolean primeiroVinculo = !repository.existsByIdosoId(dto.getIdosoId());
+        if (primeiroVinculo) {
+            dto.setTipoVinculo(TipoVinculo.EMERGENCIA);
+        } else if (TipoVinculo.EMERGENCIA.equals(dto.getTipoVinculo()) &&
                 repository.existsByIdosoIdAndTipoVinculo(dto.getIdosoId(), TipoVinculo.EMERGENCIA)) {
             throw new DuplicateResourceException("Este idoso já possui um cuidador de emergência");
         }
@@ -106,9 +109,19 @@ public class VinculoService {
         return ContatoMapper.toDTO(cuidador.getContato());
     }
 
+    @Transactional
     public void deletar(Integer id) {
         Vinculo vinculo = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Vínculo", id.longValue()));
+
+        if (TipoVinculo.EMERGENCIA.equals(vinculo.getTipoVinculo())) {
+            repository.findFirstByIdosoIdAndIdNot(vinculo.getIdoso().getId(), id)
+                    .ifPresent(outro -> {
+                        outro.setTipoVinculo(TipoVinculo.EMERGENCIA);
+                        repository.save(outro);
+                    });
+        }
+
         repository.delete(vinculo);
     }
 }
