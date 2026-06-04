@@ -3,14 +3,18 @@ package com.example.demo.services;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.example.demo.dtos.ContatoDTO;
 import com.example.demo.dtos.VinculoDTO;
 import com.example.demo.entity.Cuidador;
 import com.example.demo.entity.Idoso;
 import com.example.demo.entity.Vinculo;
+import com.example.demo.enums.TipoVinculo;
 import com.example.demo.exceptions.DuplicateResourceException;
 import com.example.demo.exceptions.InvalidRequestException;
 import com.example.demo.exceptions.ResourceNotFoundException;
+import com.example.demo.mappers.ContatoMapper;
 import com.example.demo.mappers.VinculoMapper;
 import com.example.demo.repository.CuidadorRepository;
 import com.example.demo.repository.IdosoRepository;
@@ -59,6 +63,14 @@ public class VinculoService {
             throw new DuplicateResourceException("Já existe um vínculo entre este idoso e este cuidador");
         }
 
+        boolean primeiroVinculo = !repository.existsByIdosoId(dto.getIdosoId());
+        if (primeiroVinculo) {
+            dto.setTipoVinculo(TipoVinculo.EMERGENCIA);
+        } else if (TipoVinculo.EMERGENCIA.equals(dto.getTipoVinculo()) &&
+                repository.existsByIdosoIdAndTipoVinculo(dto.getIdosoId(), TipoVinculo.EMERGENCIA)) {
+            throw new DuplicateResourceException("Este idoso já possui um cuidador de emergência");
+        }
+
         Idoso idoso = idosoRepository.findById(dto.getIdosoId())
                 .orElseThrow(() -> new ResourceNotFoundException("Idoso", dto.getIdosoId().longValue()));
 
@@ -69,9 +81,47 @@ public class VinculoService {
         return VinculoMapper.toDTO(repository.save(vinculo));
     }
 
+    @Transactional
+    public VinculoDTO definirCuidadorEmergencia(Integer vinculoId) {
+        Vinculo vinculo = repository.findById(vinculoId)
+                .orElseThrow(() -> new ResourceNotFoundException("Vínculo", vinculoId.longValue()));
+
+        repository.findByIdosoIdAndTipoVinculo(vinculo.getIdoso().getId(), TipoVinculo.EMERGENCIA)
+                .ifPresent(atual -> {
+                    atual.setTipoVinculo(TipoVinculo.PADRAO);
+                    repository.save(atual);
+                });
+
+        vinculo.setTipoVinculo(TipoVinculo.EMERGENCIA);
+        return VinculoMapper.toDTO(repository.save(vinculo));
+    }
+
+    @Transactional(readOnly = true)
+    public ContatoDTO buscarContatoDeEmergencia(Integer idosoId) {
+        Vinculo vinculo = repository.findByIdosoIdAndTipoVinculo(idosoId, TipoVinculo.EMERGENCIA)
+                .orElseThrow(() -> new ResourceNotFoundException("Cuidador de emergência para o idoso", idosoId.longValue()));
+
+        Cuidador cuidador = vinculo.getCuidador();
+        if (cuidador.getContato() == null) {
+            throw new ResourceNotFoundException("Contato do cuidador de emergência", (long) cuidador.getId());
+        }
+
+        return ContatoMapper.toDTO(cuidador.getContato());
+    }
+
+    @Transactional
     public void deletar(Integer id) {
         Vinculo vinculo = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Vínculo", id.longValue()));
+
+        if (TipoVinculo.EMERGENCIA.equals(vinculo.getTipoVinculo())) {
+            repository.findFirstByIdosoIdAndIdNot(vinculo.getIdoso().getId(), id)
+                    .ifPresent(outro -> {
+                        outro.setTipoVinculo(TipoVinculo.EMERGENCIA);
+                        repository.save(outro);
+                    });
+        }
+
         repository.delete(vinculo);
     }
 }

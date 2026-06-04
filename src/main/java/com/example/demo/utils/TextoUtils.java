@@ -44,6 +44,10 @@ public final class TextoUtils {
         return resultado.toString();
     }
 
+    public static String textoLivre(String valor) {
+        return valor;
+    }
+
     public static String limparDocumento(String valor) {
         if (valor == null || valor.isBlank()) {
             return null;
