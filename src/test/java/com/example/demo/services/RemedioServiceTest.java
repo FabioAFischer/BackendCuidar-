@@ -74,7 +74,7 @@ class RemedioServiceTest {
 
     @Test
     void deveReativarRemedioInativoAoCriarComMesmoNome() {
-        RemedioDTO dto = remedioDTO("Dipirona", "Nova observacao", null);
+        RemedioDTO dto = remedioDTO("Dipirona", "Nova observação", null);
         Remedio existente = remedio(1, "DIPIRONA", "ANTIGA OBSERVACAO", Status.INATIVO);
 
         when(remedioRepository.findByNomeAndCuidadorId("DIPIRONA", CUIDADOR_ID)).thenReturn(Optional.of(existente));
@@ -83,7 +83,7 @@ class RemedioServiceTest {
         RemedioDTO resultado = service.criar(dto, CUIDADOR_ID);
 
         assertEquals(Status.ATIVO, resultado.getStatus());
-        assertEquals("Nova Observacao", resultado.getObservacao());
+        assertEquals("Nova observação", resultado.getObservacao());
         verify(remedioRepository).save(existente);
     }
 
