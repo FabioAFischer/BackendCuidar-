@@ -10,10 +10,12 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.demo.dtos.ContatoDTO;
 import com.example.demo.dtos.VinculoDTO;
 import com.example.demo.services.VinculoService;
 
@@ -63,6 +65,18 @@ public class VinculoController {
     @PostMapping("/cadastrar")
     public ResponseEntity<VinculoDTO> criar(@RequestBody VinculoDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.criar(dto));
+    }
+
+    @Operation(summary = "Definir cuidador de emergência", description = "Define um cuidador vinculado como contato de emergência do idoso, removendo o anterior se houver")
+    @PutMapping("/{id}/emergencia")
+    public ResponseEntity<VinculoDTO> definirCuidadorEmergencia(@PathVariable Integer id) {
+        return ResponseEntity.ok(service.definirCuidadorEmergencia(id));
+    }
+
+    @Operation(summary = "Buscar contato de emergência", description = "Retorna o contato do cuidador de emergência de um idoso")
+    @GetMapping("/idoso/{idosoId}/contato-emergencia")
+    public ResponseEntity<ContatoDTO> buscarContatoDeEmergencia(@PathVariable Integer idosoId) {
+        return ResponseEntity.ok(service.buscarContatoDeEmergencia(idosoId));
     }
 
     @Operation(summary = "Deletar vínculo", description = "Remove o vínculo entre cuidador e idoso")
