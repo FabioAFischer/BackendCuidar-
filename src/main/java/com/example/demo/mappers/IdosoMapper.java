@@ -8,6 +8,7 @@ import com.example.demo.entity.Idoso;
 import com.example.demo.entity.Instituicao;
 import com.example.demo.enums.Perfil;
 import com.example.demo.enums.Status;
+import com.example.demo.utils.TextoUtils;
 
 public class IdosoMapper {
 
@@ -18,9 +19,11 @@ public class IdosoMapper {
 
         IdosoDTO dto = new IdosoDTO();
         dto.setId(idoso.getId());
-        dto.setNome(idoso.getNome());
+        dto.setNome(TextoUtils.paraExibicao(idoso.getNome()));
         dto.setCpf(idoso.getCpf());
-        dto.setObservacoes(idoso.getObservacoes());
+        dto.setObservacoes(TextoUtils.textoLivre(idoso.getObservacoes()));
+        dto.setSenhaAcessoGerada(idoso.getSenhaAcessoCriptografada() != null
+                && !idoso.getSenhaAcessoCriptografada().isBlank());
 
         if (idoso.getInstituicao() != null) {
             dto.setInstituicaoId(idoso.getInstituicao().getId());
@@ -44,9 +47,9 @@ public class IdosoMapper {
 
         Idoso idoso = new Idoso();
        
-        idoso.setNome(dto.getNome());
-        idoso.setCpf(dto.getCpf());
-        idoso.setObservacoes(dto.getObservacoes());
+        idoso.setNome(TextoUtils.paraBanco(dto.getNome()));
+        idoso.setCpf(limparDocumento(dto.getCpf()));
+        idoso.setObservacoes(TextoUtils.textoLivre(dto.getObservacoes()));
 
         if (dto.getInstituicaoId() != null) {
             Instituicao instituicao = new Instituicao();
@@ -84,9 +87,9 @@ public class IdosoMapper {
     public static void atualizarIdoso(Idoso idoso, IdosoDTO dto, Instituicao instituicao) {
         if (dto == null || idoso == null) return;
 
-        idoso.setNome(dto.getNome());
-        idoso.setCpf(dto.getCpf());
-        idoso.setObservacoes(dto.getObservacoes());
+        idoso.setNome(TextoUtils.paraBanco(dto.getNome()));
+        idoso.setCpf(limparDocumento(dto.getCpf()));
+        idoso.setObservacoes(TextoUtils.textoLivre(dto.getObservacoes()));
 
         if (instituicao != null) {
             idoso.setInstituicao(instituicao);
@@ -101,5 +104,13 @@ public class IdosoMapper {
             contato.setId(dto.getContatoId());
             idoso.setContato(contato);
         }
+    }
+
+    private static String limparDocumento(String valor) {
+        if (valor == null || valor.isBlank()) {
+            return null;
+        }
+
+        return valor.replaceAll("\\D", "");
     }
 }

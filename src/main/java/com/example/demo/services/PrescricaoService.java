@@ -1,15 +1,18 @@
 package com.example.demo.services;
 
+import java.time.LocalDateTime;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.example.demo.dtos.PrescricaoDTO;
 import com.example.demo.entity.Idoso;
 import com.example.demo.entity.Prescricao;
 import com.example.demo.entity.Remedio;
 import com.example.demo.enums.Status;
+import com.example.demo.exceptions.InvalidRequestException;
+import com.example.demo.exceptions.ResourceNotFoundException;
 import com.example.demo.mappers.PrescricaoMapper;
 import com.example.demo.repository.IdosoRepository;
 import com.example.demo.repository.PrescricaoRepository;
@@ -22,87 +25,86 @@ public class PrescricaoService {
     private final RemedioRepository remedioRepository;
     private final IdosoRepository idosoRepository;
 
-    public PrescricaoService(PrescricaoRepository repository, RemedioRepository remedioRepository, IdosoRepository idosoRepository) {
+    public PrescricaoService(
+            PrescricaoRepository repository,
+            RemedioRepository remedioRepository,
+            IdosoRepository idosoRepository) {
         this.repository = repository;
         this.remedioRepository = remedioRepository;
         this.idosoRepository = idosoRepository;
     }
 
-    @Transactional(readOnly = true)
     public Page<PrescricaoDTO> listarAtivas(Pageable pageable) {
-        return repository.findByStatus(Status.ATIVO, pageable)
-                .map(PrescricaoMapper::toDTO);
+        return repository.findAtivasNaoVencidas(Status.ATIVO, LocalDateTime.now(), pageable).map(PrescricaoMapper::toDTO);
     }
 
-    @Transactional(readOnly = true)
     public Page<PrescricaoDTO> listarPorIdoso(Integer idosoId, Pageable pageable) {
-        return repository.findByIdoso_Id(idosoId, pageable)
-                .map(PrescricaoMapper::toDTO);
+        return repository.findAtivasNaoVencidasPorIdoso(idosoId, Status.ATIVO, LocalDateTime.now(), pageable).map(PrescricaoMapper::toDTO);
     }
 
-    @Transactional(readOnly = true)
-    public Page<PrescricaoDTO> listarPorRemedio(Integer remedioId, Pageable pageable) {
-        return repository.findByRemedio_Id(remedioId, pageable)
-                .map(PrescricaoMapper::toDTO);
-    }
-
-    @Transactional(readOnly = true)
-    public PrescricaoDTO buscarPorId(Integer id) {
+    public PrescricaoDTO buscarPorId(int id) {
         Prescricao prescricao = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Prescricao nao encontrada"));
-
+                .orElseThrow(() -> new ResourceNotFoundException("Prescricao", (long) id));
         return PrescricaoMapper.toDTO(prescricao);
     }
 
-    @Transactional
     public PrescricaoDTO criar(PrescricaoDTO dto) {
+        validar(dto);
+
         Remedio remedio = buscarRemedio(dto.getRemedioId());
         Idoso idoso = buscarIdoso(dto.getIdosoId());
 
-        Prescricao prescricao = PrescricaoMapper.toEntity(dto, remedio, idoso);
-        Prescricao salva = repository.save(prescricao);
-
-        return PrescricaoMapper.toDTO(salva);
+        return PrescricaoMapper.toDTO(repository.save(PrescricaoMapper.toEntity(dto, remedio, idoso)));
     }
 
-    @Transactional
-    public PrescricaoDTO atualizar(Integer id, PrescricaoDTO dto) {
-        Prescricao prescricao = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Prescricao nao encontrada"));
+    public PrescricaoDTO atualizar(int id, PrescricaoDTO dto) {
+        validar(dto);
 
+        Prescricao prescricao = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Prescricao", (long) id));
         Remedio remedio = buscarRemedio(dto.getRemedioId());
         Idoso idoso = buscarIdoso(dto.getIdosoId());
 
         PrescricaoMapper.updateEntity(prescricao, dto, remedio, idoso);
-
-        Prescricao atualizado = repository.save(prescricao);
-        return PrescricaoMapper.toDTO(atualizado);
+        return PrescricaoMapper.toDTO(repository.save(prescricao));
     }
 
-    @Transactional
-    public void inativar(Integer id) {
+    public void inativar(int id) {
         Prescricao prescricao = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Prescricao nao encontrada"));
-
+                .orElseThrow(() -> new ResourceNotFoundException("Prescricao", (long) id));
         prescricao.setStatus(Status.INATIVO);
         repository.save(prescricao);
     }
 
-    private Remedio buscarRemedio(Integer remedioId) {
-        if (remedioId == null) {
-            throw new RuntimeException("Remedio e obrigatorio");
-        }
-
-        return remedioRepository.findById(remedioId)
-                .orElseThrow(() -> new RuntimeException("Remedio nao encontrado"));
+    private Remedio buscarRemedio(Integer id) {
+        return remedioRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Remedio", id.longValue()));
     }
 
-    private Idoso buscarIdoso(Integer idosoId) {
-        if (idosoId == null) {
-            throw new RuntimeException("Idoso e obrigatorio");
+    private Idoso buscarIdoso(Integer id) {
+        return idosoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Idoso", id.longValue()));
+    }
+
+    private void validar(PrescricaoDTO dto) {
+        if (dto == null) {
+            throw new InvalidRequestException("Dados da prescricao nao informados");
         }
 
-        return idosoRepository.findById(idosoId)
-                .orElseThrow(() -> new RuntimeException("Idoso nao encontrado"));
+        if (dto.getRemedioId() == null) {
+            throw new InvalidRequestException("Remedio e obrigatorio");
+        }
+
+        if (dto.getIdosoId() == null) {
+            throw new InvalidRequestException("Idoso e obrigatorio");
+        }
+
+        if (dto.getDosagem() == null || dto.getDosagem().isBlank()) {
+            throw new InvalidRequestException("Dosagem e obrigatoria");
+        }
+
+        if (dto.getIntervalo() == null || dto.getIntervalo() <= 0) {
+            throw new InvalidRequestException("Intervalo deve ser maior que zero");
+        }
     }
 }

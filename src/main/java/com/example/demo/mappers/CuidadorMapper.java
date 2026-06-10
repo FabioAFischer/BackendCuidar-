@@ -11,6 +11,7 @@ import com.example.demo.entity.Cuidador;
 import com.example.demo.entity.Instituicao;
 import com.example.demo.enums.Perfil;
 import com.example.demo.enums.Status;
+import com.example.demo.utils.TextoUtils;
 
 public class CuidadorMapper {
 
@@ -24,10 +25,10 @@ public class CuidadorMapper {
 
         CuidadorDTO dto = new CuidadorDTO();
         dto.setId(cuidador.getId());
-        dto.setNome(cuidador.getNome());
+        dto.setNome(TextoUtils.paraExibicao(cuidador.getNome()));
         dto.setCpf(cuidador.getCpf());
-        dto.setLogin(cuidador.getLogin());
-        dto.setSenha(cuidador.getSenha());
+        dto.setEmail(cuidador.getEmail());
+        dto.setStatus(cuidador.getStatus());
 
         if (cuidador.getInstituicao() != null) {
             dto.setInstituicaoId(cuidador.getInstituicao().getId());
@@ -52,10 +53,10 @@ public class CuidadorMapper {
         }
 
         Cuidador cuidador = new Cuidador();
-        
-        cuidador.setNome(dto.getNome());
-        cuidador.setCpf(dto.getCpf());
-        cuidador.setLogin(dto.getLogin());
+
+        cuidador.setNome(TextoUtils.paraBanco(dto.getNome()));
+        cuidador.setCpf(limparDocumento(dto.getCpf()));
+        cuidador.setEmail(dto.getEmail());
         cuidador.setSenha(dto.getSenha());
 
         if (dto.getInstituicaoId() != null) {
@@ -66,10 +67,9 @@ public class CuidadorMapper {
 
         if (dto.getContato() != null) {
             Contato contato = new Contato();
-            contato.setId(dto.getContato().getId());
-            contato.setDdd(dto.getContato().getDdd());
-            contato.setTelefone(dto.getContato().getTelefone());
-
+            // setId removido — o id é gerado pelo banco
+            contato.setDdd(TextoUtils.limparNumero(dto.getContato().getDdd()));
+            contato.setTelefone(TextoUtils.limparNumero(dto.getContato().getTelefone()));
             contato.setCuidador(cuidador);
             cuidador.setContato(contato);
         }
@@ -93,5 +93,13 @@ public class CuidadorMapper {
         }
 
         return lista;
+    }
+
+    private static String limparDocumento(String valor) {
+        if (valor == null || valor.isBlank()) {
+            return null;
+        }
+
+        return valor.replaceAll("\\D", "");
     }
 }

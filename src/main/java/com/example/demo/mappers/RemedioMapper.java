@@ -3,6 +3,7 @@ package com.example.demo.mappers;
 import com.example.demo.dtos.RemedioDTO;
 import com.example.demo.entity.Remedio;
 import com.example.demo.enums.Status;
+import com.example.demo.utils.TextoUtils;
 
 public class RemedioMapper {
 
@@ -12,8 +13,8 @@ public class RemedioMapper {
 
         RemedioDTO dto = new RemedioDTO();
         dto.setId(remedio.getId());
-        dto.setNome(remedio.getNome());
-        dto.setObservacao(remedio.getObservacao());
+        dto.setNome(TextoUtils.paraExibicao(remedio.getNome()));
+        dto.setObservacao(TextoUtils.textoLivre(remedio.getObservacao()));
         dto.setStatus(remedio.getStatus());
 
         return dto;
@@ -25,8 +26,8 @@ public class RemedioMapper {
 
         Remedio remedio = new Remedio();
 
-        remedio.setNome(dto.getNome());
-        remedio.setObservacao(dto.getObservacao());
+        remedio.setNome(TextoUtils.paraBanco(dto.getNome()));
+        remedio.setObservacao(TextoUtils.textoLivre(dto.getObservacao()));
 
         if (dto.getStatus() != null) {
             remedio.setStatus(dto.getStatus());
@@ -41,8 +42,8 @@ public class RemedioMapper {
         if (dto == null)
             return;
 
-        remedio.setNome(dto.getNome());
-        remedio.setObservacao(dto.getObservacao());
+        remedio.setNome(TextoUtils.paraBanco(dto.getNome()));
+        remedio.setObservacao(TextoUtils.textoLivre(dto.getObservacao()));
 
         if (dto.getStatus() != null) {
             remedio.setStatus(dto.getStatus());

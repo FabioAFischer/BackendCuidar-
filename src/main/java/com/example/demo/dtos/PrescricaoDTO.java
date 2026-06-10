@@ -16,15 +16,15 @@ import lombok.ToString;
 @AllArgsConstructor
 @ToString
 public class PrescricaoDTO {
-
     private Integer id;
     private Integer remedioId;
-    private String remedioNome;
     private Integer idosoId;
+    private String remedioNome;
     private String idosoNome;
-    private LocalDateTime data_criacao;
+    private LocalDateTime dataCriacao;
+    private LocalDateTime dataFim;
     private Status status;
-    private LocalDateTime data_fim;
+    private Boolean necessarioJejum;
     private String instrucao;
     private Double intervalo;
     private String dosagem;

@@ -17,7 +17,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -40,20 +39,24 @@ public class Alertas {
     
     @NotNull(message = "idoso obrigatório")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_idoso", nullable = false, foreignKey = @ForeignKey(name = "fk_idoso_prescricao"))
+    @JoinColumn(name = "id_idoso", nullable = false, foreignKey = @ForeignKey(name = "fk_idoso_alerta"))
     private Idoso idoso;
 
-    @NotBlank(message = "tipo do alerta é obrigatório")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_prescricao", foreignKey = @ForeignKey(name = "fk_prescricao_alerta"))
+    private Prescricao prescricao;
+
+    @NotNull(message = "tipo do alerta obrigatorio")
     @Enumerated(EnumType.STRING)
     @Column(name = "tipoAlerta", nullable = false, length = 20)
     private TipoAlerta tipoAlerta;
 
-    @NotBlank(message = "Status do alerta é obrigatório")
+    @NotNull(message = "Status do alerta é obrigatório")
     @Enumerated(EnumType.STRING)
     @Column(name = "statusAlerta", nullable = false, length = 20)
     private StatusAlertas statusAlertas;
 
-    @NotBlank(message = "Data de criação é obrigatória")
+    @NotNull(message = "Data de criação é obrigatória")
     @Column(name = "data_criacao", nullable = false)
     private LocalDateTime data_criacao;
 

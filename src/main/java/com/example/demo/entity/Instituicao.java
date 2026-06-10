@@ -29,7 +29,17 @@ public class Instituicao extends Usuario {
     @Column(length = 14, nullable = false, unique = true)
     private String cnpj;
 
-    @NotBlank(message = "Bairro deve ser preenchido")
+    @NotBlank
+    @Column(length = 200, nullable = false)
+    private String email;
+
+    @NotBlank
+    @Column(length = 300, nullable = false)
+    private String senha;
+
+    @Column(length = 200)
+    private String rua;
+
     @Column(length = 200)
     private String bairro;
 

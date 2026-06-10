@@ -19,4 +19,6 @@ public interface InstituicaoRepository extends JpaRepository<Instituicao, Intege
 
     Page<Instituicao> findByStatus(Status status, Pageable pageable);
 
+    Optional<Instituicao> findByEmail(String email);
+
 }

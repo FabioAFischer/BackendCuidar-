@@ -7,75 +7,60 @@ import com.example.demo.entity.Idoso;
 import com.example.demo.entity.Prescricao;
 import com.example.demo.entity.Remedio;
 import com.example.demo.enums.Status;
+import com.example.demo.utils.TextoUtils;
 
 public class PrescricaoMapper {
 
-    private PrescricaoMapper() {}
-
     public static PrescricaoDTO toDTO(Prescricao prescricao) {
-        if (prescricao == null) return null;
+        if (prescricao == null) {
+            return null;
+        }
 
         PrescricaoDTO dto = new PrescricaoDTO();
         dto.setId(prescricao.getId());
-
-        if (prescricao.getRemedio() != null) {
-            dto.setRemedioId(prescricao.getRemedio().getId());
-            dto.setRemedioNome(prescricao.getRemedio().getNome());
-        }
-
-        if (prescricao.getIdoso() != null) {
-            dto.setIdosoId(prescricao.getIdoso().getId());
-            dto.setIdosoNome(prescricao.getIdoso().getNome());
-        }
-
-        dto.setData_criacao(prescricao.getData_criacao());
+        dto.setRemedioId(prescricao.getRemedio() != null ? prescricao.getRemedio().getId() : null);
+        dto.setIdosoId(prescricao.getIdoso() != null ? prescricao.getIdoso().getId() : null);
+        dto.setRemedioNome(prescricao.getRemedio() != null ? TextoUtils.paraExibicao(prescricao.getRemedio().getNome()) : null);
+        dto.setIdosoNome(prescricao.getIdoso() != null ? TextoUtils.paraExibicao(prescricao.getIdoso().getNome()) : null);
+        dto.setDataCriacao(prescricao.getData_criacao());
+        dto.setDataFim(prescricao.getData_fim());
         dto.setStatus(prescricao.getStatus());
-        dto.setData_fim(prescricao.getData_fim());
-        dto.setInstrucao(prescricao.getInstrucao());
+        dto.setNecessarioJejum(prescricao.getNecessario_jejum());
+        dto.setInstrucao(TextoUtils.textoLivre(prescricao.getInstrucao()));
         dto.setIntervalo(prescricao.getIntervalo());
-        dto.setDosagem(prescricao.getDosagem());
+        dto.setDosagem(TextoUtils.paraExibicao(prescricao.getDosagem()));
 
         return dto;
     }
 
     public static Prescricao toEntity(PrescricaoDTO dto, Remedio remedio, Idoso idoso) {
-        if (dto == null) return null;
+        if (dto == null) {
+            return null;
+        }
 
         Prescricao prescricao = new Prescricao();
+        prescricao.setData_criacao(LocalDateTime.now());
+        prescricao.setStatus(dto.getStatus() != null ? dto.getStatus() : Status.ATIVO);
         updateEntity(prescricao, dto, remedio, idoso);
-
-        if (dto.getData_criacao() != null) {
-            prescricao.setData_criacao(dto.getData_criacao());
-        } else {
-            prescricao.setData_criacao(LocalDateTime.now());
-        }
-
-        if (dto.getStatus() != null) {
-            prescricao.setStatus(dto.getStatus());
-        } else {
-            prescricao.setStatus(Status.ATIVO);
-        }
 
         return prescricao;
     }
 
     public static void updateEntity(Prescricao prescricao, PrescricaoDTO dto, Remedio remedio, Idoso idoso) {
-        if (dto == null || prescricao == null) return;
+        if (prescricao == null || dto == null) {
+            return;
+        }
 
         prescricao.setRemedio(remedio);
         prescricao.setIdoso(idoso);
-
-        if (dto.getData_criacao() != null) {
-            prescricao.setData_criacao(dto.getData_criacao());
-        }
+        prescricao.setData_fim(dto.getDataFim());
+        prescricao.setNecessario_jejum(Boolean.TRUE.equals(dto.getNecessarioJejum()));
+        prescricao.setInstrucao(TextoUtils.textoLivre(dto.getInstrucao()));
+        prescricao.setIntervalo(dto.getIntervalo());
+        prescricao.setDosagem(TextoUtils.paraBanco(dto.getDosagem()));
 
         if (dto.getStatus() != null) {
             prescricao.setStatus(dto.getStatus());
         }
-
-        prescricao.setData_fim(dto.getData_fim());
-        prescricao.setInstrucao(dto.getInstrucao());
-        prescricao.setIntervalo(dto.getIntervalo());
-        prescricao.setDosagem(dto.getDosagem());
     }
 }

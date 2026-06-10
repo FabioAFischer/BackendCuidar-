@@ -2,11 +2,14 @@ package com.example.demo.services;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.dtos.AdministradorDTO;
 import com.example.demo.entity.Administrador;
 import com.example.demo.enums.Status;
+import com.example.demo.exceptions.DuplicateResourceException;
+import com.example.demo.exceptions.ResourceNotFoundException;
 import com.example.demo.mappers.AdministradorMapper;
 import com.example.demo.repository.AdministradorRepository;
 
@@ -14,9 +17,16 @@ import com.example.demo.repository.AdministradorRepository;
 public class AdministradorService {
 
     private final AdministradorRepository repository;
+    private final PasswordEncoder passwordEncoder;
+    private final SenhaService senhaService;
 
-    public AdministradorService(AdministradorRepository repository) {
+    public AdministradorService(
+            AdministradorRepository repository,
+            PasswordEncoder passwordEncoder,
+            SenhaService senhaService) {
         this.repository = repository;
+        this.passwordEncoder = passwordEncoder;
+        this.senhaService = senhaService;
     }
 
     public Page<AdministradorDTO> listarAtivos(Pageable pageable) {
@@ -26,17 +36,20 @@ public class AdministradorService {
 
     public AdministradorDTO buscarPorId(Integer id) {
         Administrador administrador = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Administrador não encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Administrador", id.longValue()));
 
         return AdministradorMapper.toDTO(administrador);
     }
 
     public AdministradorDTO criar(AdministradorDTO dto) {
-        if (repository.existsByEmail(dto.getEmail())) {
-            throw new RuntimeException("Já existe um administrador com esse email");
+        String cpfLimpo = limparDocumento(dto.getCpf());
+        if (repository.existsByCpf(cpfLimpo)) {
+            throw new DuplicateResourceException("Já existe um administrador com esse CPF");
         }
 
         Administrador administrador = AdministradorMapper.toEntity(dto);
+        senhaService.validar(dto.getSenha());
+        administrador.setSenha(passwordEncoder.encode(dto.getSenha()));
         Administrador salvo = repository.save(administrador);
 
         return AdministradorMapper.toDTO(salvo);
@@ -44,14 +57,19 @@ public class AdministradorService {
 
     public AdministradorDTO atualizar(Integer id, AdministradorDTO dto) {
         Administrador administrador = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Administrador não encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Administrador", id.longValue()));
 
-        if (!administrador.getEmail().equals(dto.getEmail())
-                && repository.existsByEmail(dto.getEmail())) {
-            throw new RuntimeException("Email já está em uso");
+        String cpfLimpo = limparDocumento(dto.getCpf());
+        if (!administrador.getCpf().equals(cpfLimpo)
+                && repository.existsByCpf(cpfLimpo)) {
+            throw new DuplicateResourceException("CPF já está em uso");
         }
 
         AdministradorMapper.updateEntity(administrador, dto);
+        if (dto.getSenha() != null && !dto.getSenha().isBlank()) {
+            senhaService.validar(dto.getSenha());
+            administrador.setSenha(passwordEncoder.encode(dto.getSenha()));
+        }
 
         Administrador atualizado = repository.save(administrador);
         return AdministradorMapper.toDTO(atualizado);
@@ -59,10 +77,17 @@ public class AdministradorService {
 
     public void inativar(Integer id) {
         Administrador administrador = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Administrador não encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Administrador", id.longValue()));
 
         AdministradorMapper.inativarEntity(administrador);
-
         repository.save(administrador);
+    }
+
+    private String limparDocumento(String valor) {
+        if (valor == null || valor.isBlank()) {
+            return null;
+        }
+
+        return valor.replaceAll("\\D", "");
     }
 }
