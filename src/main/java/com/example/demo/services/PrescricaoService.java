@@ -1,19 +1,27 @@
 package com.example.demo.services;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.demo.dtos.PrescricaoDTO;
+import com.example.demo.entity.Alertas;
 import com.example.demo.entity.Idoso;
 import com.example.demo.entity.Prescricao;
 import com.example.demo.entity.Remedio;
 import com.example.demo.enums.Status;
+import com.example.demo.enums.StatusAlertas;
+import com.example.demo.enums.TipoAlerta;
 import com.example.demo.exceptions.InvalidRequestException;
 import com.example.demo.exceptions.ResourceNotFoundException;
 import com.example.demo.mappers.PrescricaoMapper;
+import com.example.demo.repository.AlertasRepository;
 import com.example.demo.repository.IdosoRepository;
 import com.example.demo.repository.PrescricaoRepository;
 import com.example.demo.repository.RemedioRepository;
@@ -21,17 +29,22 @@ import com.example.demo.repository.RemedioRepository;
 @Service
 public class PrescricaoService {
 
+    private static final int MAX_ALERTAS_POR_PRESCRICAO = 10_000;
+
     private final PrescricaoRepository repository;
     private final RemedioRepository remedioRepository;
     private final IdosoRepository idosoRepository;
+    private final AlertasRepository alertasRepository;
 
     public PrescricaoService(
             PrescricaoRepository repository,
             RemedioRepository remedioRepository,
-            IdosoRepository idosoRepository) {
+            IdosoRepository idosoRepository,
+            AlertasRepository alertasRepository) {
         this.repository = repository;
         this.remedioRepository = remedioRepository;
         this.idosoRepository = idosoRepository;
+        this.alertasRepository = alertasRepository;
     }
 
     public Page<PrescricaoDTO> listarAtivas(Pageable pageable) {
@@ -48,15 +61,20 @@ public class PrescricaoService {
         return PrescricaoMapper.toDTO(prescricao);
     }
 
+    @Transactional
     public PrescricaoDTO criar(PrescricaoDTO dto) {
         validar(dto);
 
         Remedio remedio = buscarRemedio(dto.getRemedioId());
         Idoso idoso = buscarIdoso(dto.getIdosoId());
+        Prescricao prescricao = repository.save(PrescricaoMapper.toEntity(dto, remedio, idoso));
 
-        return PrescricaoMapper.toDTO(repository.save(PrescricaoMapper.toEntity(dto, remedio, idoso)));
+        alertasRepository.saveAll(criarAlertasDaPrescricao(prescricao));
+
+        return PrescricaoMapper.toDTO(prescricao);
     }
 
+    @Transactional
     public PrescricaoDTO atualizar(int id, PrescricaoDTO dto) {
         validar(dto);
 
@@ -65,13 +83,23 @@ public class PrescricaoService {
         Remedio remedio = buscarRemedio(dto.getRemedioId());
         Idoso idoso = buscarIdoso(dto.getIdosoId());
 
+        cancelarAlertasAgendados(prescricao);
         PrescricaoMapper.updateEntity(prescricao, dto, remedio, idoso);
-        return PrescricaoMapper.toDTO(repository.save(prescricao));
+        Prescricao prescricaoAtualizada = repository.save(prescricao);
+
+        if (prescricaoAtualizada.getStatus() == Status.ATIVO) {
+            alertasRepository.saveAll(criarAlertasDaPrescricao(prescricaoAtualizada, LocalDateTime.now()));
+        }
+
+        return PrescricaoMapper.toDTO(prescricaoAtualizada);
     }
 
+    @Transactional
     public void inativar(int id) {
         Prescricao prescricao = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Prescricao", (long) id));
+
+        cancelarAlertasAgendados(prescricao);
         prescricao.setStatus(Status.INATIVO);
         repository.save(prescricao);
     }
@@ -106,5 +134,74 @@ public class PrescricaoService {
         if (dto.getIntervalo() == null || dto.getIntervalo() <= 0) {
             throw new InvalidRequestException("Intervalo deve ser maior que zero");
         }
+
+        if (dto.getDataFim() == null) {
+            throw new InvalidRequestException("Data final e obrigatoria");
+        }
+
+        if (!dto.getDataFim().isAfter(LocalDateTime.now())) {
+            throw new InvalidRequestException("Data final deve ser futura");
+        }
+    }
+
+    private List<Alertas> criarAlertasDaPrescricao(Prescricao prescricao) {
+        return criarAlertasDaPrescricao(prescricao, prescricao.getData_criacao());
+    }
+
+    private List<Alertas> criarAlertasDaPrescricao(Prescricao prescricao, LocalDateTime inicioAgenda) {
+        long intervaloEmMillis = Math.round(prescricao.getIntervalo() * 60 * 60 * 1000);
+        if (intervaloEmMillis <= 0) {
+            throw new InvalidRequestException("Intervalo informado e muito pequeno");
+        }
+
+        Duration intervalo = Duration.ofMillis(intervaloEmMillis);
+        List<Alertas> alertas = new ArrayList<>();
+        LocalDateTime dataAgendada = prescricao.getData_criacao();
+        int intervalosIgnorados = 0;
+
+        while (dataAgendada.isBefore(inicioAgenda)) {
+            if (intervalosIgnorados >= MAX_ALERTAS_POR_PRESCRICAO) {
+                throw new InvalidRequestException("Prescricao excede o limite de alertas permitidos");
+            }
+
+            dataAgendada = dataAgendada.plus(intervalo);
+            intervalosIgnorados++;
+        }
+
+        while (!dataAgendada.isAfter(prescricao.getData_fim())) {
+            if (alertas.size() >= MAX_ALERTAS_POR_PRESCRICAO) {
+                throw new InvalidRequestException("Prescricao excede o limite de alertas permitidos");
+            }
+
+            Alertas alerta = new Alertas();
+            alerta.setIdoso(prescricao.getIdoso());
+            alerta.setPrescricao(prescricao);
+            alerta.setTipoAlerta(TipoAlerta.REMEDIO);
+            alerta.setStatusAlertas(StatusAlertas.AGENDADO);
+            alerta.setData_criacao(prescricao.getData_criacao());
+            alerta.setData_agendade(dataAgendada);
+            alertas.add(alerta);
+
+            dataAgendada = dataAgendada.plus(intervalo);
+        }
+
+        return alertas;
+    }
+
+    private void cancelarAlertasAgendados(Prescricao prescricao) {
+        List<Alertas> alertasAgendados = alertasRepository.findByPrescricaoIdAndStatusAlertas(
+                prescricao.getId(),
+                StatusAlertas.AGENDADO);
+
+        if (alertasAgendados.isEmpty()) {
+            return;
+        }
+
+        LocalDateTime agora = LocalDateTime.now();
+        alertasAgendados.forEach(alerta -> {
+            alerta.setStatusAlertas(StatusAlertas.CANCELADO);
+            alerta.setData_atualizacao(agora);
+        });
+        alertasRepository.saveAll(alertasAgendados);
     }
 }
