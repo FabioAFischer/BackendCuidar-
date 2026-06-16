@@ -83,7 +83,7 @@ class RemedioServiceTest {
         RemedioDTO resultado = service.criar(dto, CUIDADOR_ID);
 
         assertEquals(Status.ATIVO, resultado.getStatus());
-        assertEquals("Nova observação", resultado.getObservacao());
+        assertEquals("Nova Observação", resultado.getObservacao());
         verify(remedioRepository).save(existente);
     }
 
