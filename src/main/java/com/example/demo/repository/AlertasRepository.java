@@ -1,5 +1,7 @@
 package com.example.demo.repository;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -42,4 +44,6 @@ public interface AlertasRepository extends JpaRepository<Alertas, Integer> {
             Pageable pageable);
 
     Page<Alertas> findByIdosoIdAndStatusAlertasNot(Integer idosoId, StatusAlertas status, Pageable pageable);
+
+    List<Alertas> findByPrescricaoIdAndStatusAlertas(Integer prescricaoId, StatusAlertas status);
 }

@@ -8,14 +8,16 @@ class TextoUtilsTest {
 
     @Test
     void deveNormalizarTextoParaBanco() {
-        assertEquals("JOSE DA SILVA", TextoUtils.paraBanco("  Jos\u00e9 da Silva  "));
-        assertEquals("REMEDIO DORFLEX", TextoUtils.paraBanco("Rem\u00e9dio D\u00f3rflex"));
+        assertEquals("JOS\u00c9 DA SILVA", TextoUtils.paraBanco("  Jos\u00e9 da Silva  "));
+        assertEquals("REM\u00c9DIO D\u00d3RFLEX", TextoUtils.paraBanco("Rem\u00e9dio D\u00f3rflex"));
     }
 
     @Test
     void deveFormatarTextoParaExibicao() {
-        assertEquals("Jose Da Silva", TextoUtils.paraExibicao("JOSE DA SILVA"));
-        assertEquals("Remedio Dorflex", TextoUtils.paraExibicao("REMEDIO DORFLEX"));
+        assertEquals("Jos\u00e9 Da Silva", TextoUtils.paraExibicao("JOS\u00c9 DA SILVA"));
+        assertEquals("Rem\u00e9dio D\u00f3rflex", TextoUtils.paraExibicao("REM\u00c9DIO D\u00d3RFLEX"));
+        assertEquals("a b c", TextoUtils.paraExibicao("A B C"));
+        assertEquals("Tomar Após o Almoço", TextoUtils.paraExibicao("TOMAR APÓS O ALMOÇO"));
     }
 
     @Test

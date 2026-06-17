@@ -1,8 +1,10 @@
 package com.example.demo.services;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static com.example.demo.support.TestDataFactory.idoso;
@@ -10,6 +12,8 @@ import static com.example.demo.support.TestDataFactory.prescricao;
 import static com.example.demo.support.TestDataFactory.prescricaoDTO;
 import static com.example.demo.support.TestDataFactory.remedio;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -20,12 +24,16 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.example.demo.dtos.PrescricaoDTO;
+import com.example.demo.entity.Alertas;
 import com.example.demo.entity.Idoso;
 import com.example.demo.entity.Prescricao;
 import com.example.demo.entity.Remedio;
 import com.example.demo.enums.Status;
+import com.example.demo.enums.StatusAlertas;
+import com.example.demo.enums.TipoAlerta;
 import com.example.demo.exceptions.InvalidRequestException;
 import com.example.demo.exceptions.ResourceNotFoundException;
+import com.example.demo.repository.AlertasRepository;
 import com.example.demo.repository.IdosoRepository;
 import com.example.demo.repository.PrescricaoRepository;
 import com.example.demo.repository.RemedioRepository;
@@ -42,6 +50,9 @@ class PrescricaoServiceTest {
     @Mock
     private IdosoRepository idosoRepository;
 
+    @Mock
+    private AlertasRepository alertasRepository;
+
     @InjectMocks
     private PrescricaoService service;
 
@@ -51,6 +62,9 @@ class PrescricaoServiceTest {
         Remedio remedio = remedio();
         Idoso idoso = idoso();
         Prescricao salva = prescricao(1, remedio, idoso, Status.ATIVO);
+        LocalDateTime inicio = LocalDateTime.of(2026, 6, 11, 8, 0);
+        salva.setData_criacao(inicio);
+        salva.setData_fim(inicio.plusHours(16));
 
         when(remedioRepository.findById(10)).thenReturn(Optional.of(remedio));
         when(idosoRepository.findById(20)).thenReturn(Optional.of(idoso));
@@ -64,6 +78,19 @@ class PrescricaoServiceTest {
         assertEquals("Dipirona", resultado.getRemedioNome());
         assertEquals("Maria", resultado.getIdosoNome());
         assertEquals(Status.ATIVO, resultado.getStatus());
+
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<List<Alertas>> alertasCaptor = ArgumentCaptor.forClass(List.class);
+        verify(alertasRepository).saveAll(alertasCaptor.capture());
+
+        List<Alertas> alertas = alertasCaptor.getValue();
+        assertEquals(3, alertas.size());
+        assertEquals(TipoAlerta.REMEDIO, alertas.get(0).getTipoAlerta());
+        assertEquals(StatusAlertas.AGENDADO, alertas.get(0).getStatusAlertas());
+        assertEquals(salva, alertas.get(0).getPrescricao());
+        assertEquals(idoso, alertas.get(0).getIdoso());
+        assertEquals(salva.getData_criacao(), alertas.get(0).getData_agendade());
+        assertEquals(salva.getData_criacao().plusHours(8), alertas.get(1).getData_agendade());
     }
 
     @Test
@@ -73,29 +100,43 @@ class PrescricaoServiceTest {
         Remedio remedio = remedio();
         Idoso idoso = idoso();
         Prescricao existente = prescricao(1, remedio, idoso, Status.ATIVO);
+        existente.setData_criacao(LocalDateTime.now().minusHours(8));
+        dto.setDataFim(LocalDateTime.now().plusHours(16));
+        Alertas alertaAgendado = alertaAgendado(existente, idoso);
 
         when(prescricaoRepository.findById(1)).thenReturn(Optional.of(existente));
         when(remedioRepository.findById(10)).thenReturn(Optional.of(remedio));
         when(idosoRepository.findById(20)).thenReturn(Optional.of(idoso));
+        when(alertasRepository.findByPrescricaoIdAndStatusAlertas(1, StatusAlertas.AGENDADO))
+                .thenReturn(List.of(alertaAgendado));
         when(prescricaoRepository.save(existente)).thenReturn(existente);
 
         PrescricaoDTO resultado = service.atualizar(1, dto);
 
         assertEquals("2 Comprimidos", resultado.getDosagem());
+        assertEquals(StatusAlertas.CANCELADO, alertaAgendado.getStatusAlertas());
+        assertNotNull(alertaAgendado.getData_atualizacao());
         verify(prescricaoRepository).save(existente);
+        verify(alertasRepository, times(2)).saveAll(any());
     }
 
     @Test
     void deveInativarPrescricao() {
         Prescricao prescricao = prescricao(1, remedio(), idoso(), Status.ATIVO);
+        Alertas alertaAgendado = alertaAgendado(prescricao, prescricao.getIdoso());
 
         when(prescricaoRepository.findById(1)).thenReturn(Optional.of(prescricao));
+        when(alertasRepository.findByPrescricaoIdAndStatusAlertas(1, StatusAlertas.AGENDADO))
+                .thenReturn(List.of(alertaAgendado));
 
         service.inativar(1);
 
         ArgumentCaptor<Prescricao> captor = ArgumentCaptor.forClass(Prescricao.class);
         verify(prescricaoRepository).save(captor.capture());
         assertEquals(Status.INATIVO, captor.getValue().getStatus());
+        assertEquals(StatusAlertas.CANCELADO, alertaAgendado.getStatusAlertas());
+        assertNotNull(alertaAgendado.getData_atualizacao());
+        verify(alertasRepository).saveAll(List.of(alertaAgendado));
     }
 
     @Test
@@ -136,6 +177,22 @@ class PrescricaoServiceTest {
     }
 
     @Test
+    void deveFalharAoCriarSemDataFinal() {
+        PrescricaoDTO dto = prescricaoDTO();
+        dto.setDataFim(null);
+
+        assertThrows(InvalidRequestException.class, () -> service.criar(dto));
+    }
+
+    @Test
+    void deveFalharAoCriarComDataFinalNoPassado() {
+        PrescricaoDTO dto = prescricaoDTO();
+        dto.setDataFim(LocalDateTime.now().minusMinutes(1));
+
+        assertThrows(InvalidRequestException.class, () -> service.criar(dto));
+    }
+
+    @Test
     void deveFalharAoCriarComRemedioInexistente() {
         PrescricaoDTO dto = prescricaoDTO();
 
@@ -159,5 +216,17 @@ class PrescricaoServiceTest {
         when(prescricaoRepository.findById(99)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> service.buscarPorId(99));
+    }
+
+    private Alertas alertaAgendado(Prescricao prescricao, Idoso idoso) {
+        Alertas alerta = new Alertas();
+        alerta.setId(30);
+        alerta.setPrescricao(prescricao);
+        alerta.setIdoso(idoso);
+        alerta.setTipoAlerta(TipoAlerta.REMEDIO);
+        alerta.setStatusAlertas(StatusAlertas.AGENDADO);
+        alerta.setData_criacao(LocalDateTime.now().minusHours(1));
+        alerta.setData_agendade(LocalDateTime.now().plusHours(1));
+        return alerta;
     }
 }
