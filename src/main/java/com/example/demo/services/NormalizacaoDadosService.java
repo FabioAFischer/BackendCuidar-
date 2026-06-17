@@ -88,6 +88,7 @@ public class NormalizacaoDadosService {
         for (Idoso idoso : idosoRepository.findAll()) {
             idoso.setNome(TextoUtils.paraBanco(idoso.getNome()));
             idoso.setCpf(TextoUtils.limparDocumento(idoso.getCpf()));
+            idoso.setObservacoes(TextoUtils.paraBanco(idoso.getObservacoes()));
         }
     }
 
@@ -95,6 +96,7 @@ public class NormalizacaoDadosService {
         for (Instituicao instituicao : instituicaoRepository.findAll()) {
             instituicao.setNome(TextoUtils.paraBanco(instituicao.getNome()));
             instituicao.setCnpj(TextoUtils.limparDocumento(instituicao.getCnpj()));
+            instituicao.setRua(TextoUtils.paraBanco(instituicao.getRua()));
             instituicao.setBairro(TextoUtils.paraBanco(instituicao.getBairro()));
             instituicao.setUf(TextoUtils.paraBanco(instituicao.getUf()));
             instituicao.setCep(TextoUtils.limparDocumento(instituicao.getCep()));
@@ -103,6 +105,7 @@ public class NormalizacaoDadosService {
 
     private void normalizarPrescricoes() {
         for (Prescricao prescricao : prescricaoRepository.findAll()) {
+            prescricao.setInstrucao(TextoUtils.paraBanco(prescricao.getInstrucao()));
             prescricao.setDosagem(TextoUtils.paraBanco(prescricao.getDosagem()));
         }
     }
@@ -110,6 +113,7 @@ public class NormalizacaoDadosService {
     private void normalizarRemedios() {
         for (Remedio remedio : remedioRepository.findAll()) {
             remedio.setNome(TextoUtils.paraBanco(remedio.getNome()));
+            remedio.setObservacao(TextoUtils.paraBanco(remedio.getObservacao()));
         }
     }
 }
