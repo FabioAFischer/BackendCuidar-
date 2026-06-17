@@ -68,6 +68,7 @@ public class InstituicaoService {
             senhaService.validar(dto.getSenha());
             instituicao.setSenha(passwordEncoder.encode(dto.getSenha()));
         }
+        instituicao.setRua(TextoUtils.paraBanco(dto.getRua()));
         instituicao.setBairro(TextoUtils.paraBanco(dto.getBairro()));
         instituicao.setUf(TextoUtils.paraBanco(dto.getUf()));
         instituicao.setNumero(dto.getNumero());

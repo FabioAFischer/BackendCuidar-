@@ -1,6 +1,5 @@
 package com.example.demo.utils;
 
-import java.text.Normalizer;
 import java.util.Locale;
 
 public final class TextoUtils {
@@ -13,8 +12,7 @@ public final class TextoUtils {
             return null;
         }
 
-        String textoSemAcentos = removerAcentos(valor.trim());
-        return textoSemAcentos.toUpperCase(Locale.ROOT);
+        return valor.trim().toUpperCase(Locale.ROOT);
     }
 
     public static String paraExibicao(String valor) {
@@ -35,17 +33,15 @@ public final class TextoUtils {
                 resultado.append(" ");
             }
 
-            resultado.append(Character.toUpperCase(palavra.charAt(0)));
-            if (palavra.length() > 1) {
+            if (palavra.length() == 1) {
+                resultado.append(palavra);
+            } else {
+                resultado.append(Character.toTitleCase(palavra.charAt(0)));
                 resultado.append(palavra.substring(1));
             }
         }
 
         return resultado.toString();
-    }
-
-    public static String textoLivre(String valor) {
-        return valor;
     }
 
     public static String limparDocumento(String valor) {
@@ -58,11 +54,6 @@ public final class TextoUtils {
 
     public static String limparNumero(String valor) {
         return limparDocumento(valor);
-    }
-
-    private static String removerAcentos(String valor) {
-        String textoNormalizado = Normalizer.normalize(valor, Normalizer.Form.NFD);
-        return textoNormalizado.replaceAll("\\p{M}", "");
     }
 
     public static String paraUf(String valor) {
