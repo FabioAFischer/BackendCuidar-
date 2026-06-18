@@ -12,13 +12,13 @@ import com.example.demo.entity.Contato;
 import com.example.demo.entity.Cuidador;
 import com.example.demo.entity.Instituicao;
 import com.example.demo.enums.Status;
-import com.example.demo.exceptions.DuplicateResourceException;
 import com.example.demo.exceptions.InvalidRequestException;
 import com.example.demo.exceptions.ResourceNotFoundException;
 import com.example.demo.mappers.CuidadorMapper;
 import com.example.demo.repository.CuidadorRepository;
 import com.example.demo.repository.IdosoRepository;
 import com.example.demo.repository.InstituicaoRepository;
+import com.example.demo.utils.CpfUtils;
 import com.example.demo.utils.TextoUtils;
 
 @Service
@@ -51,7 +51,7 @@ public class CuidadorService {
     }
 
     public Page<CuidadorDTO> listarAtivosPorInstituicao(Integer instituicaoId, String cpf, Pageable pageable) {
-        String cpfLimpo = limparDocumento(cpf);
+        String cpfLimpo = CpfUtils.normalizar(cpf);
 
         if (cpfLimpo == null) {
             return repository.findByStatusAndInstituicaoId(Status.ATIVO, instituicaoId, pageable)
@@ -70,9 +70,9 @@ public class CuidadorService {
     }
 
     public CuidadorDTO criar(CuidadorDTO dto) {
-        String cpfLimpo = limparDocumento(dto.getCpf());
+        String cpfLimpo = CpfUtils.normalizar(dto.getCpf());
         String email = emailValidationService.validarParaCriacao(dto.getEmail());
-        validarCpfDisponivel(cpfLimpo);
+        CpfUtils.validarDisponivel(cpfLimpo, repository::existsByCpf, idosoRepository::existsByCpf);
 
         if (dto.getContato() == null) {
             throw new InvalidRequestException("O contato do cuidador deve ser informado");
@@ -94,9 +94,9 @@ public class CuidadorService {
         Cuidador cuidador = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Cuidador", id.longValue()));
 
-        String cpfLimpo = limparDocumento(dto.getCpf());
+        String cpfLimpo = CpfUtils.normalizar(dto.getCpf());
         if (!cuidador.getCpf().equals(cpfLimpo)) {
-            validarCpfDisponivel(cpfLimpo);
+            CpfUtils.validarDisponivel(cpfLimpo, repository::existsByCpf, idosoRepository::existsByCpf);
         }
 
         String email = emailValidationService.validarParaAtualizacao(dto.getEmail(), cuidador.getId());
@@ -157,9 +157,9 @@ public class CuidadorService {
             cuidador.setNome(TextoUtils.paraBanco(dto.getNome()));
         }
 
-        String cpfLimpo = limparDocumento(dto.getCpf());
+        String cpfLimpo = CpfUtils.normalizar(dto.getCpf());
         if (cpfLimpo != null && !cpfLimpo.equals(cuidador.getCpf())) {
-            validarCpfDisponivel(cpfLimpo);
+            CpfUtils.validarDisponivel(cpfLimpo, repository::existsByCpf, idosoRepository::existsByCpf);
             cuidador.setCpf(cpfLimpo);
         }
 
@@ -195,17 +195,4 @@ public class CuidadorService {
         }
     }
 
-    private String limparDocumento(String valor) {
-        if (valor == null || valor.isBlank()) {
-            return null;
-        }
-
-        return valor.replaceAll("\\D", "");
-    }
-
-    private void validarCpfDisponivel(String cpf) {
-        if (repository.existsByCpf(cpf) || idosoRepository.existsByCpf(cpf)) {
-            throw new DuplicateResourceException("CPF já está em uso");
-        }
-    }
 }
