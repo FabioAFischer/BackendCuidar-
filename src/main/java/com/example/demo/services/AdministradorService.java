@@ -19,14 +19,17 @@ public class AdministradorService {
     private final AdministradorRepository repository;
     private final PasswordEncoder passwordEncoder;
     private final SenhaService senhaService;
+    private final EmailValidationService emailValidationService;
 
     public AdministradorService(
             AdministradorRepository repository,
             PasswordEncoder passwordEncoder,
-            SenhaService senhaService) {
+            SenhaService senhaService,
+            EmailValidationService emailValidationService) {
         this.repository = repository;
         this.passwordEncoder = passwordEncoder;
         this.senhaService = senhaService;
+        this.emailValidationService = emailValidationService;
     }
 
     public Page<AdministradorDTO> listarAtivos(Pageable pageable) {
@@ -43,11 +46,13 @@ public class AdministradorService {
 
     public AdministradorDTO criar(AdministradorDTO dto) {
         String cpfLimpo = limparDocumento(dto.getCpf());
+        String email = emailValidationService.validarParaCriacao(dto.getEmail());
         if (repository.existsByCpf(cpfLimpo)) {
             throw new DuplicateResourceException("Já existe um administrador com esse CPF");
         }
 
         Administrador administrador = AdministradorMapper.toEntity(dto);
+        administrador.setEmail(email);
         senhaService.validar(dto.getSenha());
         administrador.setSenha(passwordEncoder.encode(dto.getSenha()));
         Administrador salvo = repository.save(administrador);
@@ -65,7 +70,10 @@ public class AdministradorService {
             throw new DuplicateResourceException("CPF já está em uso");
         }
 
+        String email = emailValidationService.validarParaAtualizacao(dto.getEmail(), administrador.getId());
+
         AdministradorMapper.updateEntity(administrador, dto);
+        administrador.setEmail(email);
         if (dto.getSenha() != null && !dto.getSenha().isBlank()) {
             senhaService.validar(dto.getSenha());
             administrador.setSenha(passwordEncoder.encode(dto.getSenha()));

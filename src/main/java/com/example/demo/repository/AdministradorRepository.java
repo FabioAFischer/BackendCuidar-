@@ -15,6 +15,8 @@ public interface AdministradorRepository extends JpaRepository<Administrador, In
 
     Optional<Administrador> findByCpf(String cpf);
 
+    Optional<Administrador> findByEmail(String email);
+
     boolean existsByCpf(String cpf);
 
     Page<Administrador> findByStatus(Status status, Pageable pageable);

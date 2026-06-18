@@ -56,6 +56,9 @@ class CuidadorServiceTest {
     @Mock
     private SenhaService senhaService;
 
+    @Mock
+    private EmailValidationService emailValidationService;
+
     @InjectMocks
     private CuidadorService service;
 
@@ -301,6 +304,8 @@ class CuidadorServiceTest {
         existente.setStatus(Status.INATIVO);
 
         when(cuidadorRepository.findById(2)).thenReturn(Optional.of(existente));
+        when(emailValidationService.validarParaAtualizacao("reativado@email.com", 2))
+                .thenReturn("reativado@email.com");
         when(cuidadorRepository.existsByCpf("98765432100")).thenReturn(false);
         when(idosoRepository.existsByCpf("98765432100")).thenReturn(false);
         when(passwordEncoder.encode("Nova@123")).thenReturn("hash-nova");

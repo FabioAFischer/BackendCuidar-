@@ -31,6 +31,9 @@ class AdministradorServiceTest {
     @Mock
     private SenhaService senhaService;
 
+    @Mock
+    private EmailValidationService emailValidationService;
+
     @InjectMocks
     private AdministradorService service;
 
