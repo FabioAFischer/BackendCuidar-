@@ -29,18 +29,21 @@ public class CuidadorService {
     private final InstituicaoRepository instituicaoRepository;
     private final PasswordEncoder passwordEncoder;
     private final SenhaService senhaService;
+    private final EmailValidationService emailValidationService;
 
     public CuidadorService(
             CuidadorRepository repository,
             IdosoRepository idosoRepository,
             InstituicaoRepository instituicaoRepository,
             PasswordEncoder passwordEncoder,
-            SenhaService senhaService) {
+            SenhaService senhaService,
+            EmailValidationService emailValidationService) {
         this.repository = repository;
         this.idosoRepository = idosoRepository;
         this.instituicaoRepository = instituicaoRepository;
         this.passwordEncoder = passwordEncoder;
         this.senhaService = senhaService;
+        this.emailValidationService = emailValidationService;
     }
 
     public Page<CuidadorDTO> listarAtivos(Pageable pageable) {
@@ -68,6 +71,7 @@ public class CuidadorService {
 
     public CuidadorDTO criar(CuidadorDTO dto) {
         String cpfLimpo = limparDocumento(dto.getCpf());
+        String email = emailValidationService.validarParaCriacao(dto.getEmail());
         validarCpfDisponivel(cpfLimpo);
 
         if (dto.getContato() == null) {
@@ -78,6 +82,7 @@ public class CuidadorService {
                 .orElseThrow(() -> new ResourceNotFoundException("Instituição", dto.getInstituicaoId().longValue()));
 
         Cuidador cuidador = CuidadorMapper.toEntity(dto);
+        cuidador.setEmail(email);
         senhaService.validar(dto.getSenha());
         cuidador.setSenha(passwordEncoder.encode(dto.getSenha()));
         cuidador.setInstituicao(instituicao);
@@ -94,12 +99,14 @@ public class CuidadorService {
             validarCpfDisponivel(cpfLimpo);
         }
 
+        String email = emailValidationService.validarParaAtualizacao(dto.getEmail(), cuidador.getId());
+
         Instituicao instituicao = instituicaoRepository.findById(dto.getInstituicaoId())
                 .orElseThrow(() -> new ResourceNotFoundException("Instituição", dto.getInstituicaoId().longValue()));
 
         cuidador.setNome(TextoUtils.paraBanco(dto.getNome()));
         cuidador.setCpf(cpfLimpo);
-        cuidador.setEmail(dto.getEmail());
+        cuidador.setEmail(email);
         if (dto.getSenha() != null && !dto.getSenha().isBlank()) {
             senhaService.validar(dto.getSenha());
             cuidador.setSenha(passwordEncoder.encode(dto.getSenha()));
@@ -157,7 +164,7 @@ public class CuidadorService {
         }
 
         if (dto.getEmail() != null) {
-            cuidador.setEmail(dto.getEmail());
+            cuidador.setEmail(emailValidationService.validarParaAtualizacao(dto.getEmail(), cuidador.getId()));
         }
 
         if (dto.getSenha() != null && !dto.getSenha().isBlank()) {

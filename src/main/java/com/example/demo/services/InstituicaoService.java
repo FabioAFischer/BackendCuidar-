@@ -23,11 +23,17 @@ public class InstituicaoService {
     private final InstituicaoRepository repository;
     private final PasswordEncoder passwordEncoder;
     private final SenhaService senhaService;
+    private final EmailValidationService emailValidationService;
 
-    public InstituicaoService(InstituicaoRepository repository, PasswordEncoder passwordEncoder, SenhaService senhaService) {
+    public InstituicaoService(
+            InstituicaoRepository repository,
+            PasswordEncoder passwordEncoder,
+            SenhaService senhaService,
+            EmailValidationService emailValidationService) {
         this.repository = repository;
         this.passwordEncoder = passwordEncoder;
         this.senhaService = senhaService;
+        this.emailValidationService = emailValidationService;
     }
 
     public Page<InstituicaoDTO> listarTodas(Pageable pageable) {
@@ -43,10 +49,12 @@ public class InstituicaoService {
 
     public InstituicaoDTO criar(InstituicaoDTO dto) {
         String cnpjLimpo = limparDocumento(dto.getCnpj());
+        String email = emailValidationService.validarParaCriacao(dto.getEmail());
         if (repository.existsByCnpj(cnpjLimpo)) {
             throw new DuplicateResourceException("Já existe uma instituição com esse CNPJ");
         }
         Instituicao instituicao = InstituicaoMapper.toEntity(dto);
+        instituicao.setEmail(email);
         senhaService.validar(dto.getSenha());
         instituicao.setSenha(passwordEncoder.encode(dto.getSenha()));
         return InstituicaoMapper.toDTO(repository.save(instituicao));
@@ -61,9 +69,11 @@ public class InstituicaoService {
             throw new DuplicateResourceException("CNPJ já está em uso");
         }
 
+        String email = emailValidationService.validarParaAtualizacao(dto.getEmail(), instituicao.getId());
+
         instituicao.setNome(TextoUtils.paraBanco(dto.getNome()));
         instituicao.setCnpj(cnpjLimpo);
-        instituicao.setEmail(dto.getEmail());
+        instituicao.setEmail(email);
         if (dto.getSenha() != null && !dto.getSenha().isBlank()) {
             senhaService.validar(dto.getSenha());
             instituicao.setSenha(passwordEncoder.encode(dto.getSenha()));

@@ -31,6 +31,9 @@ class InstituicaoServiceTest {
     @Mock
     private SenhaService senhaService;
 
+    @Mock
+    private EmailValidationService emailValidationService;
+
     @InjectMocks
     private InstituicaoService service;
 
