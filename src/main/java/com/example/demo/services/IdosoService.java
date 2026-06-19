@@ -38,6 +38,7 @@ import com.example.demo.repository.CuidadorRepository;
 import com.example.demo.repository.IdosoRepository;
 import com.example.demo.repository.InstituicaoRepository;
 import com.example.demo.repository.VinculoRepository;
+import com.example.demo.utils.CpfUtils;
 
 @Service
 public class IdosoService {
@@ -95,10 +96,8 @@ public class IdosoService {
     }
 
     public IdosoDTO criar(IdosoDTO dto) {
-        String cpfLimpo = limparDocumento(dto.getCpf());
-        if (cuidadorRepository.existsByCpf(cpfLimpo)) {
-            throw new DuplicateResourceException("CPF já está em uso");
-        }
+        String cpfLimpo = CpfUtils.normalizar(dto.getCpf());
+        CpfUtils.validarDisponivel(cpfLimpo, cuidadorRepository::existsByCpf);
 
         Optional<Idoso> idosoExistente = buscarEntidadePorCpf(cpfLimpo);
 
@@ -131,11 +130,9 @@ public class IdosoService {
         Idoso idoso = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Idoso", id.longValue()));
 
-        String cpfLimpo = limparDocumento(dto.getCpf());
+        String cpfLimpo = CpfUtils.normalizar(dto.getCpf());
         if (!idoso.getCpf().equals(cpfLimpo)) {
-            if (repository.existsByCpf(cpfLimpo) || cuidadorRepository.existsByCpf(cpfLimpo)) {
-                throw new DuplicateResourceException("CPF já está em uso");
-            }
+            CpfUtils.validarDisponivel(cpfLimpo, repository::existsByCpf, cuidadorRepository::existsByCpf);
         }
 
         Instituicao instituicao = instituicaoRepository.findById(dto.getInstituicaoId())
@@ -263,16 +260,8 @@ public class IdosoService {
     }
 
     private Optional<Idoso> buscarEntidadePorCpf(String cpf) {
-        String cpfLimpo = limparDocumento(cpf);
+        String cpfLimpo = CpfUtils.normalizar(cpf);
         return cpfLimpo == null ? Optional.empty() : repository.findByCpf(cpfLimpo);
-    }
-
-    private String limparDocumento(String valor) {
-        if (valor == null || valor.isBlank()) {
-            return null;
-        }
-
-        return valor.replaceAll("\\D", "");
     }
 
     private String gerarSenhaAcesso() {
