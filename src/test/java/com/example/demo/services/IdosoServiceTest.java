@@ -64,7 +64,7 @@ class IdosoServiceTest {
     private IdosoService service;
 
     @BeforeEach
-    void setUp() {
+    void configurarCenarioDeTeste() {
         service = new IdosoService(
                 idosoRepository,
                 cuidadorRepository,
@@ -83,7 +83,7 @@ class IdosoServiceTest {
         when(idosoRepository.findByStatusAndInstituicaoId(Status.ATIVO, 10, pageable))
                 .thenReturn(new PageImpl<>(List.of(idosoDaInstituicao)));
 
-        var resultado = service.listarAtivosPorInstituicao(10, pageable);
+        var resultado = service.listarIdososAtivosPorInstituicao(10, pageable);
 
         assertEquals(1, resultado.getTotalElements());
         assertEquals("Maria", resultado.getContent().get(0).getNome());
@@ -105,7 +105,7 @@ class IdosoServiceTest {
             return idoso;
         });
 
-        IdosoDTO resultado = service.criar(dto);
+        IdosoDTO resultado = service.cadastrarIdoso(dto);
 
         assertEquals(1, resultado.getId());
         assertEquals("Maria", resultado.getNome());
@@ -121,7 +121,7 @@ class IdosoServiceTest {
 
         when(idosoRepository.findByCpf("12345678901")).thenReturn(Optional.of(existente));
 
-        assertThrows(DuplicateResourceException.class, () -> service.criar(idosoDTO()));
+        assertThrows(DuplicateResourceException.class, () -> service.cadastrarIdoso(idosoDTO()));
     }
 
 
@@ -131,7 +131,7 @@ class IdosoServiceTest {
 
         when(cuidadorRepository.existsByCpf("12345678901")).thenReturn(true);
 
-        assertThrows(DuplicateResourceException.class, () -> service.criar(dto));
+        assertThrows(DuplicateResourceException.class, () -> service.cadastrarIdoso(dto));
     }
 
     @Test
@@ -145,7 +145,7 @@ class IdosoServiceTest {
         when(contatoRepository.save(any(Contato.class))).thenReturn(contatoSalvo);
         when(idosoRepository.save(existente)).thenReturn(existente);
 
-        IdosoDTO resultado = service.criar(dto);
+        IdosoDTO resultado = service.cadastrarIdoso(dto);
 
         assertEquals(1, resultado.getId());
         assertEquals("Maria", resultado.getNome());
@@ -158,7 +158,7 @@ class IdosoServiceTest {
         when(idosoRepository.findByCpf("12345678901")).thenReturn(Optional.empty());
         when(instituicaoRepository.findById(10)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> service.criar(idosoDTO()));
+        assertThrows(ResourceNotFoundException.class, () -> service.cadastrarIdoso(idosoDTO()));
     }
 
     @Test
@@ -169,7 +169,7 @@ class IdosoServiceTest {
         when(idosoRepository.findByCpf("12345678901")).thenReturn(Optional.empty());
         when(instituicaoRepository.findById(10)).thenReturn(Optional.of(instituicao()));
 
-        assertThrows(InvalidRequestException.class, () -> service.criar(dto));
+        assertThrows(InvalidRequestException.class, () -> service.cadastrarIdoso(dto));
     }
 
     @Test
@@ -181,7 +181,7 @@ class IdosoServiceTest {
         when(idosoRepository.findByCpf("12345678901")).thenReturn(Optional.empty());
         when(instituicaoRepository.findById(10)).thenReturn(Optional.of(instituicao()));
 
-        assertThrows(InvalidRequestException.class, () -> service.criar(dto));
+        assertThrows(InvalidRequestException.class, () -> service.cadastrarIdoso(dto));
     }
 
     @Test
@@ -197,7 +197,7 @@ class IdosoServiceTest {
         when(contatoRepository.findById(5)).thenReturn(Optional.of(contato(5, "11", "999999999")));
         when(idosoRepository.save(existente)).thenReturn(existente);
 
-        IdosoDTO resultado = service.atualizar(1, dto);
+        IdosoDTO resultado = service.atualizarIdoso(1, dto);
 
         assertEquals("Maria Atualizada", resultado.getNome());
         assertEquals(5, resultado.getContatoId());
@@ -213,7 +213,7 @@ class IdosoServiceTest {
         when(idosoRepository.findById(1)).thenReturn(Optional.of(existente));
         when(idosoRepository.existsByCpf("10987654321")).thenReturn(true);
 
-        assertThrows(DuplicateResourceException.class, () -> service.atualizar(1, dto));
+        assertThrows(DuplicateResourceException.class, () -> service.atualizarIdoso(1, dto));
     }
 
 
@@ -227,7 +227,7 @@ class IdosoServiceTest {
         when(idosoRepository.existsByCpf("10987654321")).thenReturn(false);
         when(cuidadorRepository.existsByCpf("10987654321")).thenReturn(true);
 
-        assertThrows(DuplicateResourceException.class, () -> service.atualizar(1, dto));
+        assertThrows(DuplicateResourceException.class, () -> service.atualizarIdoso(1, dto));
     }
 
     @Test
@@ -236,7 +236,7 @@ class IdosoServiceTest {
 
         when(idosoRepository.findById(1)).thenReturn(Optional.of(existente));
 
-        service.inativar(1);
+        service.inativarIdoso(1);
 
         ArgumentCaptor<Idoso> captor = ArgumentCaptor.forClass(Idoso.class);
         verify(idosoRepository).save(captor.capture());
@@ -253,12 +253,12 @@ class IdosoServiceTest {
         when(vinculoRepository.existsByIdosoIdAndCuidadorId(1, 2)).thenReturn(true);
         when(idosoRepository.save(idoso)).thenReturn(idoso);
 
-        Map<String, Object> dadosSenha = service.obterSenhaAcesso(1, 2, "senhaCuidador");
+        Map<String, Object> dadosSenha = service.obterSenhaAcessoDoIdoso(1, 2, "senhaCuidador");
         String senhaAcesso = (String) dadosSenha.get("senha");
 
         when(idosoRepository.findBySenhaAcessoCriptografadaIsNotNull()).thenReturn(List.of(idoso));
 
-        Idoso autenticado = service.autenticarPorSenhaAcesso(senhaAcesso);
+        Idoso autenticado = service.autenticarIdosoPorSenhaAcesso(senhaAcesso);
 
         assertEquals(1, autenticado.getId());
         verify(idosoRepository).findBySenhaAcessoCriptografadaIsNotNull();
@@ -269,7 +269,7 @@ class IdosoServiceTest {
         when(idosoRepository.findBySenhaAcessoCriptografadaIsNotNull()).thenReturn(List.of());
 
         UnauthorizedException ex = assertThrows(UnauthorizedException.class,
-                () -> service.autenticarPorSenhaAcesso("senhaerrada"));
+                () -> service.autenticarIdosoPorSenhaAcesso("senhaerrada"));
 
         assertEquals("Senha de acesso inválida.", ex.getMessage());
     }
@@ -278,6 +278,6 @@ class IdosoServiceTest {
     void deveFalharAoBuscarIdosoInexistente() {
         when(idosoRepository.findById(99)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> service.buscarPorId(99));
+        assertThrows(ResourceNotFoundException.class, () -> service.buscarIdosoPorId(99));
     }
 }

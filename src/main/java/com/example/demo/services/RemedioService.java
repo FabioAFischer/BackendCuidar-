@@ -37,18 +37,18 @@ public class RemedioService {
         this.cuidadorRepository = cuidadorRepository;
     }
 
-    public Page<RemedioDTO> listarAtivas(Integer cuidadorId, Pageable pageable) {
-        return repository.findByCuidadorIdAndStatus(cuidadorId, Status.ATIVO, pageable).map(RemedioMapper::toDTO);
+    public Page<RemedioDTO> listarRemediosAtivos(Integer cuidadorId, Pageable pageable) {
+        return repository.findByCuidadorIdAndStatus(cuidadorId, Status.ATIVO, pageable).map(RemedioMapper::converterRemedioParaDTO);
     }
 
-    public RemedioDTO buscarPorId(int id, Integer cuidadorId) {
+    public RemedioDTO buscarRemedioPorId(int id, Integer cuidadorId) {
         Remedio remedio = repository.findByIdAndCuidadorId(id, cuidadorId)
                 .orElseThrow(() -> new ResourceNotFoundException("Remedio", (long) id));
-        return RemedioMapper.toDTO(remedio);
+        return RemedioMapper.converterRemedioParaDTO(remedio);
     }
 
-    public RemedioDTO criar(RemedioDTO dto, Integer cuidadorId) {
-        String nomeNormalizado = TextoUtils.paraBanco(dto.getNome());
+    public RemedioDTO criarRemedio(RemedioDTO dto, Integer cuidadorId) {
+        String nomeNormalizado = TextoUtils.normalizarTextoParaBanco(dto.getNome());
         Optional<Remedio> remedioExistente = repository.findByNomeAndCuidadorId(nomeNormalizado, cuidadorId);
 
         if (remedioExistente.isPresent() && remedioExistente.get().getStatus() == Status.ATIVO) {
@@ -57,33 +57,33 @@ public class RemedioService {
 
         if (remedioExistente.isPresent()) {
             Remedio remedio = remedioExistente.get();
-            RemedioMapper.updateEntity(remedio, dto);
+            RemedioMapper.atualizarRemedioComDTO(remedio, dto);
             remedio.setStatus(Status.ATIVO);
-            return RemedioMapper.toDTO(repository.save(remedio));
+            return RemedioMapper.converterRemedioParaDTO(repository.save(remedio));
         }
 
-        Cuidador cuidador = buscarCuidador(cuidadorId);
-        Remedio remedio = RemedioMapper.toEntity(dto);
+        Cuidador cuidador = buscarCuidadorPorId(cuidadorId);
+        Remedio remedio = RemedioMapper.converterDTOParaRemedio(dto);
         remedio.setCuidador(cuidador);
-        return RemedioMapper.toDTO(repository.save(remedio));
+        return RemedioMapper.converterRemedioParaDTO(repository.save(remedio));
     }
 
-    public RemedioDTO atualizar(int id, RemedioDTO dto, Integer cuidadorId) {
+    public RemedioDTO atualizarRemedio(int id, RemedioDTO dto, Integer cuidadorId) {
         Remedio remedio = repository.findByIdAndCuidadorId(id, cuidadorId)
                 .orElseThrow(() -> new ResourceNotFoundException("Remedio", (long) id));
 
-        String nomeNormalizado = TextoUtils.paraBanco(dto.getNome());
+        String nomeNormalizado = TextoUtils.normalizarTextoParaBanco(dto.getNome());
         if (!remedio.getNome().equals(nomeNormalizado)
                 && repository.existsByNomeAndCuidadorId(nomeNormalizado, cuidadorId)) {
             throw new DuplicateResourceException("Nome ja esta em uso");
         }
 
-        RemedioMapper.updateEntity(remedio, dto);
-        return RemedioMapper.toDTO(repository.save(remedio));
+        RemedioMapper.atualizarRemedioComDTO(remedio, dto);
+        return RemedioMapper.converterRemedioParaDTO(repository.save(remedio));
     }
 
     @Transactional
-    public void inativar(int id, Integer cuidadorId) {
+    public void inativarRemedio(int id, Integer cuidadorId) {
         Remedio remedio = repository.findByIdAndCuidadorId(id, cuidadorId)
                 .orElseThrow(() -> new ResourceNotFoundException("Remedio", (long) id));
         for (Prescricao prescricao : prescricaoRepository.findByRemedioIdAndStatus(id, Status.ATIVO)) {
@@ -94,7 +94,7 @@ public class RemedioService {
         repository.save(remedio);
     }
 
-    private Cuidador buscarCuidador(Integer cuidadorId) {
+    private Cuidador buscarCuidadorPorId(Integer cuidadorId) {
         return cuidadorRepository.findById(cuidadorId)
                 .orElseThrow(() -> new ResourceNotFoundException("Cuidador", cuidadorId.longValue()));
     }

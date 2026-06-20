@@ -36,9 +36,9 @@ public class AdministradorController {
         description = "Retorna uma lista paginada de administradores ativos ordenados por nome"
     )
     @GetMapping("/listar_todas")
-    public ResponseEntity<Page<AdministradorDTO>> listarTodas(
+    public ResponseEntity<Page<AdministradorDTO>> listarAdministradores(
             @PageableDefault(size = 10, sort = "nome") Pageable pageable) {
-        return ResponseEntity.ok(service.listarAtivos(pageable));
+        return ResponseEntity.ok(service.listarAdministradoresAtivos(pageable));
     }
 
     @Operation(
@@ -46,8 +46,8 @@ public class AdministradorController {
         description = "Retorna os dados de um administrador específico com base no ID informado"
     )
     @GetMapping("/listar/{id}")
-    public ResponseEntity<AdministradorDTO> buscarPorId(@PathVariable Integer id) {
-        return ResponseEntity.ok(service.buscarPorId(id));
+    public ResponseEntity<AdministradorDTO> buscarAdministradorPorId(@PathVariable Integer id) {
+        return ResponseEntity.ok(service.buscarAdministradorPorId(id));
     }
 
     @Operation(
@@ -55,8 +55,8 @@ public class AdministradorController {
         description = "Cria um novo administrador com os dados enviados no corpo da requisição"
     )
     @PostMapping("/cadastrar")
-    public ResponseEntity<AdministradorDTO> criar(@RequestBody AdministradorDTO dto) {
-        AdministradorDTO criado = service.criar(dto);
+    public ResponseEntity<AdministradorDTO> cadastrarAdministrador(@RequestBody AdministradorDTO dto) {
+        AdministradorDTO criado = service.cadastrarAdministrador(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(criado);
     }
 
@@ -65,8 +65,8 @@ public class AdministradorController {
         description = "Atualiza os dados de um administrador existente com base no ID informado"
     )
     @PutMapping("/atualizar/{id}")
-    public ResponseEntity<AdministradorDTO> atualizar(@PathVariable Integer id, @RequestBody AdministradorDTO dto) {
-        return ResponseEntity.ok(service.atualizar(id, dto));
+    public ResponseEntity<AdministradorDTO> atualizarAdministrador(@PathVariable Integer id, @RequestBody AdministradorDTO dto) {
+        return ResponseEntity.ok(service.atualizarAdministrador(id, dto));
     }
 
     @Operation(
@@ -74,8 +74,8 @@ public class AdministradorController {
         description = "Realiza a exclusão lógica (inativação) de um administrador com base no ID informado"
     )
     @DeleteMapping("/deletar/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable Integer id) {
-        service.inativar(id);
+    public ResponseEntity<Void> inativarAdministrador(@PathVariable Integer id) {
+        service.inativarAdministrador(id);
         return ResponseEntity.noContent().build();
     }
 }

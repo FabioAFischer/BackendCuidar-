@@ -36,25 +36,25 @@ public class VinculoService {
         this.cuidadorRepository = cuidadorRepository;
     }
 
-    public Page<VinculoDTO> listarTodos(Pageable pageable) {
-        return repository.findAll(pageable).map(VinculoMapper::toDTO);
+    public Page<VinculoDTO> listarVinculos(Pageable pageable) {
+        return repository.findAll(pageable).map(VinculoMapper::converterVinculoParaDTO);
     }
 
-    public Page<VinculoDTO> listarPorIdoso(Integer idosoId, Pageable pageable) {
-        return repository.findByIdosoId(idosoId, pageable).map(VinculoMapper::toDTO);
+    public Page<VinculoDTO> listarVinculosPorIdoso(Integer idosoId, Pageable pageable) {
+        return repository.findByIdosoId(idosoId, pageable).map(VinculoMapper::converterVinculoParaDTO);
     }
 
-    public Page<VinculoDTO> listarPorCuidador(Integer cuidadorId, Pageable pageable) {
-        return repository.findByCuidadorId(cuidadorId, pageable).map(VinculoMapper::toDTO);
+    public Page<VinculoDTO> listarVinculosPorCuidador(Integer cuidadorId, Pageable pageable) {
+        return repository.findByCuidadorId(cuidadorId, pageable).map(VinculoMapper::converterVinculoParaDTO);
     }
 
-    public VinculoDTO buscarPorId(Integer id) {
+    public VinculoDTO buscarVinculoPorId(Integer id) {
         Vinculo vinculo = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Vínculo", id.longValue()));
-        return VinculoMapper.toDTO(vinculo);
+        return VinculoMapper.converterVinculoParaDTO(vinculo);
     }
 
-    public VinculoDTO criar(VinculoDTO dto) {
+    public VinculoDTO criarVinculo(VinculoDTO dto) {
         if (dto.getIdosoId() == null || dto.getCuidadorId() == null) {
             throw new InvalidRequestException("Idoso e Cuidador são obrigatórios para criar um vínculo");
         }
@@ -77,8 +77,8 @@ public class VinculoService {
         Cuidador cuidador = cuidadorRepository.findById(dto.getCuidadorId())
                 .orElseThrow(() -> new ResourceNotFoundException("Cuidador", dto.getCuidadorId().longValue()));
 
-        Vinculo vinculo = VinculoMapper.toEntity(dto, idoso, cuidador);
-        return VinculoMapper.toDTO(repository.save(vinculo));
+        Vinculo vinculo = VinculoMapper.converterDTOParaVinculo(dto, idoso, cuidador);
+        return VinculoMapper.converterVinculoParaDTO(repository.save(vinculo));
     }
 
     @Transactional
@@ -93,7 +93,7 @@ public class VinculoService {
                 });
 
         vinculo.setTipoVinculo(TipoVinculo.EMERGENCIA);
-        return VinculoMapper.toDTO(repository.save(vinculo));
+        return VinculoMapper.converterVinculoParaDTO(repository.save(vinculo));
     }
 
     @Transactional(readOnly = true)
@@ -106,11 +106,11 @@ public class VinculoService {
             throw new ResourceNotFoundException("Contato do cuidador de emergência", (long) cuidador.getId());
         }
 
-        return ContatoMapper.toDTO(cuidador.getContato());
+        return ContatoMapper.converterContatoParaDTO(cuidador.getContato());
     }
 
     @Transactional
-    public void deletar(Integer id) {
+    public void excluirVinculo(Integer id) {
         Vinculo vinculo = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Vínculo", id.longValue()));
 

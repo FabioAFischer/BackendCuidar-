@@ -38,9 +38,9 @@ public class InstituicaoController {
         description = "Retorna uma lista paginada de instituições ativas ordenadas por nome"
     )
     @GetMapping("/listar_todas")
-    public ResponseEntity<Page<InstituicaoDTO>> listarTodas(
+    public ResponseEntity<Page<InstituicaoDTO>> listarInstituicoes(
             @PageableDefault(size = 10, sort = "nome") Pageable pageable) {
-        return ResponseEntity.ok(service.listarTodas(pageable));
+        return ResponseEntity.ok(service.listarInstituicoesAtivas(pageable));
     }
 
     @Operation(
@@ -48,8 +48,8 @@ public class InstituicaoController {
         description = "Retorna os dados de uma instituição específica com base no ID informado"
     )
     @GetMapping("/listar/{id}")
-    public ResponseEntity<InstituicaoDTO> buscarPorId(@PathVariable Integer id) {
-        return ResponseEntity.ok(service.buscarPorId(id));
+    public ResponseEntity<InstituicaoDTO> buscarInstituicaoPorId(@PathVariable Integer id) {
+        return ResponseEntity.ok(service.buscarInstituicaoPorId(id));
     }
 
     @Operation(
@@ -57,8 +57,8 @@ public class InstituicaoController {
         description = "Cria uma nova instituição com os dados enviados no corpo da requisição"
     )
     @PostMapping("/cadastrar")
-    public ResponseEntity<InstituicaoDTO> criar(@RequestBody InstituicaoDTO dto) {
-        InstituicaoDTO criada = service.criar(dto);
+    public ResponseEntity<InstituicaoDTO> cadastrarInstituicao(@RequestBody InstituicaoDTO dto) {
+        InstituicaoDTO criada = service.cadastrarInstituicao(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(criada);
     }
 
@@ -67,8 +67,8 @@ public class InstituicaoController {
         description = "Atualiza os dados de uma instituição existente com base no ID informado"
     )
     @PutMapping("/atualizar/{id}")
-    public ResponseEntity<InstituicaoDTO> atualizar(@PathVariable Integer id, @RequestBody InstituicaoDTO dto) {
-        return ResponseEntity.ok(service.atualizar(id, dto));
+    public ResponseEntity<InstituicaoDTO> atualizarInstituicao(@PathVariable Integer id, @RequestBody InstituicaoDTO dto) {
+        return ResponseEntity.ok(service.atualizarInstituicao(id, dto));
     }
 
     @Operation(
@@ -76,8 +76,8 @@ public class InstituicaoController {
         description = "Realiza a exclusão lógica (inativação) de uma instituição com base no ID informado"
     )
     @DeleteMapping("/deletar/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable Integer id) {
-        service.inativar(id);
+    public ResponseEntity<Void> inativarInstituicao(@PathVariable Integer id) {
+        service.inativarInstituicao(id);
         return ResponseEntity.noContent().build();
     }
 
@@ -86,8 +86,8 @@ public class InstituicaoController {
     description = "Realiza a reativação lógica de uma instituição"
     )
     @PatchMapping("/ativar/{id}")
-    public ResponseEntity<Void> ativar(@PathVariable Integer id) {
-        service.ativar(id);
+    public ResponseEntity<Void> reativarInstituicao(@PathVariable Integer id) {
+        service.reativarInstituicao(id);
         return ResponseEntity.noContent().build();
     }
 

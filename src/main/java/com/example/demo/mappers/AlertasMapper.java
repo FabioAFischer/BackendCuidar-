@@ -11,7 +11,7 @@ import com.example.demo.utils.TextoUtils;
 
 public class AlertasMapper {
 
-    public static AlertasDTO toDTO(Alertas alerta) {
+    public static AlertasDTO converterAlertaParaDTO(Alertas alerta) {
         if (alerta == null) {
             return null;
         }
@@ -19,11 +19,11 @@ public class AlertasMapper {
         AlertasDTO dto = new AlertasDTO();
         dto.setId(alerta.getId());
         dto.setIdosoId(alerta.getIdoso() != null ? alerta.getIdoso().getId() : null);
-        dto.setIdosoNome(alerta.getIdoso() != null ? TextoUtils.paraExibicao(alerta.getIdoso().getNome()) : null);
+        dto.setIdosoNome(alerta.getIdoso() != null ? TextoUtils.formatarTextoParaExibicao(alerta.getIdoso().getNome()) : null);
         dto.setPrescricaoId(alerta.getPrescricao() != null ? alerta.getPrescricao().getId() : null);
         dto.setRemedioNome(
                 alerta.getPrescricao() != null && alerta.getPrescricao().getRemedio() != null
-                        ? TextoUtils.paraExibicao(alerta.getPrescricao().getRemedio().getNome())
+                        ? TextoUtils.formatarTextoParaExibicao(alerta.getPrescricao().getRemedio().getNome())
                         : null);
         dto.setTipoAlerta(alerta.getTipoAlerta());
         dto.setStatusAlertas(alerta.getStatusAlertas());
@@ -34,11 +34,11 @@ public class AlertasMapper {
         return dto;
     }
 
-    public static Alertas toEntity(AlertasDTO dto, Idoso idoso) {
-        return toEntity(dto, idoso, null);
+    public static Alertas converterDTOParaAlerta(AlertasDTO dto, Idoso idoso) {
+        return converterDTOParaAlerta(dto, idoso, null);
     }
 
-    public static Alertas toEntity(AlertasDTO dto, Idoso idoso, Prescricao prescricao) {
+    public static Alertas converterDTOParaAlerta(AlertasDTO dto, Idoso idoso, Prescricao prescricao) {
         if (dto == null) {
             return null;
         }
@@ -54,11 +54,11 @@ public class AlertasMapper {
         return alerta;
     }
 
-    public static void updateEntity(Alertas alerta, AlertasDTO dto, Idoso idoso) {
-        updateEntity(alerta, dto, idoso, null);
+    public static void atualizarAlertaComDTO(Alertas alerta, AlertasDTO dto, Idoso idoso) {
+        atualizarAlertaComDTO(alerta, dto, idoso, null);
     }
 
-    public static void updateEntity(Alertas alerta, AlertasDTO dto, Idoso idoso, Prescricao prescricao) {
+    public static void atualizarAlertaComDTO(Alertas alerta, AlertasDTO dto, Idoso idoso, Prescricao prescricao) {
         if (alerta == null || dto == null) {
             return;
         }

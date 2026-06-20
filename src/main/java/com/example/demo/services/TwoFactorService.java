@@ -24,10 +24,10 @@ public class TwoFactorService {
     }
 
     @Transactional
-    public void enviarCodigo(String email) {
+    public void enviarCodigoDoisFatores(String email) {
         repository.deleteByEmail(email);
 
-        String codigo = gerarCodigo();
+        String codigo = gerarCodigoDoisFatores();
 
         CodigoVerificacao verificacao = new CodigoVerificacao();
         verificacao.setEmail(email);
@@ -40,7 +40,7 @@ public class TwoFactorService {
     }
 
     @Transactional
-    public void validarCodigo(String email, String codigo) {
+    public void validarCodigoDoisFatores(String email, String codigo) {
         CodigoVerificacao verificacao = repository
                 .findTopByEmailAndUsadoFalseOrderByExpiracaoDesc(email)
                 .orElseThrow(() -> new VerificationCodeException("Nenhum codigo ativo encontrado para este email"));
@@ -57,7 +57,7 @@ public class TwoFactorService {
         repository.save(verificacao);
     }
 
-    private String gerarCodigo() {
+    private String gerarCodigoDoisFatores() {
         return String.format("%06d", new Random().nextInt(999999));
     }
 }

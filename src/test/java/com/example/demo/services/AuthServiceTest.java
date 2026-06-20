@@ -69,9 +69,9 @@ class AuthServiceTest {
 
         when(administradorRepository.findByCpf("12345678901")).thenReturn(Optional.of(administrador));
         when(passwordEncoder.matches("senha", "hash")).thenReturn(true);
-        when(jwtService.gerarToken(administrador)).thenReturn("token-admin");
+        when(jwtService.gerarTokenJwt(administrador)).thenReturn("token-admin");
 
-        Map<String, Object> resposta = service.login(dadosLogin("123.456.789-01", "senha", "ADMINISTRADOR"));
+        Map<String, Object> resposta = service.autenticarUsuario(dadosLogin("123.456.789-01", "senha", "ADMINISTRADOR"));
 
         assertEquals(1, resposta.get("id"));
         assertEquals("Admin", resposta.get("nome"));
@@ -88,11 +88,11 @@ class AuthServiceTest {
         when(cuidadorRepository.findByCpf("12345678901")).thenReturn(Optional.of(cuidador));
         when(passwordEncoder.matches("senha", "hash")).thenReturn(true);
 
-        Map<String, Object> resposta = service.login(dadosLogin("12345678901", "senha", "CUIDADOR"));
+        Map<String, Object> resposta = service.autenticarUsuario(dadosLogin("12345678901", "senha", "CUIDADOR"));
 
         assertEquals(true, resposta.get("requer2fa"));
         assertEquals("cu***@email.com", resposta.get("email"));
-        verify(twoFactorService).enviarCodigo("cuidador@email.com");
+        verify(twoFactorService).enviarCodigoDoisFatores("cuidador@email.com");
     }
 
     @Test
@@ -102,11 +102,11 @@ class AuthServiceTest {
         when(instituicaoRepository.findByCnpj("12345678000199")).thenReturn(Optional.of(instituicao));
         when(passwordEncoder.matches("senha", "hash")).thenReturn(true);
 
-        Map<String, Object> resposta = service.login(dadosLogin("12.345.678/0001-99", "senha", "INSTITUICAO"));
+        Map<String, Object> resposta = service.autenticarUsuario(dadosLogin("12.345.678/0001-99", "senha", "INSTITUICAO"));
 
         assertEquals(true, resposta.get("requer2fa"));
         assertEquals("in***@email.com", resposta.get("email"));
-        verify(twoFactorService).enviarCodigo("instituicao@email.com");
+        verify(twoFactorService).enviarCodigoDoisFatores("instituicao@email.com");
     }
 
     @Test
@@ -117,7 +117,7 @@ class AuthServiceTest {
         when(passwordEncoder.matches("errada", "hash")).thenReturn(false);
 
         assertThrows(UnauthorizedException.class,
-                () -> service.login(dadosLogin("12345678901", "errada", "ADMINISTRADOR")));
+                () -> service.autenticarUsuario(dadosLogin("12345678901", "errada", "ADMINISTRADOR")));
     }
 
     @Test
@@ -129,31 +129,31 @@ class AuthServiceTest {
         when(passwordEncoder.matches("senha", "hash")).thenReturn(true);
 
         assertThrows(UnauthorizedException.class,
-                () -> service.login(dadosLogin("12345678901", "senha", "ADMINISTRADOR")));
+                () -> service.autenticarUsuario(dadosLogin("12345678901", "senha", "ADMINISTRADOR")));
     }
 
     @Test
     void deveFalharLoginSemPerfil() {
         Map<String, String> dados = dadosLogin("12345678901", "senha", "");
 
-        assertThrows(InvalidRequestException.class, () -> service.login(dados));
+        assertThrows(InvalidRequestException.class, () -> service.autenticarUsuario(dados));
     }
 
     @Test
     void deveFalharLoginComPerfilInvalido() {
         Map<String, String> dados = dadosLogin("12345678901", "senha", "INVALIDO");
 
-        assertThrows(InvalidRequestException.class, () -> service.login(dados));
+        assertThrows(InvalidRequestException.class, () -> service.autenticarUsuario(dados));
     }
 
     @Test
     void deveLogarIdosoSomenteComSenhaAcesso() {
         Idoso idoso = idoso(20, "Maria", "12345678901", Status.ATIVO);
 
-        when(idosoService.autenticarPorSenhaAcesso("BC-ABCDEFGH")).thenReturn(idoso);
-        when(jwtService.gerarToken(idoso)).thenReturn("token-idoso");
+        when(idosoService.autenticarIdosoPorSenhaAcesso("BC-ABCDEFGH")).thenReturn(idoso);
+        when(jwtService.gerarTokenJwt(idoso)).thenReturn("token-idoso");
 
-        Map<String, Object> resposta = service.loginIdoso(Map.of("senhaAcesso", "BC-ABCDEFGH"));
+        Map<String, Object> resposta = service.autenticarIdoso(Map.of("senhaAcesso", "BC-ABCDEFGH"));
 
         assertEquals(20, resposta.get("id"));
         assertEquals("Maria", resposta.get("nome"));
@@ -161,12 +161,12 @@ class AuthServiceTest {
         assertEquals("token-idoso", resposta.get("token"));
         assertEquals("Bearer", resposta.get("tipo"));
         assertEquals(true, resposta.get("autenticado"));
-        verify(idosoService).autenticarPorSenhaAcesso("BC-ABCDEFGH");
+        verify(idosoService).autenticarIdosoPorSenhaAcesso("BC-ABCDEFGH");
     }
 
     @Test
     void deveExigirSenhaAcessoNoLoginDoIdoso() {
-        assertThrows(InvalidRequestException.class, () -> service.loginIdoso(Map.of("cpf", "12345678901")));
+        assertThrows(InvalidRequestException.class, () -> service.autenticarIdoso(Map.of("cpf", "12345678901")));
     }
 
     @Test
@@ -174,11 +174,11 @@ class AuthServiceTest {
         Cuidador cuidador = cuidador();
 
         when(cuidadorRepository.findByCpf("12345678901")).thenReturn(Optional.of(cuidador));
-        when(jwtService.gerarToken(cuidador)).thenReturn("token-cuidador");
+        when(jwtService.gerarTokenJwt(cuidador)).thenReturn("token-cuidador");
 
-        Map<String, Object> resposta = service.verificar2fa("123.456.789-01", "123456", "CUIDADOR");
+        Map<String, Object> resposta = service.validarCodigoDoisFatores("123.456.789-01", "123456", "CUIDADOR");
 
-        verify(twoFactorService).validarCodigo("cuidador@email.com", "123456");
+        verify(twoFactorService).validarCodigoDoisFatores("cuidador@email.com", "123456");
         assertEquals("token-cuidador", resposta.get("token"));
         assertEquals(true, resposta.get("autenticado"));
     }
@@ -189,10 +189,10 @@ class AuthServiceTest {
 
         when(cuidadorRepository.findByCpf("12345678901")).thenReturn(Optional.of(cuidador));
 
-        Map<String, Object> resposta = service.recuperarSenha("123.456.789-01");
+        Map<String, Object> resposta = service.solicitarRecuperacaoSenha("123.456.789-01");
 
         assertEquals("cu***@email.com", resposta.get("email"));
-        verify(twoFactorService).enviarCodigo("cuidador@email.com");
+        verify(twoFactorService).enviarCodigoDoisFatores("cuidador@email.com");
     }
 
     @Test
@@ -202,18 +202,18 @@ class AuthServiceTest {
         when(cuidadorRepository.findByEmail("cuidador@email.com")).thenReturn(Optional.of(cuidador));
         when(passwordEncoder.encode("Nova@123")).thenReturn("nova-hash");
 
-        service.novaSenha("cuidador@email.com", "Nova@123");
+        service.atualizarSenhaRecuperada("cuidador@email.com", "Nova@123");
 
-        verify(senhaService).validar("Nova@123");
+        verify(senhaService).validarSenha("Nova@123");
         verify(cuidadorRepository).save(cuidador);
         assertEquals("nova-hash", cuidador.getSenha());
     }
 
     @Test
     void deveVerificarCodigoDeRecuperacao() {
-        Map<String, Object> resposta = service.verificarRecuperacao("cuidador@email.com", "123456");
+        Map<String, Object> resposta = service.validarCodigoRecuperacaoSenha("cuidador@email.com", "123456");
 
-        verify(twoFactorService).validarCodigo("cuidador@email.com", "123456");
+        verify(twoFactorService).validarCodigoDoisFatores("cuidador@email.com", "123456");
         assertTrue((Boolean) resposta.get("valido"));
         assertEquals("cuidador@email.com", resposta.get("email"));
     }

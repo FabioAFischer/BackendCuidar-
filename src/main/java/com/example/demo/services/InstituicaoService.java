@@ -36,59 +36,59 @@ public class InstituicaoService {
         this.emailValidationService = emailValidationService;
     }
 
-    public Page<InstituicaoDTO> listarTodas(Pageable pageable) {
+    public Page<InstituicaoDTO> listarInstituicoesAtivas(Pageable pageable) {
     return repository.findAll(pageable)
-            .map(InstituicaoMapper::toDTO);
+            .map(InstituicaoMapper::converterInstituicaoParaDTO);
 }
 
-    public InstituicaoDTO buscarPorId(Integer id) {
+    public InstituicaoDTO buscarInstituicaoPorId(Integer id) {
         Instituicao instituicao = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Instituição", id.longValue()));
-        return InstituicaoMapper.toDTO(instituicao);
+        return InstituicaoMapper.converterInstituicaoParaDTO(instituicao);
     }
 
-    public InstituicaoDTO criar(InstituicaoDTO dto) {
-        String cnpjLimpo = limparDocumento(dto.getCnpj());
-        String email = emailValidationService.validarParaCriacao(dto.getEmail());
+    public InstituicaoDTO cadastrarInstituicao(InstituicaoDTO dto) {
+        String cnpjLimpo = normalizarDocumento(dto.getCnpj());
+        String email = emailValidationService.validarEmailParaCriacao(dto.getEmail());
         if (repository.existsByCnpj(cnpjLimpo)) {
             throw new DuplicateResourceException("Já existe uma instituição com esse CNPJ");
         }
-        Instituicao instituicao = InstituicaoMapper.toEntity(dto);
+        Instituicao instituicao = InstituicaoMapper.converterDTOParaInstituicao(dto);
         instituicao.setEmail(email);
-        senhaService.validar(dto.getSenha());
+        senhaService.validarSenha(dto.getSenha());
         instituicao.setSenha(passwordEncoder.encode(dto.getSenha()));
-        return InstituicaoMapper.toDTO(repository.save(instituicao));
+        return InstituicaoMapper.converterInstituicaoParaDTO(repository.save(instituicao));
     }
 
-    public InstituicaoDTO atualizar(Integer id, InstituicaoDTO dto) {
+    public InstituicaoDTO atualizarInstituicao(Integer id, InstituicaoDTO dto) {
         Instituicao instituicao = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Instituição", id.longValue()));
 
-        String cnpjLimpo = limparDocumento(dto.getCnpj());
+        String cnpjLimpo = normalizarDocumento(dto.getCnpj());
         if (!instituicao.getCnpj().equals(cnpjLimpo) && repository.existsByCnpj(cnpjLimpo)) {
             throw new DuplicateResourceException("CNPJ já está em uso");
         }
 
-        String email = emailValidationService.validarParaAtualizacao(dto.getEmail(), instituicao.getId());
+        String email = emailValidationService.validarEmailParaAtualizacao(dto.getEmail(), instituicao.getId());
 
-        instituicao.setNome(TextoUtils.paraBanco(dto.getNome()));
+        instituicao.setNome(TextoUtils.normalizarTextoParaBanco(dto.getNome()));
         instituicao.setCnpj(cnpjLimpo);
         instituicao.setEmail(email);
         if (dto.getSenha() != null && !dto.getSenha().isBlank()) {
-            senhaService.validar(dto.getSenha());
+            senhaService.validarSenha(dto.getSenha());
             instituicao.setSenha(passwordEncoder.encode(dto.getSenha()));
         }
-        instituicao.setRua(TextoUtils.paraBanco(dto.getRua()));
-        instituicao.setBairro(TextoUtils.paraBanco(dto.getBairro()));
-        instituicao.setUf(TextoUtils.paraBanco(dto.getUf()));
+        instituicao.setRua(TextoUtils.normalizarTextoParaBanco(dto.getRua()));
+        instituicao.setBairro(TextoUtils.normalizarTextoParaBanco(dto.getBairro()));
+        instituicao.setUf(TextoUtils.normalizarTextoParaBanco(dto.getUf()));
         instituicao.setNumero(dto.getNumero());
-        instituicao.setCep(limparDocumento(dto.getCep()));
+        instituicao.setCep(normalizarDocumento(dto.getCep()));
         instituicao.setData_atualizacao(LocalDateTime.now());
 
-        return InstituicaoMapper.toDTO(repository.save(instituicao));
+        return InstituicaoMapper.converterInstituicaoParaDTO(repository.save(instituicao));
     }
 
-    public void inativar(Integer id) {
+    public void inativarInstituicao(Integer id) {
         Instituicao instituicao = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Instituição", id.longValue()));
         instituicao.setStatus(Status.INATIVO);
@@ -96,7 +96,7 @@ public class InstituicaoService {
         repository.save(instituicao);
     }
 
-    public void ativar(Integer id) {
+    public void reativarInstituicao(Integer id) {
     Instituicao instituicao = repository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Instituição", id.longValue()));
 
@@ -106,7 +106,7 @@ public class InstituicaoService {
     repository.save(instituicao);
 }
 
-    private String limparDocumento(String valor) {
+    private String normalizarDocumento(String valor) {
         if (valor == null || valor.isBlank()) {
             return null;
         }

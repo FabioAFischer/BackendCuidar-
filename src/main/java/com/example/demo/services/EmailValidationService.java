@@ -32,19 +32,19 @@ public class EmailValidationService {
         this.instituicaoRepository = instituicaoRepository;
     }
 
-    public String validarParaCriacao(String email) {
-        String emailNormalizado = validarFormato(email);
-        validarDisponivel(emailNormalizado, null);
+    public String validarEmailParaCriacao(String email) {
+        String emailNormalizado = validarFormatoEmail(email);
+        validarEmailDisponivel(emailNormalizado, null);
         return emailNormalizado;
     }
 
-    public String validarParaAtualizacao(String email, Integer usuarioIdAtual) {
-        String emailNormalizado = validarFormato(email);
-        validarDisponivel(emailNormalizado, usuarioIdAtual);
+    public String validarEmailParaAtualizacao(String email, Integer usuarioIdAtual) {
+        String emailNormalizado = validarFormatoEmail(email);
+        validarEmailDisponivel(emailNormalizado, usuarioIdAtual);
         return emailNormalizado;
     }
 
-    private String validarFormato(String email) {
+    private String validarFormatoEmail(String email) {
         if (email == null || email.isBlank()) {
             throw new InvalidRequestException("Email deve ser informado");
         }
@@ -57,15 +57,15 @@ public class EmailValidationService {
         return emailNormalizado;
     }
 
-    private void validarDisponivel(String email, Integer usuarioIdAtual) {
-        if (emailPertenceAOutroUsuario(cuidadorRepository.findByEmail(email), usuarioIdAtual)
-                || emailPertenceAOutroUsuario(instituicaoRepository.findByEmail(email), usuarioIdAtual)
-                || emailPertenceAOutroUsuario(administradorRepository.findByEmail(email), usuarioIdAtual)) {
+    private void validarEmailDisponivel(String email, Integer usuarioIdAtual) {
+        if (verificarEmailPertenceAOutroUsuario(cuidadorRepository.findByEmail(email), usuarioIdAtual)
+                || verificarEmailPertenceAOutroUsuario(instituicaoRepository.findByEmail(email), usuarioIdAtual)
+                || verificarEmailPertenceAOutroUsuario(administradorRepository.findByEmail(email), usuarioIdAtual)) {
             throw new DuplicateResourceException("Email ja esta em uso");
         }
     }
 
-    private boolean emailPertenceAOutroUsuario(Optional<? extends Usuario> usuario, Integer usuarioIdAtual) {
+    private boolean verificarEmailPertenceAOutroUsuario(Optional<? extends Usuario> usuario, Integer usuarioIdAtual) {
         return usuario.isPresent()
                 && (usuarioIdAtual == null || usuario.get().getId() != usuarioIdAtual);
     }

@@ -55,7 +55,7 @@ class RemedioServiceTest {
         when(cuidadorRepository.findById(CUIDADOR_ID)).thenReturn(Optional.of(cuidador()));
         when(remedioRepository.save(any(Remedio.class))).thenReturn(salvo);
 
-        RemedioDTO resultado = service.criar(dto, CUIDADOR_ID);
+        RemedioDTO resultado = service.criarRemedio(dto, CUIDADOR_ID);
 
         assertEquals(1, resultado.getId());
         assertEquals("Dipirona", resultado.getNome());
@@ -69,7 +69,7 @@ class RemedioServiceTest {
 
         when(remedioRepository.findByNomeAndCuidadorId("DIPIRONA", CUIDADOR_ID)).thenReturn(Optional.of(existente));
 
-        assertThrows(DuplicateResourceException.class, () -> service.criar(dto, CUIDADOR_ID));
+        assertThrows(DuplicateResourceException.class, () -> service.criarRemedio(dto, CUIDADOR_ID));
     }
 
     @Test
@@ -80,7 +80,7 @@ class RemedioServiceTest {
         when(remedioRepository.findByNomeAndCuidadorId("DIPIRONA", CUIDADOR_ID)).thenReturn(Optional.of(existente));
         when(remedioRepository.save(existente)).thenReturn(existente);
 
-        RemedioDTO resultado = service.criar(dto, CUIDADOR_ID);
+        RemedioDTO resultado = service.criarRemedio(dto, CUIDADOR_ID);
 
         assertEquals(Status.ATIVO, resultado.getStatus());
         assertEquals("Nova Observação", resultado.getObservacao());
@@ -93,7 +93,7 @@ class RemedioServiceTest {
 
         when(remedioRepository.findByIdAndCuidadorId(1, CUIDADOR_ID)).thenReturn(Optional.of(remedio));
 
-        RemedioDTO resultado = service.buscarPorId(1, CUIDADOR_ID);
+        RemedioDTO resultado = service.buscarRemedioPorId(1, CUIDADOR_ID);
 
         assertEquals(1, resultado.getId());
         assertEquals("Dipirona", resultado.getNome());
@@ -103,7 +103,7 @@ class RemedioServiceTest {
     void deveFalharAoBuscarRemedioInexistente() {
         when(remedioRepository.findByIdAndCuidadorId(99, CUIDADOR_ID)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> service.buscarPorId(99, CUIDADOR_ID));
+        assertThrows(ResourceNotFoundException.class, () -> service.buscarRemedioPorId(99, CUIDADOR_ID));
     }
 
     @Test
@@ -114,7 +114,7 @@ class RemedioServiceTest {
         when(remedioRepository.findByIdAndCuidadorId(1, CUIDADOR_ID)).thenReturn(Optional.of(remedio));
         when(remedioRepository.existsByNomeAndCuidadorId("PARACETAMOL", CUIDADOR_ID)).thenReturn(true);
 
-        assertThrows(DuplicateResourceException.class, () -> service.atualizar(1, dto, CUIDADOR_ID));
+        assertThrows(DuplicateResourceException.class, () -> service.atualizarRemedio(1, dto, CUIDADOR_ID));
     }
 
     @Test
@@ -126,7 +126,7 @@ class RemedioServiceTest {
         when(remedioRepository.findByIdAndCuidadorId(1, CUIDADOR_ID)).thenReturn(Optional.of(remedio));
         when(prescricaoRepository.findByRemedioIdAndStatus(1, Status.ATIVO)).thenReturn(List.of(prescricao));
 
-        service.inativar(1, CUIDADOR_ID);
+        service.inativarRemedio(1, CUIDADOR_ID);
 
         ArgumentCaptor<Remedio> captor = ArgumentCaptor.forClass(Remedio.class);
         verify(remedioRepository).save(captor.capture());

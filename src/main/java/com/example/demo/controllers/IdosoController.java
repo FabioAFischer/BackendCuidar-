@@ -33,63 +33,63 @@ public class IdosoController {
     }
 
     @GetMapping("/listar_todos")
-    public ResponseEntity<Page<IdosoDTO>> listarTodos(
+    public ResponseEntity<Page<IdosoDTO>> listarIdosos(
             Authentication authentication,
             @PageableDefault(size = 10, sort = "nome") Pageable pageable) {
-        if (isInstituicao(authentication)) {
+        if (verificarAutenticacaoInstituicao(authentication)) {
             Integer instituicaoId = (Integer) authentication.getPrincipal();
-            return ResponseEntity.ok(service.listarAtivosPorInstituicao(instituicaoId, pageable));
+            return ResponseEntity.ok(service.listarIdososAtivosPorInstituicao(instituicaoId, pageable));
         }
 
-        return ResponseEntity.ok(service.listarAtivos(pageable));
+        return ResponseEntity.ok(service.listarIdososAtivos(pageable));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<IdosoDTO> buscarPorId(@PathVariable Integer id) {
-        return ResponseEntity.ok(service.buscarPorId(id));
+    public ResponseEntity<IdosoDTO> buscarIdosoPorId(@PathVariable Integer id) {
+        return ResponseEntity.ok(service.buscarIdosoPorId(id));
     }
 
     @GetMapping("/trazerdados/{cpf}")
-    public ResponseEntity<IdosoDTO> buscarPorCpf(@PathVariable String cpf) {
-        return ResponseEntity.ok(service.buscarPorCpf(cpf));
+    public ResponseEntity<IdosoDTO> buscarIdosoPorCpf(@PathVariable String cpf) {
+        return ResponseEntity.ok(service.buscarIdosoPorCpf(cpf));
     }
 
     @PostMapping("/cadastrar")
-    public ResponseEntity<IdosoDTO> criar(@RequestBody IdosoDTO dto) {
-        IdosoDTO criada = service.criar(dto);
+    public ResponseEntity<IdosoDTO> cadastrarIdoso(@RequestBody IdosoDTO dto) {
+        IdosoDTO criada = service.cadastrarIdoso(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(criada);
     }
 
     @PutMapping("/atualizar/{id}")
-    public ResponseEntity<IdosoDTO> atualizar(@PathVariable Integer id, @RequestBody IdosoDTO dto) {
-        return ResponseEntity.ok(service.atualizar(id, dto));
+    public ResponseEntity<IdosoDTO> atualizarIdoso(@PathVariable Integer id, @RequestBody IdosoDTO dto) {
+        return ResponseEntity.ok(service.atualizarIdoso(id, dto));
     }
 
     @DeleteMapping("/deletar/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable Integer id) {
-        service.inativar(id);
+    public ResponseEntity<Void> inativarIdoso(@PathVariable Integer id) {
+        service.inativarIdoso(id);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/{id}/senha-acesso")
-    public ResponseEntity<Map<String, Object>> obterSenhaAcesso(
+    public ResponseEntity<Map<String, Object>> obterSenhaAcessoDoIdoso(
             @PathVariable Integer id,
             @RequestBody Map<String, String> dados,
             Authentication authentication) {
-        if (!isCuidador(authentication)) {
+        if (!verificarAutenticacaoCuidador(authentication)) {
             throw new UnauthorizedException("Apenas cuidadores podem acessar a senha do idoso");
         }
 
         Integer cuidadorId = (Integer) authentication.getPrincipal();
-        return ResponseEntity.ok(service.obterSenhaAcesso(id, cuidadorId, dados.get("senha")));
+        return ResponseEntity.ok(service.obterSenhaAcessoDoIdoso(id, cuidadorId, dados.get("senha")));
     }
 
-    private boolean isInstituicao(Authentication authentication) {
+    private boolean verificarAutenticacaoInstituicao(Authentication authentication) {
         return authentication != null && authentication.getAuthorities().stream()
                 .anyMatch(authority -> "ROLE_INSTITUICAO".equals(authority.getAuthority()));
     }
 
-    private boolean isCuidador(Authentication authentication) {
+    private boolean verificarAutenticacaoCuidador(Authentication authentication) {
         return authentication != null && authentication.getAuthorities().stream()
                 .anyMatch(authority -> "ROLE_CUIDADOR".equals(authority.getAuthority()));
     }
