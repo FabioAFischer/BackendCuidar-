@@ -37,10 +37,10 @@ public class RemedioController {
         description = "Retorna uma lista paginada de remédios ativos ordenados por nome"
     )
     @GetMapping("/listar_todas")
-    public ResponseEntity<Page<RemedioDTO>> listarTodas(
+    public ResponseEntity<Page<RemedioDTO>> listarRemedios(
             @PageableDefault(size = 10, sort = "nome") Pageable pageable,
             Authentication authentication) {
-        return ResponseEntity.ok(service.listarAtivas(getCuidadorId(authentication), pageable));
+        return ResponseEntity.ok(service.listarRemediosAtivos(extrairCuidadorIdAutenticado(authentication), pageable));
     }
 
     @Operation(
@@ -48,8 +48,8 @@ public class RemedioController {
         description = "Retorna os dados de um remédio específico com base no ID informado"
     )
     @GetMapping("/listar/{id}")
-    public ResponseEntity<RemedioDTO> buscarPorId(@PathVariable int id, Authentication authentication) {
-        return ResponseEntity.ok(service.buscarPorId(id, getCuidadorId(authentication)));
+    public ResponseEntity<RemedioDTO> buscarRemedioPorId(@PathVariable int id, Authentication authentication) {
+        return ResponseEntity.ok(service.buscarRemedioPorId(id, extrairCuidadorIdAutenticado(authentication)));
     }
 
     @Operation(
@@ -57,8 +57,8 @@ public class RemedioController {
         description = "Cria um novo remédio com os dados enviados no corpo da requisição"
     )
     @PostMapping("/cadastrar")
-    public ResponseEntity<RemedioDTO> criar(@RequestBody RemedioDTO dto, Authentication authentication) {
-        RemedioDTO criada = service.criar(dto, getCuidadorId(authentication));
+    public ResponseEntity<RemedioDTO> criarRemedio(@RequestBody RemedioDTO dto, Authentication authentication) {
+        RemedioDTO criada = service.criarRemedio(dto, extrairCuidadorIdAutenticado(authentication));
         return ResponseEntity.status(HttpStatus.CREATED).body(criada);
     }
 
@@ -67,11 +67,11 @@ public class RemedioController {
         description = "Atualiza os dados de um remédio existente com base no ID informado"
     )
     @PutMapping("/atualizar/{id}")
-    public ResponseEntity<RemedioDTO> atualizar(
+    public ResponseEntity<RemedioDTO> atualizarRemedio(
             @PathVariable int id,
             @RequestBody RemedioDTO dto,
             Authentication authentication) {
-        return ResponseEntity.ok(service.atualizar(id, dto, getCuidadorId(authentication)));
+        return ResponseEntity.ok(service.atualizarRemedio(id, dto, extrairCuidadorIdAutenticado(authentication)));
     }
 
     @Operation(
@@ -79,17 +79,17 @@ public class RemedioController {
         description = "Realiza a exclusão lógica (inativação) de um remédio com base no ID informado"
     )
     @DeleteMapping("/deletar/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable int id, Authentication authentication) {
-        service.inativar(id, getCuidadorId(authentication));
+    public ResponseEntity<Void> inativarRemedio(@PathVariable int id, Authentication authentication) {
+        service.inativarRemedio(id, extrairCuidadorIdAutenticado(authentication));
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/ping")
-    public String ping() {
+    public String responderPingRemedio() {
         return "pong";
     }
 
-    private Integer getCuidadorId(Authentication authentication) {
+    private Integer extrairCuidadorIdAutenticado(Authentication authentication) {
         return (Integer) authentication.getPrincipal();
     }
 }

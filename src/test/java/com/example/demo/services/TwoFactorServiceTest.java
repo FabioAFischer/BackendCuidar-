@@ -32,7 +32,7 @@ class TwoFactorServiceTest {
 
     @Test
     void devePublicarEventoAposGerarCodigo() {
-        service.enviarCodigo("cuidador@email.com");
+        service.enviarCodigoDoisFatores("cuidador@email.com");
 
         verify(repository).deleteByEmail("cuidador@email.com");
         verify(repository).save(any(CodigoVerificacao.class));

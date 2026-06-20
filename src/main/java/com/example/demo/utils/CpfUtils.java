@@ -11,13 +11,13 @@ public final class CpfUtils {
     private CpfUtils() {
     }
 
-    public static String normalizar(String cpf) {
-        return TextoUtils.limparDocumento(cpf);
+    public static String normalizarCpf(String cpf) {
+        return TextoUtils.normalizarDocumento(cpf);
     }
 
     @SafeVarargs
-    public static boolean estaEmUso(String cpf, Predicate<String>... verificadores) {
-        String cpfLimpo = normalizar(cpf);
+    public static boolean verificarCpfEmUso(String cpf, Predicate<String>... verificadores) {
+        String cpfLimpo = normalizarCpf(cpf);
 
         if (cpfLimpo == null) {
             return false;
@@ -33,8 +33,8 @@ public final class CpfUtils {
     }
 
     @SafeVarargs
-    public static void validarDisponivel(String cpf, Predicate<String>... verificadores) {
-        if (estaEmUso(cpf, verificadores)) {
+    public static void validarCpfDisponivel(String cpf, Predicate<String>... verificadores) {
+        if (verificarCpfEmUso(cpf, verificadores)) {
             throw new DuplicateResourceException(MENSAGEM_CPF_EM_USO);
         }
     }

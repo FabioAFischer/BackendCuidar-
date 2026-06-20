@@ -40,73 +40,73 @@ public class AlertasService {
         this.vinculoRepository = vinculoRepository;
     }
 
-    public Page<AlertasDTO> listarAtivosDoCuidador(Integer cuidadorId, Pageable pageable) {
-        validarCuidador(cuidadorId);
+    public Page<AlertasDTO> listarAlertasAtivosDoCuidador(Integer cuidadorId, Pageable pageable) {
+        validarCuidadorAutenticado(cuidadorId);
         return repository.findNaoCanceladosPorCuidador(cuidadorId, StatusAlertas.CANCELADO, pageable)
-                .map(AlertasMapper::toDTO);
+                .map(AlertasMapper::converterAlertaParaDTO);
     }
 
-    public Page<AlertasDTO> listarPorIdoso(Integer idosoId, Integer cuidadorId, Pageable pageable) {
-        validarCuidador(cuidadorId);
-        validarIdosoVinculado(idosoId, cuidadorId);
+    public Page<AlertasDTO> listarAlertasPorIdoso(Integer idosoId, Integer cuidadorId, Pageable pageable) {
+        validarCuidadorAutenticado(cuidadorId);
+        validarVinculoEntreIdosoECuidador(idosoId, cuidadorId);
         return repository.findNaoCanceladosPorIdosoECuidador(idosoId, cuidadorId, StatusAlertas.CANCELADO, pageable)
-                .map(AlertasMapper::toDTO);
+                .map(AlertasMapper::converterAlertaParaDTO);
     }
 
-    public Page<AlertasDTO> listarDoIdoso(Integer idosoId, Pageable pageable) {
-        validarIdoso(idosoId);
+    public Page<AlertasDTO> listarAlertasDoIdoso(Integer idosoId, Pageable pageable) {
+        validarIdosoAutenticado(idosoId);
         return repository.findByIdosoIdAndStatusAlertasNot(idosoId, StatusAlertas.CANCELADO, pageable)
-                .map(AlertasMapper::toDTO);
+                .map(AlertasMapper::converterAlertaParaDTO);
     }
 
-    public AlertasDTO buscarPorId(int id, Integer cuidadorId) {
-        validarCuidador(cuidadorId);
-        Alertas alerta = buscarAlerta(id);
-        validarIdosoVinculado(alerta.getIdoso().getId(), cuidadorId);
-        return AlertasMapper.toDTO(alerta);
+    public AlertasDTO buscarAlertaPorId(int id, Integer cuidadorId) {
+        validarCuidadorAutenticado(cuidadorId);
+        Alertas alerta = buscarEntidadeAlertaPorId(id);
+        validarVinculoEntreIdosoECuidador(alerta.getIdoso().getId(), cuidadorId);
+        return AlertasMapper.converterAlertaParaDTO(alerta);
     }
 
-    public AlertasDTO criar(AlertasDTO dto, Integer cuidadorId) {
-        validarCuidador(cuidadorId);
-        validar(dto);
+    public AlertasDTO criarAlerta(AlertasDTO dto, Integer cuidadorId) {
+        validarCuidadorAutenticado(cuidadorId);
+        validarDadosAlerta(dto);
 
-        Idoso idoso = buscarIdoso(dto.getIdosoId());
-        validarIdosoVinculado(idoso.getId(), cuidadorId);
-        Prescricao prescricao = buscarPrescricaoParaAlerta(dto, idoso);
+        Idoso idoso = buscarIdosoPorId(dto.getIdosoId());
+        validarVinculoEntreIdosoECuidador(idoso.getId(), cuidadorId);
+        Prescricao prescricao = buscarPrescricaoVinculadaAoAlerta(dto, idoso);
 
-        return AlertasMapper.toDTO(repository.save(AlertasMapper.toEntity(dto, idoso, prescricao)));
+        return AlertasMapper.converterAlertaParaDTO(repository.save(AlertasMapper.converterDTOParaAlerta(dto, idoso, prescricao)));
     }
 
-    public AlertasDTO atualizar(int id, AlertasDTO dto, Integer cuidadorId) {
-        validarCuidador(cuidadorId);
-        validar(dto);
+    public AlertasDTO atualizarAlerta(int id, AlertasDTO dto, Integer cuidadorId) {
+        validarCuidadorAutenticado(cuidadorId);
+        validarDadosAlerta(dto);
 
-        Alertas alerta = buscarAlerta(id);
-        validarIdosoVinculado(alerta.getIdoso().getId(), cuidadorId);
+        Alertas alerta = buscarEntidadeAlertaPorId(id);
+        validarVinculoEntreIdosoECuidador(alerta.getIdoso().getId(), cuidadorId);
 
-        Idoso idoso = buscarIdoso(dto.getIdosoId());
-        validarIdosoVinculado(idoso.getId(), cuidadorId);
-        Prescricao prescricao = buscarPrescricaoParaAlerta(dto, idoso);
+        Idoso idoso = buscarIdosoPorId(dto.getIdosoId());
+        validarVinculoEntreIdosoECuidador(idoso.getId(), cuidadorId);
+        Prescricao prescricao = buscarPrescricaoVinculadaAoAlerta(dto, idoso);
 
-        AlertasMapper.updateEntity(alerta, dto, idoso, prescricao);
-        return AlertasMapper.toDTO(repository.save(alerta));
+        AlertasMapper.atualizarAlertaComDTO(alerta, dto, idoso, prescricao);
+        return AlertasMapper.converterAlertaParaDTO(repository.save(alerta));
     }
 
-    public void cancelar(int id, Integer cuidadorId) {
-        validarCuidador(cuidadorId);
+    public void cancelarAlerta(int id, Integer cuidadorId) {
+        validarCuidadorAutenticado(cuidadorId);
 
-        Alertas alerta = buscarAlerta(id);
-        validarIdosoVinculado(alerta.getIdoso().getId(), cuidadorId);
+        Alertas alerta = buscarEntidadeAlertaPorId(id);
+        validarVinculoEntreIdosoECuidador(alerta.getIdoso().getId(), cuidadorId);
 
         alerta.setStatusAlertas(StatusAlertas.CANCELADO);
         alerta.setData_atualizacao(LocalDateTime.now());
         repository.save(alerta);
     }
 
-    public AlertasDTO confirmar(int id, Integer idosoId) {
-        validarIdoso(idosoId);
+    public AlertasDTO confirmarAlerta(int id, Integer idosoId) {
+        validarIdosoAutenticado(idosoId);
 
-        Alertas alerta = buscarAlerta(id);
+        Alertas alerta = buscarEntidadeAlertaPorId(id);
         if (alerta.getIdoso() == null || alerta.getIdoso().getId() != idosoId) {
             throw new UnauthorizedException("Alerta nao pertence ao idoso autenticado");
         }
@@ -117,20 +117,20 @@ public class AlertasService {
 
         alerta.setStatusAlertas(StatusAlertas.REALIZADO);
         alerta.setData_atualizacao(LocalDateTime.now());
-        return AlertasMapper.toDTO(repository.save(alerta));
+        return AlertasMapper.converterAlertaParaDTO(repository.save(alerta));
     }
 
-    private Alertas buscarAlerta(int id) {
+    private Alertas buscarEntidadeAlertaPorId(int id) {
         return repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Alerta", (long) id));
     }
 
-    private Idoso buscarIdoso(Integer id) {
+    private Idoso buscarIdosoPorId(Integer id) {
         return idosoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Idoso", id.longValue()));
     }
 
-    private Prescricao buscarPrescricaoParaAlerta(AlertasDTO dto, Idoso idoso) {
+    private Prescricao buscarPrescricaoVinculadaAoAlerta(AlertasDTO dto, Idoso idoso) {
         if (dto.getTipoAlerta() != TipoAlerta.REMEDIO) {
             return null;
         }
@@ -149,7 +149,7 @@ public class AlertasService {
         return prescricao;
     }
 
-    private void validar(AlertasDTO dto) {
+    private void validarDadosAlerta(AlertasDTO dto) {
         if (dto == null) {
             throw new InvalidRequestException("Dados do alerta nao informados");
         }
@@ -167,19 +167,19 @@ public class AlertasService {
         }
     }
 
-    private void validarCuidador(Integer cuidadorId) {
+    private void validarCuidadorAutenticado(Integer cuidadorId) {
         if (cuidadorId == null) {
             throw new UnauthorizedException("Cuidador autenticado nao identificado");
         }
     }
 
-    private void validarIdoso(Integer idosoId) {
+    private void validarIdosoAutenticado(Integer idosoId) {
         if (idosoId == null) {
             throw new UnauthorizedException("Idoso autenticado nao identificado");
         }
     }
 
-    private void validarIdosoVinculado(Integer idosoId, Integer cuidadorId) {
+    private void validarVinculoEntreIdosoECuidador(Integer idosoId, Integer cuidadorId) {
         if (!vinculoRepository.existsByIdosoIdAndCuidadorId(idosoId, cuidadorId)) {
             throw new UnauthorizedException("Cuidador nao possui vinculo com o idoso informado");
         }

@@ -39,25 +39,25 @@ class AdministradorServiceTest {
 
     @Test
     void deveLancarExcecaoAoCriarComCpfDuplicado() {
-        AdministradorDTO dto = administradorDTO();
+        AdministradorDTO dto = criarAdministradorDTO();
 
         when(repository.existsByCpf("12345678901")).thenReturn(true);
 
-        assertThrows(DuplicateResourceException.class, () -> service.criar(dto));
+        assertThrows(DuplicateResourceException.class, () -> service.cadastrarAdministrador(dto));
     }
 
     @Test
     void deveLancarExcecaoAoBuscarAdministradorInexistente() {
         when(repository.findById(99)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> service.buscarPorId(99));
+        assertThrows(ResourceNotFoundException.class, () -> service.buscarAdministradorPorId(99));
     }
 
     @Test
     void deveLancarExcecaoAoAtualizarAdministradorInexistente() {
         when(repository.findById(99)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> service.atualizar(99, administradorDTO()));
+        assertThrows(ResourceNotFoundException.class, () -> service.atualizarAdministrador(99, criarAdministradorDTO()));
     }
 
     @Test
@@ -68,17 +68,17 @@ class AdministradorServiceTest {
         when(repository.findById(1)).thenReturn(Optional.of(existente));
         when(repository.existsByCpf("12345678901")).thenReturn(true);
 
-        assertThrows(DuplicateResourceException.class, () -> service.atualizar(1, administradorDTO()));
+        assertThrows(DuplicateResourceException.class, () -> service.atualizarAdministrador(1, criarAdministradorDTO()));
     }
 
     @Test
     void deveLancarExcecaoAoInativarAdministradorInexistente() {
         when(repository.findById(99)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> service.inativar(99));
+        assertThrows(ResourceNotFoundException.class, () -> service.inativarAdministrador(99));
     }
 
-    private AdministradorDTO administradorDTO() {
+    private AdministradorDTO criarAdministradorDTO() {
         AdministradorDTO dto = new AdministradorDTO();
         dto.setNome("Admin");
         dto.setCpf("12345678901");

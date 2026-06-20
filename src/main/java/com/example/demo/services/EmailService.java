@@ -21,7 +21,7 @@ public class EmailService {
         this.mailSender = mailSender;
     }
 
-    public void enviarCodigoVerificacao(String destinatario, String codigo) {
+    public void enviarEmailCodigoVerificacao(String destinatario, String codigo) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
@@ -29,7 +29,7 @@ public class EmailService {
             helper.setFrom("secretariabomcuidado@gmail.com");
             helper.setTo(destinatario);
             helper.setSubject("Código de verificação - Bom Cuidado");
-            helper.setText(construirHtml(codigo), true);
+            helper.setText(construirHtmlCodigoVerificacao(codigo), true);
 
             mailSender.send(message);
         } catch (Exception e) {
@@ -38,7 +38,7 @@ public class EmailService {
         }
     }
 
-    private String construirHtml(String codigo) {
+    private String construirHtmlCodigoVerificacao(String codigo) {
         return """
                 <!DOCTYPE html>
                 <html>

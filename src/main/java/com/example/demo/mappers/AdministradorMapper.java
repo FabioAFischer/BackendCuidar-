@@ -15,29 +15,29 @@ public class AdministradorMapper {
     private AdministradorMapper() {
     }
 
-    public static AdministradorDTO toDTO(Administrador administrador) {
+    public static AdministradorDTO converterAdministradorParaDTO(Administrador administrador) {
         if (administrador == null) {
             return null;
         }
 
         AdministradorDTO dto = new AdministradorDTO();
         dto.setId(administrador.getId());
-        dto.setNome(TextoUtils.paraExibicao(administrador.getNome()));
+        dto.setNome(TextoUtils.formatarTextoParaExibicao(administrador.getNome()));
         dto.setCpf(administrador.getCpf());
         dto.setEmail(administrador.getEmail());
 
         return dto;
     }
 
-    public static Administrador toEntity(AdministradorDTO dto) {
+    public static Administrador converterDTOParaAdministrador(AdministradorDTO dto) {
         if (dto == null) {
             return null;
         }
 
         Administrador administrador = new Administrador();
 
-        administrador.setNome(TextoUtils.paraBanco(dto.getNome()));
-        administrador.setCpf(limparDocumento(dto.getCpf()));
+        administrador.setNome(TextoUtils.normalizarTextoParaBanco(dto.getNome()));
+        administrador.setCpf(normalizarDocumento(dto.getCpf()));
         administrador.setEmail(dto.getEmail());
         administrador.setSenha(dto.getSenha());
 
@@ -48,18 +48,18 @@ public class AdministradorMapper {
         return administrador;
     }
 
-    public static void updateEntity(Administrador administrador, AdministradorDTO dto) {
+    public static void atualizarAdministradorComDTO(Administrador administrador, AdministradorDTO dto) {
         if (administrador == null || dto == null) {
             return;
         }
 
-        administrador.setNome(TextoUtils.paraBanco(dto.getNome()));
-        administrador.setCpf(limparDocumento(dto.getCpf()));
+        administrador.setNome(TextoUtils.normalizarTextoParaBanco(dto.getNome()));
+        administrador.setCpf(normalizarDocumento(dto.getCpf()));
         administrador.setEmail(dto.getEmail());
         administrador.setData_atualizacao(LocalDateTime.now());
     }
 
-    public static void inativarEntity(Administrador administrador) {
+    public static void inativarAdministrador(Administrador administrador) {
         if (administrador == null) {
             return;
         }
@@ -68,7 +68,7 @@ public class AdministradorMapper {
         administrador.setData_atualizacao(LocalDateTime.now());
     }
 
-    public static List<AdministradorDTO> toDTOList(List<Administrador> administradores) {
+    public static List<AdministradorDTO> converterAdministradoresParaDTOs(List<Administrador> administradores) {
         List<AdministradorDTO> lista = new ArrayList<>();
 
         if (administradores == null) {
@@ -76,13 +76,13 @@ public class AdministradorMapper {
         }
 
         for (Administrador administrador : administradores) {
-            lista.add(toDTO(administrador));
+            lista.add(converterAdministradorParaDTO(administrador));
         }
 
         return lista;
     }
 
-    private static String limparDocumento(String valor) {
+    private static String normalizarDocumento(String valor) {
         if (valor == null || valor.isBlank()) {
             return null;
         }

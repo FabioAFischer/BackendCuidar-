@@ -34,37 +34,37 @@ public class VinculoController {
 
     @Operation(summary = "Listar vínculos", description = "Retorna uma lista paginada de todos os vínculos")
     @GetMapping("/listar_todos")
-    public ResponseEntity<Page<VinculoDTO>> listarTodos(
+    public ResponseEntity<Page<VinculoDTO>> listarVinculos(
             @PageableDefault(size = 10, sort = "id") Pageable pageable) {
-        return ResponseEntity.ok(service.listarTodos(pageable));
+        return ResponseEntity.ok(service.listarVinculos(pageable));
     }
 
     @Operation(summary = "Listar vínculos por idoso", description = "Retorna vínculos de um idoso específico")
     @GetMapping("/idoso/{idosoId}")
-    public ResponseEntity<Page<VinculoDTO>> listarPorIdoso(
+    public ResponseEntity<Page<VinculoDTO>> listarVinculosPorIdoso(
             @PathVariable Integer idosoId,
             @PageableDefault(size = 10, sort = "id") Pageable pageable) {
-        return ResponseEntity.ok(service.listarPorIdoso(idosoId, pageable));
+        return ResponseEntity.ok(service.listarVinculosPorIdoso(idosoId, pageable));
     }
 
     @Operation(summary = "Listar vínculos por cuidador", description = "Retorna vínculos de um cuidador específico")
     @GetMapping("/cuidador/{cuidadorId}")
-    public ResponseEntity<Page<VinculoDTO>> listarPorCuidador(
+    public ResponseEntity<Page<VinculoDTO>> listarVinculosPorCuidador(
             @PathVariable Integer cuidadorId,
             @PageableDefault(size = 10, sort = "id") Pageable pageable) {
-        return ResponseEntity.ok(service.listarPorCuidador(cuidadorId, pageable));
+        return ResponseEntity.ok(service.listarVinculosPorCuidador(cuidadorId, pageable));
     }
 
     @Operation(summary = "Buscar vínculo por ID", description = "Retorna os dados de um vínculo pelo ID")
     @GetMapping("/{id}")
-    public ResponseEntity<VinculoDTO> buscarPorId(@PathVariable Integer id) {
-        return ResponseEntity.ok(service.buscarPorId(id));
+    public ResponseEntity<VinculoDTO> buscarVinculoPorId(@PathVariable Integer id) {
+        return ResponseEntity.ok(service.buscarVinculoPorId(id));
     }
 
     @Operation(summary = "Criar vínculo", description = "Cria um novo vínculo entre cuidador e idoso")
     @PostMapping("/cadastrar")
-    public ResponseEntity<VinculoDTO> criar(@RequestBody VinculoDTO dto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.criar(dto));
+    public ResponseEntity<VinculoDTO> criarVinculo(@RequestBody VinculoDTO dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.criarVinculo(dto));
     }
 
     @Operation(summary = "Definir cuidador de emergência", description = "Define um cuidador vinculado como contato de emergência do idoso, removendo o anterior se houver")
@@ -81,8 +81,8 @@ public class VinculoController {
 
     @Operation(summary = "Deletar vínculo", description = "Remove o vínculo entre cuidador e idoso")
     @DeleteMapping("/deletar/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable Integer id) {
-        service.deletar(id);
+    public ResponseEntity<Void> excluirVinculo(@PathVariable Integer id) {
+        service.excluirContato(id);
         return ResponseEntity.noContent().build();
     }
 }

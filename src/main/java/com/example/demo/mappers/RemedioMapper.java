@@ -7,27 +7,27 @@ import com.example.demo.utils.TextoUtils;
 
 public class RemedioMapper {
 
-    public static RemedioDTO toDTO(Remedio remedio) {
+    public static RemedioDTO converterRemedioParaDTO(Remedio remedio) {
         if (remedio == null)
             return null;
 
         RemedioDTO dto = new RemedioDTO();
         dto.setId(remedio.getId());
-        dto.setNome(TextoUtils.paraExibicao(remedio.getNome()));
-        dto.setObservacao(TextoUtils.paraExibicao(remedio.getObservacao()));
+        dto.setNome(TextoUtils.formatarTextoParaExibicao(remedio.getNome()));
+        dto.setObservacao(TextoUtils.formatarTextoParaExibicao(remedio.getObservacao()));
         dto.setStatus(remedio.getStatus());
 
         return dto;
     }
 
-    public static Remedio toEntity(RemedioDTO dto) {
+    public static Remedio converterDTOParaRemedio(RemedioDTO dto) {
         if (dto == null)
             return null;
 
         Remedio remedio = new Remedio();
 
-        remedio.setNome(TextoUtils.paraBanco(dto.getNome()));
-        remedio.setObservacao(TextoUtils.paraBanco(dto.getObservacao()));
+        remedio.setNome(TextoUtils.normalizarTextoParaBanco(dto.getNome()));
+        remedio.setObservacao(TextoUtils.normalizarTextoParaBanco(dto.getObservacao()));
 
         if (dto.getStatus() != null) {
             remedio.setStatus(dto.getStatus());
@@ -38,12 +38,12 @@ public class RemedioMapper {
         return remedio;
     }
 
-    public static void updateEntity(Remedio remedio, RemedioDTO dto) {
+    public static void atualizarRemedioComDTO(Remedio remedio, RemedioDTO dto) {
         if (dto == null)
             return;
 
-        remedio.setNome(TextoUtils.paraBanco(dto.getNome()));
-        remedio.setObservacao(TextoUtils.paraBanco(dto.getObservacao()));
+        remedio.setNome(TextoUtils.normalizarTextoParaBanco(dto.getNome()));
+        remedio.setObservacao(TextoUtils.normalizarTextoParaBanco(dto.getObservacao()));
 
         if (dto.getStatus() != null) {
             remedio.setStatus(dto.getStatus());

@@ -47,74 +47,74 @@ public class PrescricaoService {
         this.alertasRepository = alertasRepository;
     }
 
-    public Page<PrescricaoDTO> listarAtivas(Pageable pageable) {
-        return repository.findAtivasNaoVencidas(Status.ATIVO, LocalDateTime.now(), pageable).map(PrescricaoMapper::toDTO);
+    public Page<PrescricaoDTO> listarPrescricoesAtivas(Pageable pageable) {
+        return repository.findAtivasNaoVencidas(Status.ATIVO, LocalDateTime.now(), pageable).map(PrescricaoMapper::converterPrescricaoParaDTO);
     }
 
-    public Page<PrescricaoDTO> listarPorIdoso(Integer idosoId, Pageable pageable) {
-        return repository.findAtivasNaoVencidasPorIdoso(idosoId, Status.ATIVO, LocalDateTime.now(), pageable).map(PrescricaoMapper::toDTO);
+    public Page<PrescricaoDTO> listarPrescricoesPorIdoso(Integer idosoId, Pageable pageable) {
+        return repository.findAtivasNaoVencidasPorIdoso(idosoId, Status.ATIVO, LocalDateTime.now(), pageable).map(PrescricaoMapper::converterPrescricaoParaDTO);
     }
 
-    public PrescricaoDTO buscarPorId(int id) {
+    public PrescricaoDTO buscarPrescricaoPorId(int id) {
         Prescricao prescricao = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Prescricao", (long) id));
-        return PrescricaoMapper.toDTO(prescricao);
+        return PrescricaoMapper.converterPrescricaoParaDTO(prescricao);
     }
 
     @Transactional
-    public PrescricaoDTO criar(PrescricaoDTO dto) {
-        validar(dto);
+    public PrescricaoDTO criarPrescricao(PrescricaoDTO dto) {
+        validarDadosPrescricao(dto);
 
-        Remedio remedio = buscarRemedio(dto.getRemedioId());
-        Idoso idoso = buscarIdoso(dto.getIdosoId());
-        Prescricao prescricao = repository.save(PrescricaoMapper.toEntity(dto, remedio, idoso));
+        Remedio remedio = buscarRemedioPorId(dto.getRemedioId());
+        Idoso idoso = buscarIdosoPorId(dto.getIdosoId());
+        Prescricao prescricao = repository.save(PrescricaoMapper.converterDTOParaPrescricao(dto, remedio, idoso));
 
-        alertasRepository.saveAll(criarAlertasDaPrescricao(prescricao));
+        alertasRepository.saveAll(criarAlertasParaPrescricao(prescricao));
 
-        return PrescricaoMapper.toDTO(prescricao);
+        return PrescricaoMapper.converterPrescricaoParaDTO(prescricao);
     }
 
     @Transactional
-    public PrescricaoDTO atualizar(int id, PrescricaoDTO dto) {
-        validar(dto);
+    public PrescricaoDTO atualizarPrescricao(int id, PrescricaoDTO dto) {
+        validarDadosPrescricao(dto);
 
         Prescricao prescricao = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Prescricao", (long) id));
-        Remedio remedio = buscarRemedio(dto.getRemedioId());
-        Idoso idoso = buscarIdoso(dto.getIdosoId());
+        Remedio remedio = buscarRemedioPorId(dto.getRemedioId());
+        Idoso idoso = buscarIdosoPorId(dto.getIdosoId());
 
-        cancelarAlertasAgendados(prescricao);
-        PrescricaoMapper.updateEntity(prescricao, dto, remedio, idoso);
+        cancelarAlertasAgendadosDaPrescricao(prescricao);
+        PrescricaoMapper.atualizarPrescricaoComDTO(prescricao, dto, remedio, idoso);
         Prescricao prescricaoAtualizada = repository.save(prescricao);
 
         if (prescricaoAtualizada.getStatus() == Status.ATIVO) {
-            alertasRepository.saveAll(criarAlertasDaPrescricao(prescricaoAtualizada, LocalDateTime.now()));
+            alertasRepository.saveAll(criarAlertasParaPrescricao(prescricaoAtualizada, LocalDateTime.now()));
         }
 
-        return PrescricaoMapper.toDTO(prescricaoAtualizada);
+        return PrescricaoMapper.converterPrescricaoParaDTO(prescricaoAtualizada);
     }
 
     @Transactional
-    public void inativar(int id) {
+    public void inativarPrescricao(int id) {
         Prescricao prescricao = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Prescricao", (long) id));
 
-        cancelarAlertasAgendados(prescricao);
+        cancelarAlertasAgendadosDaPrescricao(prescricao);
         prescricao.setStatus(Status.INATIVO);
         repository.save(prescricao);
     }
 
-    private Remedio buscarRemedio(Integer id) {
+    private Remedio buscarRemedioPorId(Integer id) {
         return remedioRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Remedio", id.longValue()));
     }
 
-    private Idoso buscarIdoso(Integer id) {
+    private Idoso buscarIdosoPorId(Integer id) {
         return idosoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Idoso", id.longValue()));
     }
 
-    private void validar(PrescricaoDTO dto) {
+    private void validarDadosPrescricao(PrescricaoDTO dto) {
         if (dto == null) {
             throw new InvalidRequestException("Dados da prescricao nao informados");
         }
@@ -144,11 +144,11 @@ public class PrescricaoService {
         }
     }
 
-    private List<Alertas> criarAlertasDaPrescricao(Prescricao prescricao) {
-        return criarAlertasDaPrescricao(prescricao, prescricao.getData_criacao());
+    private List<Alertas> criarAlertasParaPrescricao(Prescricao prescricao) {
+        return criarAlertasParaPrescricao(prescricao, prescricao.getData_criacao());
     }
 
-    private List<Alertas> criarAlertasDaPrescricao(Prescricao prescricao, LocalDateTime inicioAgenda) {
+    private List<Alertas> criarAlertasParaPrescricao(Prescricao prescricao, LocalDateTime inicioAgenda) {
         long intervaloEmMillis = Math.round(prescricao.getIntervalo() * 60 * 60 * 1000);
         if (intervaloEmMillis <= 0) {
             throw new InvalidRequestException("Intervalo informado e muito pequeno");
@@ -188,7 +188,7 @@ public class PrescricaoService {
         return alertas;
     }
 
-    private void cancelarAlertasAgendados(Prescricao prescricao) {
+    private void cancelarAlertasAgendadosDaPrescricao(Prescricao prescricao) {
         List<Alertas> alertasAgendados = alertasRepository.findByPrescricaoIdAndStatusAlertas(
                 prescricao.getId(),
                 StatusAlertas.AGENDADO);

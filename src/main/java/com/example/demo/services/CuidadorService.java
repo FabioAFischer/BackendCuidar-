@@ -46,33 +46,33 @@ public class CuidadorService {
         this.emailValidationService = emailValidationService;
     }
 
-    public Page<CuidadorDTO> listarAtivos(Pageable pageable) {
-        return repository.findByStatus(Status.ATIVO, pageable).map(CuidadorMapper::toDTO);
+    public Page<CuidadorDTO> listarCuidadoresAtivos(Pageable pageable) {
+        return repository.findByStatus(Status.ATIVO, pageable).map(CuidadorMapper::converterCuidadorParaDTO);
     }
 
-    public Page<CuidadorDTO> listarAtivosPorInstituicao(Integer instituicaoId, String cpf, Pageable pageable) {
-        String cpfLimpo = CpfUtils.normalizar(cpf);
+    public Page<CuidadorDTO> listarCuidadoresAtivosPorInstituicao(Integer instituicaoId, String cpf, Pageable pageable) {
+        String cpfLimpo = CpfUtils.normalizarCpf(cpf);
 
         if (cpfLimpo == null) {
             return repository.findByStatusAndInstituicaoId(Status.ATIVO, instituicaoId, pageable)
-                    .map(CuidadorMapper::toDTO);
+                    .map(CuidadorMapper::converterCuidadorParaDTO);
         }
 
         return repository.findByStatusAndInstituicaoIdAndCpf(Status.ATIVO, instituicaoId, cpfLimpo, pageable)
-                .map(CuidadorMapper::toDTO);
+                .map(CuidadorMapper::converterCuidadorParaDTO);
     }
 
-    public CuidadorDTO buscarPorId(Integer id) {
+    public CuidadorDTO buscarCuidadorPorId(Integer id) {
         Cuidador cuidador = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Cuidador", id.longValue()));
 
-        return CuidadorMapper.toDTO(cuidador);
+        return CuidadorMapper.converterCuidadorParaDTO(cuidador);
     }
 
-    public CuidadorDTO criar(CuidadorDTO dto) {
-        String cpfLimpo = CpfUtils.normalizar(dto.getCpf());
-        String email = emailValidationService.validarParaCriacao(dto.getEmail());
-        CpfUtils.validarDisponivel(cpfLimpo, repository::existsByCpf, idosoRepository::existsByCpf);
+    public CuidadorDTO cadastrarCuidador(CuidadorDTO dto) {
+        String cpfLimpo = CpfUtils.normalizarCpf(dto.getCpf());
+        String email = emailValidationService.validarEmailParaCriacao(dto.getEmail());
+        CpfUtils.validarCpfDisponivel(cpfLimpo, repository::existsByCpf, idosoRepository::existsByCpf);
 
         if (dto.getContato() == null) {
             throw new InvalidRequestException("O contato do cuidador deve ser informado");
@@ -81,34 +81,34 @@ public class CuidadorService {
         Instituicao instituicao = instituicaoRepository.findById(dto.getInstituicaoId())
                 .orElseThrow(() -> new ResourceNotFoundException("Instituição", dto.getInstituicaoId().longValue()));
 
-        Cuidador cuidador = CuidadorMapper.toEntity(dto);
+        Cuidador cuidador = CuidadorMapper.converterDTOParaCuidador(dto);
         cuidador.setEmail(email);
-        senhaService.validar(dto.getSenha());
+        senhaService.validarSenha(dto.getSenha());
         cuidador.setSenha(passwordEncoder.encode(dto.getSenha()));
         cuidador.setInstituicao(instituicao);
 
-        return CuidadorMapper.toDTO(repository.save(cuidador));
+        return CuidadorMapper.converterCuidadorParaDTO(repository.save(cuidador));
     }
 
-    public CuidadorDTO atualizar(Integer id, CuidadorDTO dto) {
+    public CuidadorDTO atualizarCuidador(Integer id, CuidadorDTO dto) {
         Cuidador cuidador = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Cuidador", id.longValue()));
 
-        String cpfLimpo = CpfUtils.normalizar(dto.getCpf());
+        String cpfLimpo = CpfUtils.normalizarCpf(dto.getCpf());
         if (!cuidador.getCpf().equals(cpfLimpo)) {
-            CpfUtils.validarDisponivel(cpfLimpo, repository::existsByCpf, idosoRepository::existsByCpf);
+            CpfUtils.validarCpfDisponivel(cpfLimpo, repository::existsByCpf, idosoRepository::existsByCpf);
         }
 
-        String email = emailValidationService.validarParaAtualizacao(dto.getEmail(), cuidador.getId());
+        String email = emailValidationService.validarEmailParaAtualizacao(dto.getEmail(), cuidador.getId());
 
         Instituicao instituicao = instituicaoRepository.findById(dto.getInstituicaoId())
                 .orElseThrow(() -> new ResourceNotFoundException("Instituição", dto.getInstituicaoId().longValue()));
 
-        cuidador.setNome(TextoUtils.paraBanco(dto.getNome()));
+        cuidador.setNome(TextoUtils.normalizarTextoParaBanco(dto.getNome()));
         cuidador.setCpf(cpfLimpo);
         cuidador.setEmail(email);
         if (dto.getSenha() != null && !dto.getSenha().isBlank()) {
-            senhaService.validar(dto.getSenha());
+            senhaService.validarSenha(dto.getSenha());
             cuidador.setSenha(passwordEncoder.encode(dto.getSenha()));
         }
         cuidador.setInstituicao(instituicao);
@@ -121,25 +121,25 @@ public class CuidadorService {
                 contato.setCuidador(cuidador);
                 cuidador.setContato(contato);
             }
-            contato.setDdd(TextoUtils.limparNumero(dto.getContato().getDdd()));
-            contato.setTelefone(TextoUtils.limparNumero(dto.getContato().getTelefone()));
+            contato.setDdd(TextoUtils.normalizarNumero(dto.getContato().getDdd()));
+            contato.setTelefone(TextoUtils.normalizarNumero(dto.getContato().getTelefone()));
         }
 
-        return CuidadorMapper.toDTO(repository.save(cuidador));
+        return CuidadorMapper.converterCuidadorParaDTO(repository.save(cuidador));
     }
 
-    public CuidadorDTO reativar(Integer id, CuidadorDTO dto) {
+    public CuidadorDTO reativarCuidador(Integer id, CuidadorDTO dto) {
         Cuidador cuidador = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Cuidador", id.longValue()));
 
-        aplicarCamposEnviados(cuidador, dto);
+        aplicarCamposEnviadosAoCuidador(cuidador, dto);
         cuidador.setStatus(Status.ATIVO);
         cuidador.setData_atualizacao(LocalDateTime.now());
 
-        return CuidadorMapper.toDTO(repository.save(cuidador));
+        return CuidadorMapper.converterCuidadorParaDTO(repository.save(cuidador));
     }
 
-    public void inativar(Integer id) {
+    public void inativarCuidador(Integer id) {
         Cuidador cuidador = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Cuidador", id.longValue()));
 
@@ -148,27 +148,27 @@ public class CuidadorService {
         repository.save(cuidador);
     }
 
-    private void aplicarCamposEnviados(Cuidador cuidador, CuidadorDTO dto) {
+    private void aplicarCamposEnviadosAoCuidador(Cuidador cuidador, CuidadorDTO dto) {
         if (dto == null) {
             return;
         }
 
         if (dto.getNome() != null) {
-            cuidador.setNome(TextoUtils.paraBanco(dto.getNome()));
+            cuidador.setNome(TextoUtils.normalizarTextoParaBanco(dto.getNome()));
         }
 
-        String cpfLimpo = CpfUtils.normalizar(dto.getCpf());
+        String cpfLimpo = CpfUtils.normalizarCpf(dto.getCpf());
         if (cpfLimpo != null && !cpfLimpo.equals(cuidador.getCpf())) {
-            CpfUtils.validarDisponivel(cpfLimpo, repository::existsByCpf, idosoRepository::existsByCpf);
+            CpfUtils.validarCpfDisponivel(cpfLimpo, repository::existsByCpf, idosoRepository::existsByCpf);
             cuidador.setCpf(cpfLimpo);
         }
 
         if (dto.getEmail() != null) {
-            cuidador.setEmail(emailValidationService.validarParaAtualizacao(dto.getEmail(), cuidador.getId()));
+            cuidador.setEmail(emailValidationService.validarEmailParaAtualizacao(dto.getEmail(), cuidador.getId()));
         }
 
         if (dto.getSenha() != null && !dto.getSenha().isBlank()) {
-            senhaService.validar(dto.getSenha());
+            senhaService.validarSenha(dto.getSenha());
             cuidador.setSenha(passwordEncoder.encode(dto.getSenha()));
         }
 
@@ -187,10 +187,10 @@ public class CuidadorService {
             }
 
             if (dto.getContato().getDdd() != null) {
-                contato.setDdd(TextoUtils.limparNumero(dto.getContato().getDdd()));
+                contato.setDdd(TextoUtils.normalizarNumero(dto.getContato().getDdd()));
             }
             if (dto.getContato().getTelefone() != null) {
-                contato.setTelefone(TextoUtils.limparNumero(dto.getContato().getTelefone()));
+                contato.setTelefone(TextoUtils.normalizarNumero(dto.getContato().getTelefone()));
             }
         }
     }
