@@ -22,7 +22,7 @@ class Codigo2faEmailListenerTest {
 
     @Test
     void deveEnviarEmailAoReceberEventoDeCodigoGerado() {
-        listener.enviarEmail(new Codigo2faGeradoEvent("cuidador@email.com", "123456"));
+        listener.enviarEmailCodigoDoisFatores(new Codigo2faGeradoEvent("cuidador@email.com", "123456"));
 
         verify(emailService).enviarEmailCodigoVerificacao("cuidador@email.com", "123456");
     }

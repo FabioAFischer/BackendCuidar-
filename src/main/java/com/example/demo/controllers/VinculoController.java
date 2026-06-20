@@ -82,7 +82,7 @@ public class VinculoController {
     @Operation(summary = "Deletar vínculo", description = "Remove o vínculo entre cuidador e idoso")
     @DeleteMapping("/deletar/{id}")
     public ResponseEntity<Void> excluirVinculo(@PathVariable Integer id) {
-        service.excluirContato(id);
+        service.excluirVinculo(id);
         return ResponseEntity.noContent().build();
     }
 }
