@@ -46,7 +46,7 @@ class CuidadorControllerTest {
 
         assertEquals(HttpStatus.OK, resposta.getStatusCode());
         assertEquals(1, resposta.getBody().getTotalElements());
-        verify(service).listarAdministradoresAtivos(pageable);
+        verify(service).listarCuidadoresAtivos(pageable);
     }
 
     @Test
@@ -98,7 +98,7 @@ class CuidadorControllerTest {
 
         assertEquals(HttpStatus.CREATED, resposta.getStatusCode());
         assertEquals(2, resposta.getBody().getId());
-        verify(service).cadastrarAdministrador(dto);
+        verify(service).cadastrarCuidador(dto);
     }
 
     @Test
@@ -121,7 +121,7 @@ class CuidadorControllerTest {
 
         assertEquals(HttpStatus.OK, resposta.getStatusCode());
         assertEquals("Cuidador Atualizado", resposta.getBody().getNome());
-        verify(service).atualizarAdministrador(2, dto);
+        verify(service).atualizarCuidador(2, dto);
     }
 
     @Test
@@ -169,24 +169,24 @@ class CuidadorControllerTest {
 
     @Test
     void deveRetornarNoContentAoInativarCuidadorExistente() {
-        var resposta = controller.excluirContato(2);
+        var resposta = controller.inativarCuidador(2);
 
         assertEquals(HttpStatus.NO_CONTENT, resposta.getStatusCode());
         assertNull(resposta.getBody());
-        verify(service).inativarAdministrador(2);
+        verify(service).inativarCuidador(2);
     }
 
     @Test
     void deveLancarResourceNotFoundAoInativarCuidadorInexistente() {
         org.mockito.Mockito.doThrow(new ResourceNotFoundException("Cuidador", 99L))
-                .when(service).inativarAdministrador(99);
+                .when(service).inativarCuidador(99);
 
-        assertThrows(ResourceNotFoundException.class, () -> controller.excluirContato(99));
+        assertThrows(ResourceNotFoundException.class, () -> controller.inativarCuidador(99));
     }
 
     @Test
     void deveRetornarPongAoResponderPing() {
-        assertEquals("pong", controller.ping());
+        assertEquals("pong", controller.responderPingCuidador());
     }
 
     private CuidadorDTO criarCuidadorDTO() {
