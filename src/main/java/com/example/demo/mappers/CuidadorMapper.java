@@ -18,14 +18,14 @@ public class CuidadorMapper {
     private CuidadorMapper() {
     }
 
-    public static CuidadorDTO toDTO(Cuidador cuidador) {
+    public static CuidadorDTO converterCuidadorParaDTO(Cuidador cuidador) {
         if (cuidador == null) {
             return null;
         }
 
         CuidadorDTO dto = new CuidadorDTO();
         dto.setId(cuidador.getId());
-        dto.setNome(TextoUtils.paraExibicao(cuidador.getNome()));
+        dto.setNome(TextoUtils.formatarTextoParaExibicao(cuidador.getNome()));
         dto.setCpf(cuidador.getCpf());
         dto.setEmail(cuidador.getEmail());
         dto.setStatus(cuidador.getStatus());
@@ -47,15 +47,15 @@ public class CuidadorMapper {
         return dto;
     }
 
-    public static Cuidador toEntity(CuidadorDTO dto) {
+    public static Cuidador converterDTOParaCuidador(CuidadorDTO dto) {
         if (dto == null) {
             return null;
         }
 
         Cuidador cuidador = new Cuidador();
 
-        cuidador.setNome(TextoUtils.paraBanco(dto.getNome()));
-        cuidador.setCpf(limparDocumento(dto.getCpf()));
+        cuidador.setNome(TextoUtils.normalizarTextoParaBanco(dto.getNome()));
+        cuidador.setCpf(normalizarDocumento(dto.getCpf()));
         cuidador.setEmail(dto.getEmail());
         cuidador.setSenha(dto.getSenha());
 
@@ -68,8 +68,8 @@ public class CuidadorMapper {
         if (dto.getContato() != null) {
             Contato contato = new Contato();
             // setId removido — o id é gerado pelo banco
-            contato.setDdd(TextoUtils.limparNumero(dto.getContato().getDdd()));
-            contato.setTelefone(TextoUtils.limparNumero(dto.getContato().getTelefone()));
+            contato.setDdd(TextoUtils.normalizarNumero(dto.getContato().getDdd()));
+            contato.setTelefone(TextoUtils.normalizarNumero(dto.getContato().getTelefone()));
             contato.setCuidador(cuidador);
             cuidador.setContato(contato);
         }
@@ -81,7 +81,7 @@ public class CuidadorMapper {
         return cuidador;
     }
 
-    public static List<CuidadorDTO> toDTOList(List<Cuidador> cuidadores) {
+    public static List<CuidadorDTO> converterCuidadoresParaDTOs(List<Cuidador> cuidadores) {
         List<CuidadorDTO> lista = new ArrayList<>();
 
         if (cuidadores == null) {
@@ -89,13 +89,13 @@ public class CuidadorMapper {
         }
 
         for (Cuidador cuidador : cuidadores) {
-            lista.add(toDTO(cuidador));
+            lista.add(converterCuidadorParaDTO(cuidador));
         }
 
         return lista;
     }
 
-    private static String limparDocumento(String valor) {
+    private static String normalizarDocumento(String valor) {
         if (valor == null || valor.isBlank()) {
             return null;
         }

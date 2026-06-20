@@ -14,14 +14,14 @@ public class IdosoMapper {
 
     private IdosoMapper() {}
 
-    public static IdosoDTO toDTO(Idoso idoso) {
+    public static IdosoDTO converterIdosoParaDTO(Idoso idoso) {
         if (idoso == null) return null;
 
         IdosoDTO dto = new IdosoDTO();
         dto.setId(idoso.getId());
-        dto.setNome(TextoUtils.paraExibicao(idoso.getNome()));
+        dto.setNome(TextoUtils.formatarTextoParaExibicao(idoso.getNome()));
         dto.setCpf(idoso.getCpf());
-        dto.setObservacoes(TextoUtils.paraExibicao(idoso.getObservacoes()));
+        dto.setObservacoes(TextoUtils.formatarTextoParaExibicao(idoso.getObservacoes()));
         dto.setSenhaAcessoGerada(idoso.getSenhaAcessoCriptografada() != null
                 && !idoso.getSenhaAcessoCriptografada().isBlank());
 
@@ -31,7 +31,7 @@ public class IdosoMapper {
 
         if (idoso.getContato() != null) {
             dto.setContatoId(idoso.getContato().getId());
-            dto.setContato(ContatoMapper.toDTO(idoso.getContato()));
+            dto.setContato(ContatoMapper.converterContatoParaDTO(idoso.getContato()));
         }
 
         dto.setData_criacao(idoso.getData_criacao());
@@ -42,14 +42,14 @@ public class IdosoMapper {
         return dto;
     }
 
-    public static Idoso toEntity(IdosoDTO dto) {
+    public static Idoso converterDTOParaIdoso(IdosoDTO dto) {
         if (dto == null) return null;
 
         Idoso idoso = new Idoso();
        
-        idoso.setNome(TextoUtils.paraBanco(dto.getNome()));
-        idoso.setCpf(limparDocumento(dto.getCpf()));
-        idoso.setObservacoes(TextoUtils.paraBanco(dto.getObservacoes()));
+        idoso.setNome(TextoUtils.normalizarTextoParaBanco(dto.getNome()));
+        idoso.setCpf(normalizarDocumento(dto.getCpf()));
+        idoso.setObservacoes(TextoUtils.normalizarTextoParaBanco(dto.getObservacoes()));
 
         if (dto.getInstituicaoId() != null) {
             Instituicao instituicao = new Instituicao();
@@ -84,12 +84,12 @@ public class IdosoMapper {
         return idoso;
     }
 
-    public static void atualizarIdoso(Idoso idoso, IdosoDTO dto, Instituicao instituicao) {
+    public static void atualizarIdosoComDTO(Idoso idoso, IdosoDTO dto, Instituicao instituicao) {
         if (dto == null || idoso == null) return;
 
-        idoso.setNome(TextoUtils.paraBanco(dto.getNome()));
-        idoso.setCpf(limparDocumento(dto.getCpf()));
-        idoso.setObservacoes(TextoUtils.paraBanco(dto.getObservacoes()));
+        idoso.setNome(TextoUtils.normalizarTextoParaBanco(dto.getNome()));
+        idoso.setCpf(normalizarDocumento(dto.getCpf()));
+        idoso.setObservacoes(TextoUtils.normalizarTextoParaBanco(dto.getObservacoes()));
 
         if (instituicao != null) {
             idoso.setInstituicao(instituicao);
@@ -106,7 +106,7 @@ public class IdosoMapper {
         }
     }
 
-    private static String limparDocumento(String valor) {
+    private static String normalizarDocumento(String valor) {
         if (valor == null || valor.isBlank()) {
             return null;
         }

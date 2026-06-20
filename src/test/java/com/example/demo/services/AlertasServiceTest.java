@@ -55,7 +55,7 @@ class AlertasServiceTest {
         when(vinculoRepository.existsByIdosoIdAndCuidadorId(20, 2)).thenReturn(true);
         when(alertasRepository.save(any(Alertas.class))).thenReturn(salvo);
 
-        AlertasDTO resultado = service.criar(dto, 2);
+        AlertasDTO resultado = service.criarAlerta(dto, 2);
 
         assertEquals(1, resultado.getId());
         assertEquals(20, resultado.getIdosoId());
@@ -72,7 +72,7 @@ class AlertasServiceTest {
         when(idosoRepository.findById(20)).thenReturn(Optional.of(idoso));
         when(vinculoRepository.existsByIdosoIdAndCuidadorId(20, 2)).thenReturn(false);
 
-        assertThrows(UnauthorizedException.class, () -> service.criar(dto, 2));
+        assertThrows(UnauthorizedException.class, () -> service.criarAlerta(dto, 2));
     }
 
     @Test
@@ -87,7 +87,7 @@ class AlertasServiceTest {
         when(vinculoRepository.existsByIdosoIdAndCuidadorId(20, 2)).thenReturn(true);
         when(alertasRepository.save(existente)).thenReturn(existente);
 
-        AlertasDTO resultado = service.atualizar(1, dto, 2);
+        AlertasDTO resultado = service.atualizarAlerta(1, dto, 2);
 
         assertEquals(TipoAlerta.CONSULTA, resultado.getTipoAlerta());
         verify(alertasRepository).save(existente);
@@ -100,7 +100,7 @@ class AlertasServiceTest {
         when(alertasRepository.findById(1)).thenReturn(Optional.of(alerta));
         when(vinculoRepository.existsByIdosoIdAndCuidadorId(20, 2)).thenReturn(true);
 
-        service.cancelar(1, 2);
+        service.cancelarAlerta(1, 2);
 
         ArgumentCaptor<Alertas> captor = ArgumentCaptor.forClass(Alertas.class);
         verify(alertasRepository).save(captor.capture());
@@ -109,7 +109,7 @@ class AlertasServiceTest {
 
     @Test
     void deveFalharAoCriarComDtoNulo() {
-        assertThrows(InvalidRequestException.class, () -> service.criar(null, 2));
+        assertThrows(InvalidRequestException.class, () -> service.criarAlerta(null, 2));
     }
 
     @Test
@@ -117,7 +117,7 @@ class AlertasServiceTest {
         AlertasDTO dto = alertaDTO();
         dto.setIdosoId(null);
 
-        assertThrows(InvalidRequestException.class, () -> service.criar(dto, 2));
+        assertThrows(InvalidRequestException.class, () -> service.criarAlerta(dto, 2));
     }
 
     @Test
@@ -125,7 +125,7 @@ class AlertasServiceTest {
         AlertasDTO dto = alertaDTO();
         dto.setTipoAlerta(null);
 
-        assertThrows(InvalidRequestException.class, () -> service.criar(dto, 2));
+        assertThrows(InvalidRequestException.class, () -> service.criarAlerta(dto, 2));
     }
 
     @Test
@@ -133,7 +133,7 @@ class AlertasServiceTest {
         AlertasDTO dto = alertaDTO();
         dto.setDataAgendada(null);
 
-        assertThrows(InvalidRequestException.class, () -> service.criar(dto, 2));
+        assertThrows(InvalidRequestException.class, () -> service.criarAlerta(dto, 2));
     }
 
     @Test
@@ -142,18 +142,18 @@ class AlertasServiceTest {
 
         when(idosoRepository.findById(20)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> service.criar(dto, 2));
+        assertThrows(ResourceNotFoundException.class, () -> service.criarAlerta(dto, 2));
     }
 
     @Test
     void deveFalharAoBuscarAlertaInexistente() {
         when(alertasRepository.findById(99)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> service.buscarPorId(99, 2));
+        assertThrows(ResourceNotFoundException.class, () -> service.buscarAlertaPorId(99, 2));
     }
 
     @Test
     void deveFalharSemCuidadorAutenticado() {
-        assertThrows(UnauthorizedException.class, () -> service.criar(alertaDTO(), null));
+        assertThrows(UnauthorizedException.class, () -> service.criarAlerta(alertaDTO(), null));
     }
 }

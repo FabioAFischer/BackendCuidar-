@@ -26,7 +26,7 @@ public final class TestDataFactory {
     private TestDataFactory() {
     }
 
-    public static RemedioDTO remedioDTO(String nome, String observacao, Status status) {
+    public static RemedioDTO criarRemedioDTO(String nome, String observacao, Status status) {
         RemedioDTO dto = new RemedioDTO();
         dto.setNome(nome);
         dto.setObservacao(observacao);
@@ -34,7 +34,7 @@ public final class TestDataFactory {
         return dto;
     }
 
-    public static Remedio remedio(int id, String nome, String observacao, Status status) {
+    public static Remedio criarRemedio(int id, String nome, String observacao, Status status) {
         Remedio remedio = new Remedio();
         remedio.setId(id);
         remedio.setNome(nome);
@@ -43,7 +43,7 @@ public final class TestDataFactory {
         return remedio;
     }
 
-    public static PrescricaoDTO prescricaoDTO() {
+    public static PrescricaoDTO criarPrescricaoDTO() {
         PrescricaoDTO dto = new PrescricaoDTO();
         dto.setRemedioId(10);
         dto.setIdosoId(20);
@@ -55,7 +55,7 @@ public final class TestDataFactory {
         return dto;
     }
 
-    public static Prescricao prescricao(int id, Remedio remedio, Idoso idoso, Status status) {
+    public static Prescricao criarPrescricao(int id, Remedio remedio, Idoso idoso, Status status) {
         Prescricao prescricao = new Prescricao();
         prescricao.setId(id);
         prescricao.setRemedio(remedio);
@@ -70,7 +70,7 @@ public final class TestDataFactory {
         return prescricao;
     }
 
-    public static AlertasDTO alertaDTO() {
+    public static AlertasDTO criarAlertaDTO() {
         AlertasDTO dto = new AlertasDTO();
         dto.setIdosoId(20);
         dto.setTipoAlerta(TipoAlerta.REMEDIO);
@@ -78,7 +78,7 @@ public final class TestDataFactory {
         return dto;
     }
 
-    public static Alertas alerta(int id, Idoso idoso, StatusAlertas statusAlertas) {
+    public static Alertas criarAlerta(int id, Idoso idoso, StatusAlertas statusAlertas) {
         Alertas alerta = new Alertas();
         alerta.setId(id);
         alerta.setIdoso(idoso);
@@ -89,28 +89,28 @@ public final class TestDataFactory {
         return alerta;
     }
 
-    public static Remedio remedio() {
-        return remedio(10, "Dipirona", null, Status.ATIVO);
+    public static Remedio criarRemedio() {
+        return criarRemedio(10, "Dipirona", null, Status.ATIVO);
     }
 
-    public static IdosoDTO idosoDTO() {
+    public static IdosoDTO criarIdosoDTO() {
         IdosoDTO dto = new IdosoDTO();
         dto.setNome("Maria");
         dto.setCpf("12345678901");
         dto.setObservacoes("Alergia a dipirona");
         dto.setInstituicaoId(10);
-        dto.setContato(contatoDTO());
+        dto.setContato(criarContatoDTO());
         return dto;
     }
 
-    public static ContatoDTO contatoDTO() {
+    public static ContatoDTO criarContatoDTO() {
         ContatoDTO dto = new ContatoDTO();
         dto.setDdd("11");
         dto.setTelefone("999999999");
         return dto;
     }
 
-    public static Idoso idoso() {
+    public static Idoso criarIdoso() {
         Idoso idoso = new Idoso();
         idoso.setId(20);
         idoso.setNome("Maria");
@@ -118,21 +118,21 @@ public final class TestDataFactory {
         return idoso;
     }
 
-    public static Idoso idoso(int id, String nome, String cpf, Status status) {
-        Idoso idoso = idoso();
+    public static Idoso criarIdoso(int id, String nome, String cpf, Status status) {
+        Idoso idoso = criarIdoso();
         idoso.setId(id);
         idoso.setNome(nome);
         idoso.setCpf(cpf);
         idoso.setObservacoes("Alergia a dipirona");
-        idoso.setInstituicao(instituicao());
-        idoso.setContato(contato(5, "11", "999999999"));
+        idoso.setInstituicao(criarInstituicao());
+        idoso.setContato(criarContato(5, "11", "999999999"));
         idoso.setData_criacao(LocalDateTime.now());
         idoso.setPerfil(Perfil.IDOSO);
         idoso.setStatus(status);
         return idoso;
     }
 
-    public static Instituicao instituicao() {
+    public static Instituicao criarInstituicao() {
         Instituicao instituicao = new Instituicao();
         instituicao.setId(10);
         instituicao.setNome("Instituicao Bom Cuidado");
@@ -140,7 +140,7 @@ public final class TestDataFactory {
         return instituicao;
     }
 
-    public static Contato contato(Integer id, String ddd, String telefone) {
+    public static Contato criarContato(Integer id, String ddd, String telefone) {
         Contato contato = new Contato();
         contato.setId(id);
         contato.setDdd(ddd);
@@ -148,14 +148,14 @@ public final class TestDataFactory {
         return contato;
     }
 
-    public static Map<String, String> dadosLogin(String identificador, String senha, String perfil) {
+    public static Map<String, String> criarDadosLogin(String identificador, String senha, String perfil) {
         return Map.of(
                 "identificador", identificador,
                 "senha", senha,
                 "perfil", perfil);
     }
 
-    public static Administrador administrador() {
+    public static Administrador criarAdministrador() {
         Administrador administrador = new Administrador();
         administrador.setId(1);
         administrador.setNome("Admin");
@@ -168,7 +168,7 @@ public final class TestDataFactory {
         return administrador;
     }
 
-    public static Cuidador cuidador() {
+    public static Cuidador criarCuidador() {
         Cuidador cuidador = new Cuidador();
         cuidador.setId(2);
         cuidador.setNome("Cuidador");
@@ -181,7 +181,7 @@ public final class TestDataFactory {
         return cuidador;
     }
 
-    public static Instituicao instituicaoAuth() {
+    public static Instituicao criarInstituicaoAutenticacao() {
         Instituicao instituicao = new Instituicao();
         instituicao.setId(3);
         instituicao.setNome("Instituicao");

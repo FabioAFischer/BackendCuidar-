@@ -54,14 +54,14 @@ public class AuthService {
         this.idosoService = idosoService;
     }
 
-    public Map<String, Object> login(Map<String, String> dados) {
+    public Map<String, Object> autenticarUsuario(Map<String, String> dados) {
         if (dados == null) {
             throw new InvalidRequestException("Dados de login não informados");
         }
 
-        String identificador = primeiroValor(dados, "identificador", "cpfCnpj", "cpf", "cnpj");
-        String senha = primeiroValor(dados, "senha", "password");
-        Perfil perfil = parsePerfil(dados.get("perfil"));
+        String identificador = obterPrimeiroValorPreenchido(dados, "identificador", "cpfCnpj", "cpf", "cnpj");
+        String senha = obterPrimeiroValorPreenchido(dados, "senha", "password");
+        Perfil perfil = converterTextoParaPerfil(dados.get("perfil"));
 
         if (identificador == null || identificador.isBlank()) {
             throw new InvalidRequestException("Informe CPF ou CNPJ");
@@ -71,8 +71,8 @@ public class AuthService {
             throw new InvalidRequestException("Informe a senha");
         }
 
-        Usuario usuario = buscarUsuario(perfil, identificador);
-        String senhaSalva = senhaDoUsuario(usuario);
+        Usuario usuario = buscarUsuarioPorPerfilEIdentificador(perfil, identificador);
+        String senhaSalva = obterSenhaDoUsuario(usuario);
 
         if (senhaSalva == null || !passwordEncoder.matches(senha, senhaSalva)) {
             throw new UnauthorizedException("Credenciais inválidas");
@@ -83,26 +83,26 @@ public class AuthService {
         }
 
         if (perfil == Perfil.CUIDADOR || perfil == Perfil.INSTITUICAO) {
-            String email = emailDoUsuario(usuario);
-            twoFactorService.enviarCodigo(email);
+            String email = obterEmailDoUsuario(usuario);
+            twoFactorService.enviarCodigoDoisFatores(email);
 
             Map<String, Object> resposta = new HashMap<>();
             resposta.put("requer2fa", true);
-            resposta.put("email", mascararEmail(email));
+            resposta.put("email", mascararEnderecoEmail(email));
             return resposta;
         }
 
-        return gerarRespostaLogin(usuario);
+        return gerarRespostaAutenticacao(usuario);
     }
 
-    public Map<String, Object> verificar2fa(String identificador, String codigo, String perfil) {
-        Usuario usuario = buscarUsuario(parsePerfil(perfil), identificador);
-        String email = emailDoUsuario(usuario);
-        twoFactorService.validarCodigo(email, codigo);
-        return gerarRespostaLogin(usuario);
+    public Map<String, Object> validarCodigoDoisFatores(String identificador, String codigo, String perfil) {
+        Usuario usuario = buscarUsuarioPorPerfilEIdentificador(converterTextoParaPerfil(perfil), identificador);
+        String email = obterEmailDoUsuario(usuario);
+        twoFactorService.validarCodigoDoisFatores(email, codigo);
+        return gerarRespostaAutenticacao(usuario);
     }
 
-    public Map<String, Object> loginIdoso(Map<String, String> dados) {
+    public Map<String, Object> autenticarIdoso(Map<String, String> dados) {
         if (dados == null) {
             throw new InvalidRequestException("Dados de login nao informados");
         }
@@ -112,10 +112,10 @@ public class AuthService {
             throw new InvalidRequestException("Senha de acesso é obrigatória.");
         }
 
-        return gerarRespostaLogin(idosoService.autenticarPorSenhaAcesso(senhaAcesso));
+        return gerarRespostaAutenticacao(idosoService.autenticarIdosoPorSenhaAcesso(senhaAcesso));
     }
 
-    private String emailDoUsuario(Usuario usuario) {
+    private String obterEmailDoUsuario(Usuario usuario) {
         if (usuario instanceof Cuidador cuidador) return cuidador.getEmail();
         if (usuario instanceof Instituicao instituicao) return instituicao.getEmail();
         throw new UnsupportedProfileException("Perfil nao suporta 2FA");
@@ -140,12 +140,12 @@ public class AuthService {
         };
     }
 
-    private Map<String, Object> gerarRespostaLogin(Usuario usuario) {
+    private Map<String, Object> gerarRespostaAutenticacao(Usuario usuario) {
         Map<String, Object> resposta = new HashMap<>();
         resposta.put("id", usuario.getId());
         resposta.put("nome", usuario.getNome());
         resposta.put("perfil", usuario.getPerfil());
-        resposta.put("token", jwtService.gerarToken(usuario));
+        resposta.put("token", jwtService.gerarTokenJwt(usuario));
         resposta.put("tipo", "Bearer");
         resposta.put("autenticado", true);
 
@@ -155,14 +155,14 @@ public class AuthService {
         return resposta;
     }
 
-    private String mascararEmail(String email) {
+    private String mascararEnderecoEmail(String email) {
         int at = email.indexOf("@");
         if (at <= 2) return email;
         return email.substring(0, 2) + "***" + email.substring(at);
     }
 
-    private Usuario buscarUsuario(Perfil perfil, String identificador) {
-        String documento = limparDocumento(identificador);
+    private Usuario buscarUsuarioPorPerfilEIdentificador(Perfil perfil, String identificador) {
+        String documento = normalizarDocumento(identificador);
 
         return switch (perfil) {
             case ADMINISTRADOR -> administradorRepository.findByCpf(documento)
@@ -175,7 +175,7 @@ public class AuthService {
         };
     }
 
-    private String senhaDoUsuario(Usuario usuario) {
+    private String obterSenhaDoUsuario(Usuario usuario) {
         if (usuario instanceof Administrador administrador) return administrador.getSenha();
         if (usuario instanceof Cuidador cuidador) return cuidador.getSenha();
         if (usuario instanceof Instituicao instituicao) return instituicao.getSenha();
@@ -183,7 +183,7 @@ public class AuthService {
         throw new UnsupportedProfileException("Perfil nao permitido para login");
     }
 
-    private Perfil parsePerfil(String perfil) {
+    private Perfil converterTextoParaPerfil(String perfil) {
         if (perfil == null || perfil.isBlank()) {
             throw new InvalidRequestException("Informe o perfil");
         }
@@ -195,7 +195,7 @@ public class AuthService {
         }
     }
 
-    private String primeiroValor(Map<String, String> dados, String... chaves) {
+    private String obterPrimeiroValorPreenchido(Map<String, String> dados, String... chaves) {
         for (String chave : chaves) {
             String valor = dados.get(chave);
             if (valor != null && !valor.isBlank()) return valor;
@@ -203,32 +203,32 @@ public class AuthService {
         return null;
     }
 
-    private String limparDocumento(String valor) {
+    private String normalizarDocumento(String valor) {
         return valor.replaceAll("\\D", "");
     }
 
-    public Map<String, Object> recuperarSenha(String identificador) {
+    public Map<String, Object> solicitarRecuperacaoSenha(String identificador) {
     if (identificador == null || identificador.isBlank()) {
         throw new InvalidRequestException("Informe o CPF ou CNPJ");
     }
 
-    String documento = limparDocumento(identificador);
+    String documento = normalizarDocumento(identificador);
 
     Usuario usuario = cuidadorRepository.findByCpf(documento)
             .map(u -> (Usuario) u)
             .or(() -> instituicaoRepository.findByCnpj(documento).map(u -> (Usuario) u))
             .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado com esse CPF ou CNPJ"));
 
-    String email = emailDoUsuario(usuario);
-    twoFactorService.enviarCodigo(email);
+    String email = obterEmailDoUsuario(usuario);
+    twoFactorService.enviarCodigoDoisFatores(email);
 
     Map<String, Object> resposta = new HashMap<>();
-    resposta.put("email", mascararEmail(email));
+    resposta.put("email", mascararEnderecoEmail(email));
     return resposta;
 }
 
-public Map<String, Object> verificarRecuperacao(String email, String codigo) {
-    twoFactorService.validarCodigo(email, codigo);
+public Map<String, Object> validarCodigoRecuperacaoSenha(String email, String codigo) {
+    twoFactorService.validarCodigoDoisFatores(email, codigo);
 
     Map<String, Object> resposta = new HashMap<>();
     resposta.put("valido", true);
@@ -236,8 +236,8 @@ public Map<String, Object> verificarRecuperacao(String email, String codigo) {
     return resposta;
 }
 
-public void novaSenha(String email, String novaSenha) {
-    senhaService.validar(novaSenha);
+public void atualizarSenhaRecuperada(String email, String novaSenha) {
+    senhaService.validarSenha(novaSenha);
 
     Usuario usuario = buscarUsuarioPorEmail(email);
 
@@ -256,13 +256,13 @@ public void novaSenha(String email, String novaSenha) {
     throw new UnsupportedProfileException("Perfil nao suporta recuperacao de senha");
 }
 
-public Map<String, Object> reenviarCodigo(String identificador, String perfil) {
-    Usuario usuario = buscarUsuario(parsePerfil(perfil), identificador);
-    String email = emailDoUsuario(usuario);
-    twoFactorService.enviarCodigo(email);
+public Map<String, Object> reenviarCodigoDoisFatores(String identificador, String perfil) {
+    Usuario usuario = buscarUsuarioPorPerfilEIdentificador(converterTextoParaPerfil(perfil), identificador);
+    String email = obterEmailDoUsuario(usuario);
+    twoFactorService.enviarCodigoDoisFatores(email);
 
     Map<String, Object> resposta = new HashMap<>();
-    resposta.put("email", mascararEmail(email));
+    resposta.put("email", mascararEnderecoEmail(email));
     resposta.put("mensagem", "Código reenviado com sucesso");
     return resposta;
 }

@@ -70,7 +70,7 @@ class PrescricaoServiceTest {
         when(idosoRepository.findById(20)).thenReturn(Optional.of(idoso));
         when(prescricaoRepository.save(any(Prescricao.class))).thenReturn(salva);
 
-        PrescricaoDTO resultado = service.criar(dto);
+        PrescricaoDTO resultado = service.criarPrescricao(dto);
 
         assertEquals(1, resultado.getId());
         assertEquals(10, resultado.getRemedioId());
@@ -102,7 +102,7 @@ class PrescricaoServiceTest {
         Prescricao existente = prescricao(1, remedio, idoso, Status.ATIVO);
         existente.setData_criacao(LocalDateTime.now().minusHours(8));
         dto.setDataFim(LocalDateTime.now().plusHours(16));
-        Alertas alertaAgendado = alertaAgendado(existente, idoso);
+        Alertas alertaAgendado = criarAlertaAgendado(existente, idoso);
 
         when(prescricaoRepository.findById(1)).thenReturn(Optional.of(existente));
         when(remedioRepository.findById(10)).thenReturn(Optional.of(remedio));
@@ -111,7 +111,7 @@ class PrescricaoServiceTest {
                 .thenReturn(List.of(alertaAgendado));
         when(prescricaoRepository.save(existente)).thenReturn(existente);
 
-        PrescricaoDTO resultado = service.atualizar(1, dto);
+        PrescricaoDTO resultado = service.atualizarPrescricao(1, dto);
 
         assertEquals("2 Comprimidos", resultado.getDosagem());
         assertEquals(StatusAlertas.CANCELADO, alertaAgendado.getStatusAlertas());
@@ -123,13 +123,13 @@ class PrescricaoServiceTest {
     @Test
     void deveInativarPrescricao() {
         Prescricao prescricao = prescricao(1, remedio(), idoso(), Status.ATIVO);
-        Alertas alertaAgendado = alertaAgendado(prescricao, prescricao.getIdoso());
+        Alertas alertaAgendado = criarAlertaAgendado(prescricao, prescricao.getIdoso());
 
         when(prescricaoRepository.findById(1)).thenReturn(Optional.of(prescricao));
         when(alertasRepository.findByPrescricaoIdAndStatusAlertas(1, StatusAlertas.AGENDADO))
                 .thenReturn(List.of(alertaAgendado));
 
-        service.inativar(1);
+        service.inativarPrescricao(1);
 
         ArgumentCaptor<Prescricao> captor = ArgumentCaptor.forClass(Prescricao.class);
         verify(prescricaoRepository).save(captor.capture());
@@ -141,7 +141,7 @@ class PrescricaoServiceTest {
 
     @Test
     void deveFalharAoCriarComDtoNulo() {
-        assertThrows(InvalidRequestException.class, () -> service.criar(null));
+        assertThrows(InvalidRequestException.class, () -> service.criarPrescricao(null));
     }
 
     @Test
@@ -149,7 +149,7 @@ class PrescricaoServiceTest {
         PrescricaoDTO dto = prescricaoDTO();
         dto.setRemedioId(null);
 
-        assertThrows(InvalidRequestException.class, () -> service.criar(dto));
+        assertThrows(InvalidRequestException.class, () -> service.criarPrescricao(dto));
     }
 
     @Test
@@ -157,7 +157,7 @@ class PrescricaoServiceTest {
         PrescricaoDTO dto = prescricaoDTO();
         dto.setIdosoId(null);
 
-        assertThrows(InvalidRequestException.class, () -> service.criar(dto));
+        assertThrows(InvalidRequestException.class, () -> service.criarPrescricao(dto));
     }
 
     @Test
@@ -165,7 +165,7 @@ class PrescricaoServiceTest {
         PrescricaoDTO dto = prescricaoDTO();
         dto.setDosagem(" ");
 
-        assertThrows(InvalidRequestException.class, () -> service.criar(dto));
+        assertThrows(InvalidRequestException.class, () -> service.criarPrescricao(dto));
     }
 
     @Test
@@ -173,7 +173,7 @@ class PrescricaoServiceTest {
         PrescricaoDTO dto = prescricaoDTO();
         dto.setIntervalo(0.0);
 
-        assertThrows(InvalidRequestException.class, () -> service.criar(dto));
+        assertThrows(InvalidRequestException.class, () -> service.criarPrescricao(dto));
     }
 
     @Test
@@ -181,7 +181,7 @@ class PrescricaoServiceTest {
         PrescricaoDTO dto = prescricaoDTO();
         dto.setDataFim(null);
 
-        assertThrows(InvalidRequestException.class, () -> service.criar(dto));
+        assertThrows(InvalidRequestException.class, () -> service.criarPrescricao(dto));
     }
 
     @Test
@@ -189,7 +189,7 @@ class PrescricaoServiceTest {
         PrescricaoDTO dto = prescricaoDTO();
         dto.setDataFim(LocalDateTime.now().minusMinutes(1));
 
-        assertThrows(InvalidRequestException.class, () -> service.criar(dto));
+        assertThrows(InvalidRequestException.class, () -> service.criarPrescricao(dto));
     }
 
     @Test
@@ -198,7 +198,7 @@ class PrescricaoServiceTest {
 
         when(remedioRepository.findById(10)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> service.criar(dto));
+        assertThrows(ResourceNotFoundException.class, () -> service.criarPrescricao(dto));
     }
 
     @Test
@@ -208,17 +208,17 @@ class PrescricaoServiceTest {
         when(remedioRepository.findById(10)).thenReturn(Optional.of(remedio()));
         when(idosoRepository.findById(20)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> service.criar(dto));
+        assertThrows(ResourceNotFoundException.class, () -> service.criarPrescricao(dto));
     }
 
     @Test
     void deveFalharAoBuscarPrescricaoInexistente() {
         when(prescricaoRepository.findById(99)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> service.buscarPorId(99));
+        assertThrows(ResourceNotFoundException.class, () -> service.buscarPrescricaoPorId(99));
     }
 
-    private Alertas alertaAgendado(Prescricao prescricao, Idoso idoso) {
+    private Alertas criarAlertaAgendado(Prescricao prescricao, Idoso idoso) {
         Alertas alerta = new Alertas();
         alerta.setId(30);
         alerta.setPrescricao(prescricao);

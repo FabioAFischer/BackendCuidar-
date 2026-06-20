@@ -37,44 +37,44 @@ class EmailValidationServiceTest {
     private EmailValidationService service;
 
     @Test
-    void ValidarParaCriacao_emailValido_normalizaEmail() {
+    void deveNormalizarEmailValidoParaCriacao() {
         when(cuidadorRepository.findByEmail("usuario@email.com")).thenReturn(Optional.empty());
         when(instituicaoRepository.findByEmail("usuario@email.com")).thenReturn(Optional.empty());
         when(administradorRepository.findByEmail("usuario@email.com")).thenReturn(Optional.empty());
 
-        String resultado = service.validarParaCriacao(" Usuario@Email.COM ");
+        String resultado = service.validarEmailParaCriacao(" Usuario@Email.COM ");
 
         assertEquals("usuario@email.com", resultado);
     }
 
     @Test
-    void ValidarParaCriacao_emailInvalido_lancaInvalidRequest() {
-        assertThrows(InvalidRequestException.class, () -> service.validarParaCriacao("email-invalido"));
+    void deveLancarInvalidRequestAoValidarEmailInvalidoParaCriacao() {
+        assertThrows(InvalidRequestException.class, () -> service.validarEmailParaCriacao("email-invalido"));
     }
 
     @Test
-    void ValidarParaCriacao_emailDeCuidadorExistente_lancaDuplicateResource() {
+    void deveLancarDuplicateResourceAoValidarEmailDeCuidadorExistenteParaCriacao() {
         Cuidador cuidador = new Cuidador();
         cuidador.setId(2);
 
         when(cuidadorRepository.findByEmail("usuario@email.com")).thenReturn(Optional.of(cuidador));
 
-        assertThrows(DuplicateResourceException.class, () -> service.validarParaCriacao("usuario@email.com"));
+        assertThrows(DuplicateResourceException.class, () -> service.validarEmailParaCriacao("usuario@email.com"));
     }
 
     @Test
-    void ValidarParaCriacao_emailDeInstituicaoExistente_lancaDuplicateResource() {
+    void deveLancarDuplicateResourceAoValidarEmailDeInstituicaoExistenteParaCriacao() {
         Instituicao instituicao = new Instituicao();
         instituicao.setId(3);
 
         when(cuidadorRepository.findByEmail("usuario@email.com")).thenReturn(Optional.empty());
         when(instituicaoRepository.findByEmail("usuario@email.com")).thenReturn(Optional.of(instituicao));
 
-        assertThrows(DuplicateResourceException.class, () -> service.validarParaCriacao("usuario@email.com"));
+        assertThrows(DuplicateResourceException.class, () -> service.validarEmailParaCriacao("usuario@email.com"));
     }
 
     @Test
-    void ValidarParaCriacao_emailDeAdministradorExistente_lancaDuplicateResource() {
+    void deveLancarDuplicateResourceAoValidarEmailDeAdministradorExistenteParaCriacao() {
         Administrador administrador = new Administrador();
         administrador.setId(1);
 
@@ -82,11 +82,11 @@ class EmailValidationServiceTest {
         when(instituicaoRepository.findByEmail("usuario@email.com")).thenReturn(Optional.empty());
         when(administradorRepository.findByEmail("usuario@email.com")).thenReturn(Optional.of(administrador));
 
-        assertThrows(DuplicateResourceException.class, () -> service.validarParaCriacao("usuario@email.com"));
+        assertThrows(DuplicateResourceException.class, () -> service.validarEmailParaCriacao("usuario@email.com"));
     }
 
     @Test
-    void ValidarParaAtualizacao_emailDoMesmoUsuario_permaneceDisponivel() {
+    void deveManterEmailDoMesmoUsuarioDisponivelParaAtualizacao() {
         Cuidador cuidador = new Cuidador();
         cuidador.setId(2);
 
@@ -94,7 +94,7 @@ class EmailValidationServiceTest {
         when(instituicaoRepository.findByEmail("usuario@email.com")).thenReturn(Optional.empty());
         when(administradorRepository.findByEmail("usuario@email.com")).thenReturn(Optional.empty());
 
-        String resultado = service.validarParaAtualizacao("usuario@email.com", 2);
+        String resultado = service.validarEmailParaAtualizacao("usuario@email.com", 2);
 
         assertEquals("usuario@email.com", resultado);
     }

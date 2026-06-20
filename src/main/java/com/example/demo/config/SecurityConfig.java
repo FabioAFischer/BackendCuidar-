@@ -72,7 +72,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(parseAllowedOrigins());
+        config.setAllowedOrigins(carregarOrigensPermitidas());
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
@@ -82,7 +82,7 @@ public class SecurityConfig {
         return source;
     }
 
-    private List<String> parseAllowedOrigins() {
+    private List<String> carregarOrigensPermitidas() {
         return Arrays.stream(allowedOrigins.split(","))
                 .map(String::trim)
                 .filter(origin -> !origin.isBlank())

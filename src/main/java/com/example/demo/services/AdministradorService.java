@@ -32,66 +32,66 @@ public class AdministradorService {
         this.emailValidationService = emailValidationService;
     }
 
-    public Page<AdministradorDTO> listarAtivos(Pageable pageable) {
+    public Page<AdministradorDTO> listarAdministradoresAtivos(Pageable pageable) {
         return repository.findByStatus(Status.ATIVO, pageable)
-                .map(AdministradorMapper::toDTO);
+                .map(AdministradorMapper::converterAdministradorParaDTO);
     }
 
-    public AdministradorDTO buscarPorId(Integer id) {
+    public AdministradorDTO buscarAdministradorPorId(Integer id) {
         Administrador administrador = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Administrador", id.longValue()));
 
-        return AdministradorMapper.toDTO(administrador);
+        return AdministradorMapper.converterAdministradorParaDTO(administrador);
     }
 
-    public AdministradorDTO criar(AdministradorDTO dto) {
-        String cpfLimpo = limparDocumento(dto.getCpf());
-        String email = emailValidationService.validarParaCriacao(dto.getEmail());
+    public AdministradorDTO cadastrarAdministrador(AdministradorDTO dto) {
+        String cpfLimpo = normalizarDocumento(dto.getCpf());
+        String email = emailValidationService.validarEmailParaCriacao(dto.getEmail());
         if (repository.existsByCpf(cpfLimpo)) {
             throw new DuplicateResourceException("Já existe um administrador com esse CPF");
         }
 
-        Administrador administrador = AdministradorMapper.toEntity(dto);
+        Administrador administrador = AdministradorMapper.converterDTOParaAdministrador(dto);
         administrador.setEmail(email);
-        senhaService.validar(dto.getSenha());
+        senhaService.validarSenha(dto.getSenha());
         administrador.setSenha(passwordEncoder.encode(dto.getSenha()));
         Administrador salvo = repository.save(administrador);
 
-        return AdministradorMapper.toDTO(salvo);
+        return AdministradorMapper.converterAdministradorParaDTO(salvo);
     }
 
-    public AdministradorDTO atualizar(Integer id, AdministradorDTO dto) {
+    public AdministradorDTO atualizarAdministrador(Integer id, AdministradorDTO dto) {
         Administrador administrador = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Administrador", id.longValue()));
 
-        String cpfLimpo = limparDocumento(dto.getCpf());
+        String cpfLimpo = normalizarDocumento(dto.getCpf());
         if (!administrador.getCpf().equals(cpfLimpo)
                 && repository.existsByCpf(cpfLimpo)) {
             throw new DuplicateResourceException("CPF já está em uso");
         }
 
-        String email = emailValidationService.validarParaAtualizacao(dto.getEmail(), administrador.getId());
+        String email = emailValidationService.validarEmailParaAtualizacao(dto.getEmail(), administrador.getId());
 
-        AdministradorMapper.updateEntity(administrador, dto);
+        AdministradorMapper.atualizarAdministradorComDTO(administrador, dto);
         administrador.setEmail(email);
         if (dto.getSenha() != null && !dto.getSenha().isBlank()) {
-            senhaService.validar(dto.getSenha());
+            senhaService.validarSenha(dto.getSenha());
             administrador.setSenha(passwordEncoder.encode(dto.getSenha()));
         }
 
         Administrador atualizado = repository.save(administrador);
-        return AdministradorMapper.toDTO(atualizado);
+        return AdministradorMapper.converterAdministradorParaDTO(atualizado);
     }
 
-    public void inativar(Integer id) {
+    public void inativarAdministrador(Integer id) {
         Administrador administrador = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Administrador", id.longValue()));
 
-        AdministradorMapper.inativarEntity(administrador);
+        AdministradorMapper.inativarAdministrador(administrador);
         repository.save(administrador);
     }
 
-    private String limparDocumento(String valor) {
+    private String normalizarDocumento(String valor) {
         if (valor == null || valor.isBlank()) {
             return null;
         }

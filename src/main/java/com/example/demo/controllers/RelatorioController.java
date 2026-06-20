@@ -27,8 +27,8 @@ public class RelatorioController {
         description = "Retorna dados consolidados de instituições, cuidadores e idosos para geração de relatório PDF"
     )
     @GetMapping("/admin/relatorio")
-    public ResponseEntity<RelatorioDTO> gerar() {
-        return ResponseEntity.ok(service.gerar());
+    public ResponseEntity<RelatorioDTO> gerarRelatorioGeral() {
+        return ResponseEntity.ok(service.gerarRelatorioGeral());
     }
 
     @Operation(
@@ -36,8 +36,8 @@ public class RelatorioController {
         description = "Retorna cuidadores e idosos vinculados à instituição autenticada"
     )
     @GetMapping("/instituicao/relatorio")
-    public ResponseEntity<RelatorioDTO.RelatorioInstituicaoDTO> gerarInstituicao(Authentication authentication) {
+    public ResponseEntity<RelatorioDTO.RelatorioInstituicaoDTO> gerarRelatorioInstituicao(Authentication authentication) {
         Integer instituicaoId = (Integer) authentication.getPrincipal();
-        return ResponseEntity.ok(service.gerarInstituicao(instituicaoId));
+        return ResponseEntity.ok(service.gerarRelatorioInstituicao(instituicaoId));
     }
 }

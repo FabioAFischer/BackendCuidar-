@@ -37,10 +37,10 @@ public class AlertasController {
         description = "Retorna uma lista paginada de alertas nao cancelados dos idosos vinculados ao cuidador autenticado"
     )
     @GetMapping("/listar_todos")
-    public ResponseEntity<Page<AlertasDTO>> listarTodos(
+    public ResponseEntity<Page<AlertasDTO>> listarAlertas(
             @PageableDefault(size = 10, sort = "id") Pageable pageable,
             Authentication authentication) {
-        return ResponseEntity.ok(service.listarAtivosDoCuidador(getCuidadorId(authentication), pageable));
+        return ResponseEntity.ok(service.listarAlertasAtivosDoCuidador(extrairCuidadorIdAutenticado(authentication), pageable));
     }
 
     @Operation(
@@ -48,10 +48,10 @@ public class AlertasController {
         description = "Retorna alertas nao cancelados do idoso autenticado no app"
     )
     @GetMapping("/me")
-    public ResponseEntity<Page<AlertasDTO>> listarMeusAlertas(
+    public ResponseEntity<Page<AlertasDTO>> listarAlertasDoUsuario(
             @PageableDefault(size = 20, sort = "data_agendade") Pageable pageable,
             Authentication authentication) {
-        return ResponseEntity.ok(service.listarDoIdoso(getUsuarioId(authentication), pageable));
+        return ResponseEntity.ok(service.listarAlertasDoIdoso(extrairUsuarioIdAutenticado(authentication), pageable));
     }
 
     @Operation(
@@ -59,11 +59,11 @@ public class AlertasController {
         description = "Retorna alertas nao cancelados de um idoso vinculado ao cuidador autenticado"
     )
     @GetMapping("/idoso/{idosoId}")
-    public ResponseEntity<Page<AlertasDTO>> listarPorIdoso(
+    public ResponseEntity<Page<AlertasDTO>> listarAlertasPorIdoso(
             @PathVariable Integer idosoId,
             @PageableDefault(size = 10, sort = "id") Pageable pageable,
             Authentication authentication) {
-        return ResponseEntity.ok(service.listarPorIdoso(idosoId, getCuidadorId(authentication), pageable));
+        return ResponseEntity.ok(service.listarAlertasPorIdoso(idosoId, extrairCuidadorIdAutenticado(authentication), pageable));
     }
 
     @Operation(
@@ -71,8 +71,8 @@ public class AlertasController {
         description = "Retorna os dados de um alerta de idoso vinculado ao cuidador autenticado"
     )
     @GetMapping("/listar/{id}")
-    public ResponseEntity<AlertasDTO> buscarPorId(@PathVariable int id, Authentication authentication) {
-        return ResponseEntity.ok(service.buscarPorId(id, getCuidadorId(authentication)));
+    public ResponseEntity<AlertasDTO> buscarAlertaPorId(@PathVariable int id, Authentication authentication) {
+        return ResponseEntity.ok(service.buscarAlertaPorId(id, extrairCuidadorIdAutenticado(authentication)));
     }
 
     @Operation(
@@ -80,8 +80,8 @@ public class AlertasController {
         description = "Cria um novo alerta para um idoso vinculado ao cuidador autenticado"
     )
     @PostMapping("/cadastrar")
-    public ResponseEntity<AlertasDTO> criar(@RequestBody AlertasDTO dto, Authentication authentication) {
-        AlertasDTO criado = service.criar(dto, getCuidadorId(authentication));
+    public ResponseEntity<AlertasDTO> criarAlerta(@RequestBody AlertasDTO dto, Authentication authentication) {
+        AlertasDTO criado = service.criarAlerta(dto, extrairCuidadorIdAutenticado(authentication));
         return ResponseEntity.status(HttpStatus.CREATED).body(criado);
     }
 
@@ -90,11 +90,11 @@ public class AlertasController {
         description = "Atualiza um alerta de idoso vinculado ao cuidador autenticado"
     )
     @PutMapping("/atualizar/{id}")
-    public ResponseEntity<AlertasDTO> atualizar(
+    public ResponseEntity<AlertasDTO> atualizarAlerta(
             @PathVariable int id,
             @RequestBody AlertasDTO dto,
             Authentication authentication) {
-        return ResponseEntity.ok(service.atualizar(id, dto, getCuidadorId(authentication)));
+        return ResponseEntity.ok(service.atualizarAlerta(id, dto, extrairCuidadorIdAutenticado(authentication)));
     }
 
     @Operation(
@@ -102,8 +102,8 @@ public class AlertasController {
         description = "Realiza a exclusao logica de um alerta de idoso vinculado ao cuidador autenticado"
     )
     @DeleteMapping("/deletar/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable int id, Authentication authentication) {
-        service.cancelar(id, getCuidadorId(authentication));
+    public ResponseEntity<Void> cancelarAlerta(@PathVariable int id, Authentication authentication) {
+        service.cancelarAlerta(id, extrairCuidadorIdAutenticado(authentication));
         return ResponseEntity.noContent().build();
     }
 
@@ -112,15 +112,15 @@ public class AlertasController {
         description = "Marca um alerta do idoso autenticado como realizado"
     )
     @PutMapping("/{id}/confirmar")
-    public ResponseEntity<AlertasDTO> confirmar(@PathVariable int id, Authentication authentication) {
-        return ResponseEntity.ok(service.confirmar(id, getUsuarioId(authentication)));
+    public ResponseEntity<AlertasDTO> confirmarAlerta(@PathVariable int id, Authentication authentication) {
+        return ResponseEntity.ok(service.confirmarAlerta(id, extrairUsuarioIdAutenticado(authentication)));
     }
 
-    private Integer getCuidadorId(Authentication authentication) {
-        return getUsuarioId(authentication);
+    private Integer extrairCuidadorIdAutenticado(Authentication authentication) {
+        return extrairUsuarioIdAutenticado(authentication);
     }
 
-    private Integer getUsuarioId(Authentication authentication) {
+    private Integer extrairUsuarioIdAutenticado(Authentication authentication) {
         if (authentication == null || authentication.getPrincipal() == null) {
             return null;
         }

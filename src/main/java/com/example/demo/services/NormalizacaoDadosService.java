@@ -53,7 +53,7 @@ public class NormalizacaoDadosService {
 
     @EventListener(ApplicationReadyEvent.class)
     @Transactional
-    public void normalizarDadosExistentes() {
+    public void normalizarDadosCadastraisExistentes() {
         normalizarAdministradores();
         normalizarContatos();
         normalizarCuidadores();
@@ -65,55 +65,55 @@ public class NormalizacaoDadosService {
 
     private void normalizarAdministradores() {
         for (Administrador administrador : administradorRepository.findAll()) {
-            administrador.setNome(TextoUtils.paraBanco(administrador.getNome()));
-            administrador.setCpf(TextoUtils.limparDocumento(administrador.getCpf()));
+            administrador.setNome(TextoUtils.normalizarTextoParaBanco(administrador.getNome()));
+            administrador.setCpf(TextoUtils.normalizarDocumento(administrador.getCpf()));
         }
     }
 
     private void normalizarContatos() {
         for (Contato contato : contatoRepository.findAll()) {
-            contato.setDdd(TextoUtils.limparNumero(contato.getDdd()));
-            contato.setTelefone(TextoUtils.limparNumero(contato.getTelefone()));
+            contato.setDdd(TextoUtils.normalizarNumero(contato.getDdd()));
+            contato.setTelefone(TextoUtils.normalizarNumero(contato.getTelefone()));
         }
     }
 
     private void normalizarCuidadores() {
         for (Cuidador cuidador : cuidadorRepository.findAll()) {
-            cuidador.setNome(TextoUtils.paraBanco(cuidador.getNome()));
-            cuidador.setCpf(TextoUtils.limparDocumento(cuidador.getCpf()));
+            cuidador.setNome(TextoUtils.normalizarTextoParaBanco(cuidador.getNome()));
+            cuidador.setCpf(TextoUtils.normalizarDocumento(cuidador.getCpf()));
         }
     }
 
     private void normalizarIdosos() {
         for (Idoso idoso : idosoRepository.findAll()) {
-            idoso.setNome(TextoUtils.paraBanco(idoso.getNome()));
-            idoso.setCpf(TextoUtils.limparDocumento(idoso.getCpf()));
-            idoso.setObservacoes(TextoUtils.paraBanco(idoso.getObservacoes()));
+            idoso.setNome(TextoUtils.normalizarTextoParaBanco(idoso.getNome()));
+            idoso.setCpf(TextoUtils.normalizarDocumento(idoso.getCpf()));
+            idoso.setObservacoes(TextoUtils.normalizarTextoParaBanco(idoso.getObservacoes()));
         }
     }
 
     private void normalizarInstituicoes() {
         for (Instituicao instituicao : instituicaoRepository.findAll()) {
-            instituicao.setNome(TextoUtils.paraBanco(instituicao.getNome()));
-            instituicao.setCnpj(TextoUtils.limparDocumento(instituicao.getCnpj()));
-            instituicao.setRua(TextoUtils.paraBanco(instituicao.getRua()));
-            instituicao.setBairro(TextoUtils.paraBanco(instituicao.getBairro()));
-            instituicao.setUf(TextoUtils.paraBanco(instituicao.getUf()));
-            instituicao.setCep(TextoUtils.limparDocumento(instituicao.getCep()));
+            instituicao.setNome(TextoUtils.normalizarTextoParaBanco(instituicao.getNome()));
+            instituicao.setCnpj(TextoUtils.normalizarDocumento(instituicao.getCnpj()));
+            instituicao.setRua(TextoUtils.normalizarTextoParaBanco(instituicao.getRua()));
+            instituicao.setBairro(TextoUtils.normalizarTextoParaBanco(instituicao.getBairro()));
+            instituicao.setUf(TextoUtils.normalizarTextoParaBanco(instituicao.getUf()));
+            instituicao.setCep(TextoUtils.normalizarDocumento(instituicao.getCep()));
         }
     }
 
     private void normalizarPrescricoes() {
         for (Prescricao prescricao : prescricaoRepository.findAll()) {
-            prescricao.setInstrucao(TextoUtils.paraBanco(prescricao.getInstrucao()));
-            prescricao.setDosagem(TextoUtils.paraBanco(prescricao.getDosagem()));
+            prescricao.setInstrucao(TextoUtils.normalizarTextoParaBanco(prescricao.getInstrucao()));
+            prescricao.setDosagem(TextoUtils.normalizarTextoParaBanco(prescricao.getDosagem()));
         }
     }
 
     private void normalizarRemedios() {
         for (Remedio remedio : remedioRepository.findAll()) {
-            remedio.setNome(TextoUtils.paraBanco(remedio.getNome()));
-            remedio.setObservacao(TextoUtils.paraBanco(remedio.getObservacao()));
+            remedio.setNome(TextoUtils.normalizarTextoParaBanco(remedio.getNome()));
+            remedio.setObservacao(TextoUtils.normalizarTextoParaBanco(remedio.getObservacao()));
         }
     }
 }

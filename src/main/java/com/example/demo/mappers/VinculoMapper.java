@@ -13,7 +13,7 @@ public class VinculoMapper {
 
     private VinculoMapper() {}
 
-    public static VinculoDTO toDTO(Vinculo vinculo) {
+    public static VinculoDTO converterVinculoParaDTO(Vinculo vinculo) {
         if (vinculo == null) return null;
 
         VinculoDTO dto = new VinculoDTO();
@@ -22,12 +22,12 @@ public class VinculoMapper {
 
         if (vinculo.getIdoso() != null) {
             dto.setIdosoId(vinculo.getIdoso().getId());
-            dto.setNomeIdoso(TextoUtils.paraExibicao(vinculo.getIdoso().getNome()));
+            dto.setNomeIdoso(TextoUtils.formatarTextoParaExibicao(vinculo.getIdoso().getNome()));
         }
 
         if (vinculo.getCuidador() != null) {
             dto.setCuidadorId(vinculo.getCuidador().getId());
-            dto.setNomeCuidador(TextoUtils.paraExibicao(vinculo.getCuidador().getNome()));
+            dto.setNomeCuidador(TextoUtils.formatarTextoParaExibicao(vinculo.getCuidador().getNome()));
         }
 
         dto.setTipoVinculo(vinculo.getTipoVinculo());
@@ -35,7 +35,7 @@ public class VinculoMapper {
         return dto;
     }
 
-    public static Vinculo toEntity(VinculoDTO dto, Idoso idoso, Cuidador cuidador) {
+    public static Vinculo converterDTOParaVinculo(VinculoDTO dto, Idoso idoso, Cuidador cuidador) {
         if (dto == null) return null;
 
         Vinculo vinculo = new Vinculo();
