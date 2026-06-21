@@ -193,4 +193,73 @@ public final class TestDataFactory {
         instituicao.setData_criacao(LocalDateTime.now());
         return instituicao;
     }
+
+    public static RemedioDTO remedioDTO(String nome, String observacao, Status status) {
+        return criarRemedioDTO(nome, observacao, status);
+    }
+
+    public static Remedio remedio(int id, String nome, String observacao, Status status) {
+        return criarRemedio(id, nome, observacao, status);
+    }
+
+    public static PrescricaoDTO prescricaoDTO() {
+        return criarPrescricaoDTO();
+    }
+
+    public static Prescricao prescricao(int id, Remedio remedio, Idoso idoso, Status status) {
+        return criarPrescricao(id, remedio, idoso, status);
+    }
+
+    public static AlertasDTO alertaDTO() {
+        return criarAlertaDTO();
+    }
+
+    public static Alertas alerta(int id, Idoso idoso, StatusAlertas statusAlertas) {
+        return criarAlerta(id, idoso, statusAlertas);
+    }
+
+    public static Remedio remedio() {
+        return criarRemedio();
+    }
+
+    public static IdosoDTO idosoDTO() {
+        return criarIdosoDTO();
+    }
+
+    public static ContatoDTO contatoDTO() {
+        return criarContatoDTO();
+    }
+
+    public static Idoso idoso() {
+        return criarIdoso();
+    }
+
+    public static Idoso idoso(int id, String nome, String cpf, Status status) {
+        return criarIdoso(id, nome, cpf, status);
+    }
+
+    public static Instituicao instituicao() {
+        return criarInstituicao();
+    }
+
+    public static Contato contato(Integer id, String ddd, String telefone) {
+        return criarContato(id, ddd, telefone);
+    }
+
+    public static Map<String, String> dadosLogin(String identificador, String senha, String perfil) {
+        return criarDadosLogin(identificador, senha, perfil);
+    }
+
+    public static Administrador administrador() {
+        return criarAdministrador();
+    }
+
+    public static Cuidador cuidador() {
+        return criarCuidador();
+    }
+
+    public static Instituicao instituicaoAuth() {
+        return criarInstituicaoAutenticacao();
+    }
+
 }
