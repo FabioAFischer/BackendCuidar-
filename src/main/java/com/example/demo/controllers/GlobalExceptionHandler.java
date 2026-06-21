@@ -6,7 +6,9 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -39,6 +41,16 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(Map.of(
             "code", "VALIDATION_ERROR",
             "errors", errors,
+            "timestamp", LocalDateTime.now().toString()
+        ));
+    }
+
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<Map<String, Object>> tratarMetodoHttpNaoSuportado(HttpRequestMethodNotSupportedException ex) {
+        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(Map.of(
+            "code", "METHOD_NOT_ALLOWED",
+            "message", "Método HTTP não permitido para este endpoint",
             "timestamp", LocalDateTime.now().toString()
         ));
     }
