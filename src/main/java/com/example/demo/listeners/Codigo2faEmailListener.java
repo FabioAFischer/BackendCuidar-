@@ -19,7 +19,7 @@ public class Codigo2faEmailListener {
 
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void enviarEmail(Codigo2faGeradoEvent event) {
-        emailService.enviarCodigoVerificacao(event.email(), event.codigo());
+    public void enviarEmailCodigoDoisFatores(Codigo2faGeradoEvent event) {
+        emailService.enviarEmailCodigoVerificacao(event.email(), event.codigo());
     }
 }

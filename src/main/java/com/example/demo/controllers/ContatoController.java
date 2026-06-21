@@ -37,9 +37,9 @@ public class ContatoController {
         description = "Retorna uma lista paginada de contatos"
     )
     @GetMapping("/listar_todos")
-    public ResponseEntity<Page<ContatoDTO>> listarTodos(
+    public ResponseEntity<Page<ContatoDTO>> listarContatos(
             @PageableDefault(size = 10, sort = "id") Pageable pageable) {
-        return ResponseEntity.ok(service.listarTodos(pageable));
+        return ResponseEntity.ok(service.listarContatos(pageable));
     }
 
     @Operation(
@@ -47,10 +47,10 @@ public class ContatoController {
         description = "Retorna uma lista paginada de contatos vinculados a um idoso específico"
     )
     @GetMapping("/listar/{idosoId}")
-    public ResponseEntity<Page<ContatoDTO>> listarPorIdoso(
+    public ResponseEntity<Page<ContatoDTO>> listarContatosPorIdoso(
             @PathVariable Integer idosoId,
             @PageableDefault(size = 10, sort = "id") Pageable pageable) {
-        return ResponseEntity.ok(service.listarPorIdoso(idosoId, pageable));
+        return ResponseEntity.ok(service.listarContatosPorIdoso(idosoId, pageable));
     }
 
     @Operation(
@@ -58,8 +58,8 @@ public class ContatoController {
         description = "Retorna os dados de um contato pelo ID informado"
     )
     @GetMapping("/{id}")
-    public ResponseEntity<ContatoDTO> buscarPorId(@PathVariable Integer id) {
-        return ResponseEntity.ok(service.buscarPorId(id));
+    public ResponseEntity<ContatoDTO> buscarContatoPorId(@PathVariable Integer id) {
+        return ResponseEntity.ok(service.buscarContatoPorId(id));
     }
 
     @Operation(
@@ -67,8 +67,8 @@ public class ContatoController {
         description = "Cria um novo contato com os dados informados"
     )
     @PostMapping("/cadastrar")
-    public ResponseEntity<ContatoDTO> criar(@Valid @RequestBody ContatoDTO dto) {
-        ContatoDTO criado = service.criar(dto);
+    public ResponseEntity<ContatoDTO> criarContato(@Valid @RequestBody ContatoDTO dto) {
+        ContatoDTO criado = service.criarContato(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(criado);
     }
 
@@ -77,8 +77,8 @@ public class ContatoController {
         description = "Atualiza os dados de um contato existente"
     )
     @PutMapping("/atualizar/{id}")
-    public ResponseEntity<ContatoDTO> atualizar(@PathVariable Integer id, @Valid @RequestBody ContatoDTO dto) {
-        return ResponseEntity.ok(service.atualizar(id, dto));
+    public ResponseEntity<ContatoDTO> atualizarContato(@PathVariable Integer id, @Valid @RequestBody ContatoDTO dto) {
+        return ResponseEntity.ok(service.atualizarContato(id, dto));
     }
 
     @Operation(
@@ -86,8 +86,8 @@ public class ContatoController {
         description = "Remove um contato quando ele não estiver vinculado a cuidador ou idoso"
     )
     @DeleteMapping("/deletar/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable Integer id) {
-        service.deletar(id);
+    public ResponseEntity<Void> excluirContato(@PathVariable Integer id) {
+        service.excluirContato(id);
         return ResponseEntity.noContent().build();
     }
 }

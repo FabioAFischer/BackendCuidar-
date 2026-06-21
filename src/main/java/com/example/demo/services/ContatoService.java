@@ -35,51 +35,51 @@ public class ContatoService {
         this.idosoRepository = idosoRepository;
     }
 
-    public Page<ContatoDTO> listarTodos(Pageable pageable) {
-        return contatoRepository.findAll(pageable).map(ContatoMapper::toDTO);
+    public Page<ContatoDTO> listarContatos(Pageable pageable) {
+        return contatoRepository.findAll(pageable).map(ContatoMapper::converterContatoParaDTO);
     }
 
-    public Page<ContatoDTO> listarPorIdoso(Integer idosoId, Pageable pageable) {
-        return contatoRepository.findByIdosos_Id(idosoId, pageable).map(ContatoMapper::toDTO);
+    public Page<ContatoDTO> listarContatosPorIdoso(Integer idosoId, Pageable pageable) {
+        return contatoRepository.findByIdosos_Id(idosoId, pageable).map(ContatoMapper::converterContatoParaDTO);
     }
 
-    public ContatoDTO buscarPorId(Integer id) {
+    public ContatoDTO buscarContatoPorId(Integer id) {
         Contato contato = contatoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Contato", id.longValue()));
 
-        return ContatoMapper.toDTO(contato);
+        return ContatoMapper.converterContatoParaDTO(contato);
     }
 
-    public ContatoDTO criar(ContatoDTO dto) {
-        Cuidador cuidador = buscarCuidador(dto.getCuidadorId());
-        List<Idoso> idosos = buscarIdosos(dto.getIdosos());
+    public ContatoDTO criarContato(ContatoDTO dto) {
+        Cuidador cuidador = buscarCuidadorPorId(dto.getCuidadorId());
+        List<Idoso> idosos = buscarIdososPorIds(dto.getIdosos());
 
-        Contato contato = ContatoMapper.toEntity(dto, cuidador, idosos);
+        Contato contato = ContatoMapper.converterDTOParaContato(dto, cuidador, idosos);
         Contato salvo = contatoRepository.save(contato);
         vincularContatoAIdosos(salvo, idosos);
 
-        return ContatoMapper.toDTO(salvo);
+        return ContatoMapper.converterContatoParaDTO(salvo);
     }
 
-    public ContatoDTO atualizar(Integer id, ContatoDTO dto) {
+    public ContatoDTO atualizarContato(Integer id, ContatoDTO dto) {
         Contato contato = contatoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Contato", id.longValue()));
 
         Cuidador cuidador = dto.getCuidadorId() != null
-                ? buscarCuidador(dto.getCuidadorId())
+                ? buscarCuidadorPorId(dto.getCuidadorId())
                 : contato.getCuidador();
         List<Idoso> idosos = dto.getIdosos() != null
-                ? buscarIdosos(dto.getIdosos())
+                ? buscarIdososPorIds(dto.getIdosos())
                 : contato.getIdosos();
 
-        ContatoMapper.atualizarContato(contato, dto, cuidador, idosos);
+        ContatoMapper.atualizarContatoComDTO(contato, dto, cuidador, idosos);
         Contato atualizado = contatoRepository.save(contato);
         vincularContatoAIdosos(atualizado, idosos);
 
-        return ContatoMapper.toDTO(atualizado);
+        return ContatoMapper.converterContatoParaDTO(atualizado);
     }
 
-    public void deletar(Integer id) {
+    public void excluirContato(Integer id) {
         Contato contato = contatoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Contato", id.longValue()));
 
@@ -90,14 +90,14 @@ public class ContatoService {
         contatoRepository.delete(contato);
     }
 
-    private Cuidador buscarCuidador(Integer cuidadorId) {
+    private Cuidador buscarCuidadorPorId(Integer cuidadorId) {
         if (cuidadorId == null) return null;
 
         return cuidadorRepository.findById(cuidadorId)
                 .orElseThrow(() -> new ResourceNotFoundException("Cuidador", cuidadorId.longValue()));
     }
 
-    private List<Idoso> buscarIdosos(List<Integer> idososIds) {
+    private List<Idoso> buscarIdososPorIds(List<Integer> idososIds) {
         if (idososIds == null || idososIds.isEmpty()) return List.of();
 
         List<Idoso> idosos = idosoRepository.findAllById(idososIds);

@@ -34,23 +34,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain) throws ServletException, IOException {
 
-        String token = extrairToken(request);
+        String token = extrairTokenDaRequisicao(request);
 
-        if (rotaPublica(request)) {
+        if (verificarRotaPublica(request)) {
             filterChain.doFilter(request, response);
             return;
         }
 
         if (token != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             try {
-                jwtService.validarToken(token);
+                jwtService.validarTokenJwt(token);
             } catch (InvalidTokenException exception) {
-                escreverErroToken(response, exception);
+                escreverRespostaErroToken(response, exception);
                 return;
             }
 
-            Integer usuarioId = jwtService.getUsuarioId(token);
-            Perfil perfil = jwtService.getPerfil(token);
+            Integer usuarioId = jwtService.extrairUsuarioId(token);
+            Perfil perfil = jwtService.extrairPerfil(token);
 
             UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                     usuarioId,
@@ -64,7 +64,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    private void escreverErroToken(HttpServletResponse response, InvalidTokenException exception) throws IOException {
+    private void escreverRespostaErroToken(HttpServletResponse response, InvalidTokenException exception) throws IOException {
         response.setStatus(exception.getStatus().value());
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
@@ -73,7 +73,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 """.formatted(exception.getErrorCode(), exception.getMessage(), LocalDateTime.now()));
     }
 
-    private String extrairToken(HttpServletRequest request) {
+    private String extrairTokenDaRequisicao(HttpServletRequest request) {
         String authorization = request.getHeader("Authorization");
 
         if (authorization == null || !authorization.startsWith("Bearer ")) {
@@ -83,7 +83,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return authorization.substring(7);
     }
 
-    private boolean rotaPublica(HttpServletRequest request) {
+    private boolean verificarRotaPublica(HttpServletRequest request) {
         String path = request.getServletPath();
 
         return "OPTIONS".equalsIgnoreCase(request.getMethod())

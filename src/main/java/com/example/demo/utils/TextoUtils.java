@@ -7,7 +7,7 @@ public final class TextoUtils {
     private TextoUtils() {
     }
 
-    public static String paraBanco(String valor) {
+    public static String normalizarTextoParaBanco(String valor) {
         if (valor == null) {
             return null;
         }
@@ -15,7 +15,7 @@ public final class TextoUtils {
         return valor.trim().toUpperCase(Locale.ROOT);
     }
 
-    public static String paraExibicao(String valor) {
+    public static String formatarTextoParaExibicao(String valor) {
         if (valor == null) {
             return null;
         }
@@ -44,7 +44,7 @@ public final class TextoUtils {
         return resultado.toString();
     }
 
-    public static String limparDocumento(String valor) {
+    public static String normalizarDocumento(String valor) {
         if (valor == null || valor.isBlank()) {
             return null;
         }
@@ -52,11 +52,11 @@ public final class TextoUtils {
         return valor.replaceAll("\\D", "");
     }
 
-    public static String limparNumero(String valor) {
-        return limparDocumento(valor);
+    public static String normalizarNumero(String valor) {
+        return normalizarDocumento(valor);
     }
 
-    public static String paraUf(String valor) {
+    public static String normalizarUf(String valor) {
         if (valor == null) {
             return null;
         }

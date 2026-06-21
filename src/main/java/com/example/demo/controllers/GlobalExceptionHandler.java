@@ -20,7 +20,7 @@ public class GlobalExceptionHandler {
 
     // Captura todas as suas exceptions customizadas (ResourceNotFound, Business, Unauthorized)
     @ExceptionHandler(AppException.class)
-    public ResponseEntity<Map<String, Object>> handleAppException(AppException ex) {
+    public ResponseEntity<Map<String, Object>> tratarExcecaoAplicacao(AppException ex) {
         return ResponseEntity.status(ex.getStatus()).body(Map.of(
             "code", ex.getErrorCode(),
             "message", ex.getMessage(),
@@ -30,7 +30,7 @@ public class GlobalExceptionHandler {
 
     // Captura erros de validação (@Valid nos DTOs)
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, Object>> handleValidation(MethodArgumentNotValidException ex) {
+    public ResponseEntity<Map<String, Object>> tratarErroValidacao(MethodArgumentNotValidException ex) {
         List<String> errors = ex.getBindingResult().getFieldErrors()
             .stream()
             .map(e -> e.getField() + ": " + e.getDefaultMessage())
@@ -45,7 +45,7 @@ public class GlobalExceptionHandler {
 
     // Captura qualquer erro inesperado
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, Object>> handleGeneric(Exception ex) {
+    public ResponseEntity<Map<String, Object>> tratarErroGenerico(Exception ex) {
         logger.error("Erro inesperado no servidor", ex);
         return ResponseEntity.internalServerError().body(Map.of(
             "code", "INTERNAL_ERROR",

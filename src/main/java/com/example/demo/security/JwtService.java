@@ -28,7 +28,7 @@ public class JwtService {
     @Value("${jwt.expiration-ms}")
     private long expirationMs;
 
-    public String gerarToken(Usuario usuario) {
+    public String gerarTokenJwt(Usuario usuario) {
         Date agora = new Date();
         Date expiracao = new Date(agora.getTime() + expirationMs);
 
@@ -42,44 +42,44 @@ public class JwtService {
                 .subject(String.valueOf(usuario.getId()))
                 .issuedAt(agora)
                 .expiration(expiracao)
-                .signWith(chaveAssinatura())
+                .signWith(gerarChaveAssinatura())
                 .compact();
     }
 
-    public boolean tokenValido(String token) {
+    public boolean verificarTokenValido(String token) {
         try {
-            validarToken(token);
+            validarTokenJwt(token);
             return true;
         } catch (InvalidTokenException exception) {
             return false;
         }
     }
 
-    public void validarToken(String token) {
+    public void validarTokenJwt(String token) {
         try {
-            claims(token);
+            extrairClaims(token);
         } catch (JwtException | IllegalArgumentException exception) {
             throw new InvalidTokenException();
         }
     }
 
-    public Integer getUsuarioId(String token) {
-        return Integer.valueOf(claims(token).getSubject());
+    public Integer extrairUsuarioId(String token) {
+        return Integer.valueOf(extrairClaims(token).getSubject());
     }
 
-    public Perfil getPerfil(String token) {
-        return Perfil.valueOf(claims(token).get("perfil", String.class));
+    public Perfil extrairPerfil(String token) {
+        return Perfil.valueOf(extrairClaims(token).get("perfil", String.class));
     }
 
-    private Claims claims(String token) {
+    private Claims extrairClaims(String token) {
         return Jwts.parser()
-                .verifyWith(chaveAssinatura())
+                .verifyWith(gerarChaveAssinatura())
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
     }
 
-    private SecretKey chaveAssinatura() {
+    private SecretKey gerarChaveAssinatura() {
         return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 }

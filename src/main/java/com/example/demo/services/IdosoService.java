@@ -72,34 +72,34 @@ public class IdosoService {
         this.chaveCriptografia = new SecretKeySpec(gerarChaveCriptografia(segredoCriptografia), "AES");
     }
 
-    public Page<IdosoDTO> listarAtivos(Pageable pageable) {
-        return repository.findByStatus(Status.ATIVO, pageable).map(IdosoMapper::toDTO);
+    public Page<IdosoDTO> listarIdososAtivos(Pageable pageable) {
+        return repository.findByStatus(Status.ATIVO, pageable).map(IdosoMapper::converterIdosoParaDTO);
     }
 
-    public Page<IdosoDTO> listarAtivosPorInstituicao(Integer instituicaoId, Pageable pageable) {
+    public Page<IdosoDTO> listarIdososAtivosPorInstituicao(Integer instituicaoId, Pageable pageable) {
         return repository.findByStatusAndInstituicaoId(Status.ATIVO, instituicaoId, pageable)
-                .map(IdosoMapper::toDTO);
+                .map(IdosoMapper::converterIdosoParaDTO);
     }
 
-    public IdosoDTO buscarPorId(Integer id) {
+    public IdosoDTO buscarIdosoPorId(Integer id) {
         Idoso idoso = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Idoso", id.longValue()));
 
-        return IdosoMapper.toDTO(idoso);
+        return IdosoMapper.converterIdosoParaDTO(idoso);
     }
 
-    public IdosoDTO buscarPorCpf(String cpf) {
-        Idoso idoso = buscarEntidadePorCpf(cpf)
+    public IdosoDTO buscarIdosoPorCpf(String cpf) {
+        Idoso idoso = buscarEntidadeIdosoPorCpf(cpf)
                 .orElseThrow(() -> new ResourceNotFoundException("Idoso não encontrado com CPF informado"));
 
-        return IdosoMapper.toDTO(idoso);
+        return IdosoMapper.converterIdosoParaDTO(idoso);
     }
 
-    public IdosoDTO criar(IdosoDTO dto) {
-        String cpfLimpo = CpfUtils.normalizar(dto.getCpf());
-        CpfUtils.validarDisponivel(cpfLimpo, cuidadorRepository::existsByCpf);
+    public IdosoDTO cadastrarIdoso(IdosoDTO dto) {
+        String cpfLimpo = CpfUtils.normalizarCpf(dto.getCpf());
+        CpfUtils.validarCpfDisponivel(cpfLimpo, cuidadorRepository::existsByCpf);
 
-        Optional<Idoso> idosoExistente = buscarEntidadePorCpf(cpfLimpo);
+        Optional<Idoso> idosoExistente = buscarEntidadeIdosoPorCpf(cpfLimpo);
 
         if (idosoExistente.isPresent() && idosoExistente.get().getStatus() == Status.ATIVO) {
             throw new DuplicateResourceException("Já existe um idoso ativo com esse CPF");
@@ -108,31 +108,31 @@ public class IdosoService {
         Instituicao instituicao = instituicaoRepository.findById(dto.getInstituicaoId())
                 .orElseThrow(() -> new ResourceNotFoundException("Instituição", dto.getInstituicaoId().longValue()));
 
-        Contato contato = resolverContato(dto);
+        Contato contato = resolverContatoDoIdoso(dto);
 
         if (idosoExistente.isPresent()) {
             Idoso idoso = idosoExistente.get();
-            IdosoMapper.atualizarIdoso(idoso, dto, instituicao);
+            IdosoMapper.atualizarIdosoComDTO(idoso, dto, instituicao);
             idoso.setContato(contato);
             idoso.setStatus(Status.ATIVO);
             idoso.setData_atualizacao(LocalDateTime.now());
-            return IdosoMapper.toDTO(repository.save(idoso));
+            return IdosoMapper.converterIdosoParaDTO(repository.save(idoso));
         }
 
-        Idoso idoso = IdosoMapper.toEntity(dto);
+        Idoso idoso = IdosoMapper.converterDTOParaIdoso(dto);
         idoso.setInstituicao(instituicao);
         idoso.setContato(contato);
 
-        return IdosoMapper.toDTO(repository.save(idoso));
+        return IdosoMapper.converterIdosoParaDTO(repository.save(idoso));
     }
 
-    public IdosoDTO atualizar(Integer id, IdosoDTO dto) {
+    public IdosoDTO atualizarIdoso(Integer id, IdosoDTO dto) {
         Idoso idoso = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Idoso", id.longValue()));
 
-        String cpfLimpo = CpfUtils.normalizar(dto.getCpf());
+        String cpfLimpo = CpfUtils.normalizarCpf(dto.getCpf());
         if (!idoso.getCpf().equals(cpfLimpo)) {
-            CpfUtils.validarDisponivel(cpfLimpo, repository::existsByCpf, cuidadorRepository::existsByCpf);
+            CpfUtils.validarCpfDisponivel(cpfLimpo, repository::existsByCpf, cuidadorRepository::existsByCpf);
         }
 
         Instituicao instituicao = instituicaoRepository.findById(dto.getInstituicaoId())
@@ -145,13 +145,13 @@ public class IdosoService {
             if (contatoDTO.getId() != null) {
                 contato = contatoRepository.findById(contatoDTO.getId())
                         .orElseThrow(() -> new ResourceNotFoundException("Contato", contatoDTO.getId().longValue()));
-                ContatoMapper.atualizarContato(contato, contatoDTO, null, null);
+                ContatoMapper.atualizarContatoComDTO(contato, contatoDTO, null, null);
                 contato = contatoRepository.save(contato);
             } else {
                 if (contatoDTO.getDdd() == null || contatoDTO.getTelefone() == null) {
                     throw new InvalidRequestException("Dados de contato incompletos");
                 }
-                contato = ContatoMapper.toEntity(contatoDTO, null, java.util.List.of());
+                contato = ContatoMapper.converterDTOParaContato(contatoDTO, null, java.util.List.of());
                 contato = contatoRepository.save(contato);
             }
         } else if (dto.getContatoId() != null) {
@@ -159,14 +159,14 @@ public class IdosoService {
                     .orElseThrow(() -> new ResourceNotFoundException("Contato", dto.getContatoId().longValue()));
         }
 
-        IdosoMapper.atualizarIdoso(idoso, dto, instituicao);
+        IdosoMapper.atualizarIdosoComDTO(idoso, dto, instituicao);
         if (contato != null) idoso.setContato(contato);
         idoso.setData_atualizacao(LocalDateTime.now());
 
-        return IdosoMapper.toDTO(repository.save(idoso));
+        return IdosoMapper.converterIdosoParaDTO(repository.save(idoso));
     }
 
-    public void inativar(Integer id) {
+    public void inativarIdoso(Integer id) {
         Idoso idoso = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Idoso", id.longValue()));
 
@@ -175,7 +175,7 @@ public class IdosoService {
         repository.save(idoso);
     }
 
-    public Idoso autenticarPorSenhaAcesso(String senhaAcesso) {
+    public Idoso autenticarIdosoPorSenhaAcesso(String senhaAcesso) {
         if (senhaAcesso == null || senhaAcesso.isBlank()) {
             throw new InvalidRequestException("Senha de acesso é obrigatória.");
         }
@@ -201,7 +201,7 @@ public class IdosoService {
         throw new UnauthorizedException("Senha de acesso inválida.");
     }
 
-    public Map<String, Object> obterSenhaAcesso(Integer idosoId, Integer cuidadorId, String senhaCuidador) {
+    public Map<String, Object> obterSenhaAcessoDoIdoso(Integer idosoId, Integer cuidadorId, String senhaCuidador) {
         if (senhaCuidador == null || senhaCuidador.isBlank()) {
             throw new InvalidRequestException("Informe a senha do cuidador");
         }
@@ -240,14 +240,14 @@ public class IdosoService {
                 "gerada", geradaAgora);
     }
 
-    private Contato resolverContato(IdosoDTO dto) {
+    private Contato resolverContatoDoIdoso(IdosoDTO dto) {
         ContatoDTO contatoDTO = dto.getContato();
 
         if (contatoDTO != null) {
             if (contatoDTO.getDdd() == null || contatoDTO.getTelefone() == null) {
                 throw new InvalidRequestException("Dados de contato incompletos");
             }
-            Contato contato = ContatoMapper.toEntity(contatoDTO, null, java.util.List.of());
+            Contato contato = ContatoMapper.converterDTOParaContato(contatoDTO, null, java.util.List.of());
             return contatoRepository.save(contato);
         }
 
@@ -259,8 +259,8 @@ public class IdosoService {
         throw new InvalidRequestException("Contato é obrigatório");
     }
 
-    private Optional<Idoso> buscarEntidadePorCpf(String cpf) {
-        String cpfLimpo = CpfUtils.normalizar(cpf);
+    private Optional<Idoso> buscarEntidadeIdosoPorCpf(String cpf) {
+        String cpfLimpo = CpfUtils.normalizarCpf(cpf);
         return cpfLimpo == null ? Optional.empty() : repository.findByCpf(cpfLimpo);
     }
 

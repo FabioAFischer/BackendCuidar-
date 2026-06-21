@@ -10,7 +10,7 @@ import com.example.demo.entity.Idoso;
 
 public class ContatoMapper {
 
-    public static ContatoDTO toDTO(Contato contato) {
+    public static ContatoDTO converterContatoParaDTO(Contato contato) {
         if (contato == null) return null;
 
         ContatoDTO dto = new ContatoDTO();
@@ -34,29 +34,29 @@ public class ContatoMapper {
         return dto;
     }
 
-    public static Contato toEntity(ContatoDTO dto, Cuidador cuidador, List<Idoso> idosos) {
+    public static Contato converterDTOParaContato(ContatoDTO dto, Cuidador cuidador, List<Idoso> idosos) {
         if (dto == null) return null;
 
         Contato contato = new Contato();
         
-        contato.setDdd(limparNumero(dto.getDdd()));
-        contato.setTelefone(limparNumero(dto.getTelefone()));
+        contato.setDdd(normalizarNumero(dto.getDdd()));
+        contato.setTelefone(normalizarNumero(dto.getTelefone()));
         contato.setCuidador(cuidador);
         contato.setIdosos(idosos);
 
         return contato;
     }
 
-    public static void atualizarContato(Contato contato, ContatoDTO dto, Cuidador cuidador, List<Idoso> idosos) {
+    public static void atualizarContatoComDTO(Contato contato, ContatoDTO dto, Cuidador cuidador, List<Idoso> idosos) {
         if (dto == null) return;
 
-        contato.setDdd(limparNumero(dto.getDdd()));
-        contato.setTelefone(limparNumero(dto.getTelefone()));
+        contato.setDdd(normalizarNumero(dto.getDdd()));
+        contato.setTelefone(normalizarNumero(dto.getTelefone()));
         contato.setCuidador(cuidador);
         contato.setIdosos(idosos);
     }
 
-    private static String limparNumero(String valor) {
+    private static String normalizarNumero(String valor) {
         if (valor == null || valor.isBlank()) {
             return null;
         }

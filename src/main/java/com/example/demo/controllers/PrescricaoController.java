@@ -36,9 +36,9 @@ public class PrescricaoController {
         description = "Retorna uma lista paginada de prescricoes ativas"
     )
     @GetMapping("/listar_todas")
-    public ResponseEntity<Page<PrescricaoDTO>> listarTodas(
+    public ResponseEntity<Page<PrescricaoDTO>> listarPrescricoes(
             @PageableDefault(size = 10, sort = "id") Pageable pageable) {
-        return ResponseEntity.ok(service.listarAtivas(pageable));
+        return ResponseEntity.ok(service.listarPrescricoesAtivas(pageable));
     }
 
     @Operation(
@@ -46,10 +46,10 @@ public class PrescricaoController {
         description = "Retorna uma lista paginada de prescricoes ativas de um idoso"
     )
     @GetMapping("/idoso/{idosoId}")
-    public ResponseEntity<Page<PrescricaoDTO>> listarPorIdoso(
+    public ResponseEntity<Page<PrescricaoDTO>> listarPrescricoesPorIdoso(
             @PathVariable Integer idosoId,
             @PageableDefault(size = 10, sort = "id") Pageable pageable) {
-        return ResponseEntity.ok(service.listarPorIdoso(idosoId, pageable));
+        return ResponseEntity.ok(service.listarPrescricoesPorIdoso(idosoId, pageable));
     }
 
     @Operation(
@@ -57,8 +57,8 @@ public class PrescricaoController {
         description = "Retorna os dados de uma prescricao especifica com base no ID informado"
     )
     @GetMapping("/listar/{id}")
-    public ResponseEntity<PrescricaoDTO> buscarPorId(@PathVariable int id) {
-        return ResponseEntity.ok(service.buscarPorId(id));
+    public ResponseEntity<PrescricaoDTO> buscarPrescricaoPorId(@PathVariable int id) {
+        return ResponseEntity.ok(service.buscarPrescricaoPorId(id));
     }
 
     @Operation(
@@ -66,8 +66,8 @@ public class PrescricaoController {
         description = "Cria uma nova prescricao com os dados enviados no corpo da requisicao"
     )
     @PostMapping("/cadastrar")
-    public ResponseEntity<PrescricaoDTO> criar(@RequestBody PrescricaoDTO dto) {
-        PrescricaoDTO criada = service.criar(dto);
+    public ResponseEntity<PrescricaoDTO> criarPrescricao(@RequestBody PrescricaoDTO dto) {
+        PrescricaoDTO criada = service.criarPrescricao(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(criada);
     }
 
@@ -76,8 +76,8 @@ public class PrescricaoController {
         description = "Atualiza os dados de uma prescricao existente com base no ID informado"
     )
     @PutMapping("/atualizar/{id}")
-    public ResponseEntity<PrescricaoDTO> atualizar(@PathVariable int id, @RequestBody PrescricaoDTO dto) {
-        return ResponseEntity.ok(service.atualizar(id, dto));
+    public ResponseEntity<PrescricaoDTO> atualizarPrescricao(@PathVariable int id, @RequestBody PrescricaoDTO dto) {
+        return ResponseEntity.ok(service.atualizarPrescricao(id, dto));
     }
 
     @Operation(
@@ -85,8 +85,8 @@ public class PrescricaoController {
         description = "Realiza a exclusao logica de uma prescricao com base no ID informado"
     )
     @DeleteMapping("/deletar/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable int id) {
-        service.inativar(id);
+    public ResponseEntity<Void> inativarPrescricao(@PathVariable int id) {
+        service.inativarPrescricao(id);
         return ResponseEntity.noContent().build();
     }
 }

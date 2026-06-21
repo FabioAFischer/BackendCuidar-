@@ -36,160 +36,160 @@ class CuidadorControllerTest {
     private CuidadorController controller;
 
     @Test
-    void ListarTodos_semPerfilInstituicao_retornaTodosAtivos() {
+    void deveListarTodosCuidadoresAtivosSemPerfilInstituicao() {
         var pageable = PageRequest.of(0, 10);
-        var pagina = new PageImpl<>(List.of(cuidadorDTO()));
+        var pagina = new PageImpl<>(List.of(criarCuidadorDTO()));
 
-        when(service.listarAtivos(pageable)).thenReturn(pagina);
+        when(service.listarCuidadoresAtivos(pageable)).thenReturn(pagina);
 
-        var resposta = controller.listarTodos(null, null, pageable);
+        var resposta = controller.listarCuidadores(null, null, pageable);
 
         assertEquals(HttpStatus.OK, resposta.getStatusCode());
         assertEquals(1, resposta.getBody().getTotalElements());
-        verify(service).listarAtivos(pageable);
+        verify(service).listarCuidadoresAtivos(pageable);
     }
 
     @Test
-    void ListarTodos_comPerfilInstituicao_retornaCuidadoresDaInstituicao() {
+    void deveListarCuidadoresDaInstituicaoQuandoPerfilInstituicao() {
         var pageable = PageRequest.of(0, 10);
-        var pagina = new PageImpl<>(List.of(cuidadorDTO()));
+        var pagina = new PageImpl<>(List.of(criarCuidadorDTO()));
         var authentication = new UsernamePasswordAuthenticationToken(
                 10,
                 null,
                 List.of(new SimpleGrantedAuthority("ROLE_INSTITUICAO")));
 
-        when(service.listarAtivosPorInstituicao(10, "123.456.789-01", pageable)).thenReturn(pagina);
+        when(service.listarCuidadoresAtivosPorInstituicao(10, "123.456.789-01", pageable)).thenReturn(pagina);
 
-        var resposta = controller.listarTodos("123.456.789-01", authentication, pageable);
+        var resposta = controller.listarCuidadores("123.456.789-01", authentication, pageable);
 
         assertEquals(HttpStatus.OK, resposta.getStatusCode());
         assertEquals(1, resposta.getBody().getTotalElements());
-        verify(service).listarAtivosPorInstituicao(10, "123.456.789-01", pageable);
+        verify(service).listarCuidadoresAtivosPorInstituicao(10, "123.456.789-01", pageable);
     }
 
     @Test
-    void Buscar_porIdExistente_retornaOk() {
-        CuidadorDTO dto = cuidadorDTO();
+    void deveRetornarOkAoBuscarCuidadorExistente() {
+        CuidadorDTO dto = criarCuidadorDTO();
 
-        when(service.buscarPorId(2)).thenReturn(dto);
+        when(service.buscarCuidadorPorId(2)).thenReturn(dto);
 
-        var resposta = controller.buscarPorId(2);
+        var resposta = controller.buscarCuidadorPorId(2);
 
         assertEquals(HttpStatus.OK, resposta.getStatusCode());
         assertEquals(dto, resposta.getBody());
     }
 
     @Test
-    void Buscar_porIdInexistente_lancaResourceNotFound() {
-        when(service.buscarPorId(99)).thenThrow(new ResourceNotFoundException("Cuidador", 99L));
+    void deveLancarResourceNotFoundAoBuscarCuidadorInexistente() {
+        when(service.buscarCuidadorPorId(99)).thenThrow(new ResourceNotFoundException("Cuidador", 99L));
 
-        assertThrows(ResourceNotFoundException.class, () -> controller.buscarPorId(99));
+        assertThrows(ResourceNotFoundException.class, () -> controller.buscarCuidadorPorId(99));
     }
 
     @Test
-    void Criar_dadosValidos_retornaCreated() {
-        CuidadorDTO dto = cuidadorDTO();
-        CuidadorDTO criado = cuidadorDTO();
+    void deveRetornarCreatedAoCadastrarCuidadorValido() {
+        CuidadorDTO dto = criarCuidadorDTO();
+        CuidadorDTO criado = criarCuidadorDTO();
         criado.setId(2);
 
-        when(service.criar(dto)).thenReturn(criado);
+        when(service.cadastrarCuidador(dto)).thenReturn(criado);
 
-        var resposta = controller.criar(dto);
+        var resposta = controller.cadastrarCuidador(dto);
 
         assertEquals(HttpStatus.CREATED, resposta.getStatusCode());
         assertEquals(2, resposta.getBody().getId());
-        verify(service).criar(dto);
+        verify(service).cadastrarCuidador(dto);
     }
 
     @Test
-    void Criar_cpfDuplicado_lancaDuplicateResource() {
-        CuidadorDTO dto = cuidadorDTO();
+    void deveLancarDuplicateResourceAoCadastrarCpfDuplicado() {
+        CuidadorDTO dto = criarCuidadorDTO();
 
-        when(service.criar(dto)).thenThrow(new DuplicateResourceException("CPF ja esta em uso"));
+        when(service.cadastrarCuidador(dto)).thenThrow(new DuplicateResourceException("CPF ja esta em uso"));
 
-        assertThrows(DuplicateResourceException.class, () -> controller.criar(dto));
+        assertThrows(DuplicateResourceException.class, () -> controller.cadastrarCuidador(dto));
     }
 
     @Test
-    void Atualizar_dadosValidos_retornaOk() {
-        CuidadorDTO dto = cuidadorDTO();
+    void deveRetornarOkAoAtualizarCuidadorValido() {
+        CuidadorDTO dto = criarCuidadorDTO();
         dto.setNome("Cuidador Atualizado");
 
-        when(service.atualizar(2, dto)).thenReturn(dto);
+        when(service.atualizarCuidador(2, dto)).thenReturn(dto);
 
-        var resposta = controller.atualizar(2, dto);
+        var resposta = controller.atualizarCuidador(2, dto);
 
         assertEquals(HttpStatus.OK, resposta.getStatusCode());
         assertEquals("Cuidador Atualizado", resposta.getBody().getNome());
-        verify(service).atualizar(2, dto);
+        verify(service).atualizarCuidador(2, dto);
     }
 
     @Test
-    void Atualizar_cuidadorInexistente_lancaResourceNotFound() {
-        CuidadorDTO dto = cuidadorDTO();
+    void deveLancarResourceNotFoundAoAtualizarCuidadorInexistente() {
+        CuidadorDTO dto = criarCuidadorDTO();
 
-        when(service.atualizar(99, dto)).thenThrow(new ResourceNotFoundException("Cuidador", 99L));
+        when(service.atualizarCuidador(99, dto)).thenThrow(new ResourceNotFoundException("Cuidador", 99L));
 
-        assertThrows(ResourceNotFoundException.class, () -> controller.atualizar(99, dto));
+        assertThrows(ResourceNotFoundException.class, () -> controller.atualizarCuidador(99, dto));
     }
 
     @Test
-    void Reativar_dadosValidos_retornaOk() {
-        CuidadorDTO dto = cuidadorDTO();
+    void deveRetornarOkAoReativarCuidadorValido() {
+        CuidadorDTO dto = criarCuidadorDTO();
         dto.setStatus(Status.ATIVO);
 
-        when(service.reativar(2, dto)).thenReturn(dto);
+        when(service.reativarCuidador(2, dto)).thenReturn(dto);
 
-        var resposta = controller.reativar(2, dto);
+        var resposta = controller.reativarCuidador(2, dto);
 
         assertEquals(HttpStatus.OK, resposta.getStatusCode());
         assertEquals(Status.ATIVO, resposta.getBody().getStatus());
-        verify(service).reativar(2, dto);
+        verify(service).reativarCuidador(2, dto);
     }
 
     @Test
-    void Reativar_semDto_retornaOk() {
-        CuidadorDTO reativado = cuidadorDTO();
+    void deveRetornarOkAoReativarCuidadorSemDto() {
+        CuidadorDTO reativado = criarCuidadorDTO();
         reativado.setStatus(Status.ATIVO);
 
-        when(service.reativar(2, null)).thenReturn(reativado);
+        when(service.reativarCuidador(2, null)).thenReturn(reativado);
 
-        var resposta = controller.reativar(2, null);
+        var resposta = controller.reativarCuidador(2, null);
 
         assertEquals(HttpStatus.OK, resposta.getStatusCode());
         assertEquals(Status.ATIVO, resposta.getBody().getStatus());
     }
 
     @Test
-    void Reativar_cuidadorInexistente_lancaResourceNotFound() {
-        when(service.reativar(99, null)).thenThrow(new ResourceNotFoundException("Cuidador", 99L));
+    void deveLancarResourceNotFoundAoReativarCuidadorInexistente() {
+        when(service.reativarCuidador(99, null)).thenThrow(new ResourceNotFoundException("Cuidador", 99L));
 
-        assertThrows(ResourceNotFoundException.class, () -> controller.reativar(99, null));
+        assertThrows(ResourceNotFoundException.class, () -> controller.reativarCuidador(99, null));
     }
 
     @Test
-    void Deletar_cuidadorExistente_retornaNoContent() {
-        var resposta = controller.deletar(2);
+    void deveRetornarNoContentAoInativarCuidadorExistente() {
+        var resposta = controller.inativarCuidador(2);
 
         assertEquals(HttpStatus.NO_CONTENT, resposta.getStatusCode());
         assertNull(resposta.getBody());
-        verify(service).inativar(2);
+        verify(service).inativarCuidador(2);
     }
 
     @Test
-    void Deletar_cuidadorInexistente_lancaResourceNotFound() {
+    void deveLancarResourceNotFoundAoInativarCuidadorInexistente() {
         org.mockito.Mockito.doThrow(new ResourceNotFoundException("Cuidador", 99L))
-                .when(service).inativar(99);
+                .when(service).inativarCuidador(99);
 
-        assertThrows(ResourceNotFoundException.class, () -> controller.deletar(99));
+        assertThrows(ResourceNotFoundException.class, () -> controller.inativarCuidador(99));
     }
 
     @Test
-    void Ping_requisicaoValida_retornaPong() {
-        assertEquals("pong", controller.ping());
+    void deveRetornarPongAoResponderPing() {
+        assertEquals("pong", controller.responderPingCuidador());
     }
 
-    private CuidadorDTO cuidadorDTO() {
+    private CuidadorDTO criarCuidadorDTO() {
         CuidadorDTO dto = new CuidadorDTO();
         dto.setId(2);
         dto.setNome("Cuidador");

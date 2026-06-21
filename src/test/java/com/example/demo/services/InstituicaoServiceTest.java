@@ -39,25 +39,25 @@ class InstituicaoServiceTest {
 
     @Test
     void deveLancarExcecaoAoCriarComCnpjDuplicado() {
-        InstituicaoDTO dto = instituicaoDTO();
+        InstituicaoDTO dto = criarInstituicaoDTO();
 
         when(repository.existsByCnpj("12345678000199")).thenReturn(true);
 
-        assertThrows(DuplicateResourceException.class, () -> service.criar(dto));
+        assertThrows(DuplicateResourceException.class, () -> service.cadastrarInstituicao(dto));
     }
 
     @Test
     void deveLancarExcecaoAoBuscarInstituicaoInexistente() {
         when(repository.findById(99)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> service.buscarPorId(99));
+        assertThrows(ResourceNotFoundException.class, () -> service.buscarInstituicaoPorId(99));
     }
 
     @Test
     void deveLancarExcecaoAoAtualizarInstituicaoInexistente() {
         when(repository.findById(99)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> service.atualizar(99, instituicaoDTO()));
+        assertThrows(ResourceNotFoundException.class, () -> service.atualizarInstituicao(99, criarInstituicaoDTO()));
     }
 
     @Test
@@ -68,24 +68,24 @@ class InstituicaoServiceTest {
         when(repository.findById(3)).thenReturn(Optional.of(existente));
         when(repository.existsByCnpj("12345678000199")).thenReturn(true);
 
-        assertThrows(DuplicateResourceException.class, () -> service.atualizar(3, instituicaoDTO()));
+        assertThrows(DuplicateResourceException.class, () -> service.atualizarInstituicao(3, criarInstituicaoDTO()));
     }
 
     @Test
     void deveLancarExcecaoAoInativarInstituicaoInexistente() {
         when(repository.findById(99)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> service.inativar(99));
+        assertThrows(ResourceNotFoundException.class, () -> service.inativarInstituicao(99));
     }
 
     @Test
     void deveLancarExcecaoAoAtivarInstituicaoInexistente() {
         when(repository.findById(99)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> service.ativar(99));
+        assertThrows(ResourceNotFoundException.class, () -> service.reativarInstituicao(99));
     }
 
-    private InstituicaoDTO instituicaoDTO() {
+    private InstituicaoDTO criarInstituicaoDTO() {
         InstituicaoDTO dto = new InstituicaoDTO();
         dto.setNome("Instituicao Bom Cuidado");
         dto.setCnpj("12345678000199");
