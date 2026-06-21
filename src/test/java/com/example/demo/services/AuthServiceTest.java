@@ -217,4 +217,41 @@ class AuthServiceTest {
         assertTrue((Boolean) resposta.get("valido"));
         assertEquals("cuidador@email.com", resposta.get("email"));
     }
+
+    @Test
+    void deveReenviarCodigoDoisFatoresQuandoCuidadorExistir() {
+        Cuidador cuidador = cuidador();
+
+        when(cuidadorRepository.findByCpf("12345678901")).thenReturn(Optional.of(cuidador));
+
+        Map<String, Object> resposta = service.reenviarCodigoDoisFatores("123.456.789-01", "CUIDADOR");
+
+        assertEquals("cu***@email.com", resposta.get("email"));
+        assertEquals("Código reenviado com sucesso", resposta.get("mensagem"));
+        verify(twoFactorService).enviarCodigoDoisFatores("cuidador@email.com");
+    }
+
+    @Test
+    void deveReenviarCodigoDoisFatoresQuandoInstituicaoExistir() {
+        Instituicao instituicao = instituicaoAuth();
+
+        when(instituicaoRepository.findByCnpj("12345678000199")).thenReturn(Optional.of(instituicao));
+
+        Map<String, Object> resposta = service.reenviarCodigoDoisFatores("12.345.678/0001-99", "INSTITUICAO");
+
+        assertEquals("in***@email.com", resposta.get("email"));
+        assertEquals("Código reenviado com sucesso", resposta.get("mensagem"));
+        verify(twoFactorService).enviarCodigoDoisFatores("instituicao@email.com");
+    }
+
+    @Test
+    void deveLancarExcecaoQuandoReenviarCodigoComPerfilAdministrador() {
+        Administrador administrador = administrador();
+
+        when(administradorRepository.findByCpf("12345678901")).thenReturn(Optional.of(administrador));
+
+        assertThrows(com.example.demo.exceptions.UnsupportedProfileException.class,
+                () -> service.reenviarCodigoDoisFatores("12345678901", "ADMINISTRADOR"));
+    }
+
 }

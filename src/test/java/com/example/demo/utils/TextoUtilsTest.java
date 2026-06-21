@@ -1,6 +1,7 @@
 package com.example.demo.utils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.junit.jupiter.api.Test;
 
@@ -25,4 +26,15 @@ class TextoUtilsTest {
         assertEquals("12345678900", TextoUtils.normalizarDocumento("123.456.789-00"));
         assertEquals("11999998888", TextoUtils.normalizarNumero("(11) 99999-8888"));
     }
+
+    @Test
+    void deveNormalizarUfQuandoValorForInformado() {
+        assertEquals("SP", TextoUtils.normalizarUf(" sp "));
+    }
+
+    @Test
+    void deveRetornarNuloQuandoNormalizarUfNula() {
+        assertNull(TextoUtils.normalizarUf(null));
+    }
+
 }
