@@ -38,7 +38,7 @@ public class JwtService {
         claims.put("perfil", usuario.getPerfil().name());
 
         return Jwts.builder()
-                .extrairClaims(claims)
+                .claims(claims)
                 .subject(String.valueOf(usuario.getId()))
                 .issuedAt(agora)
                 .expiration(expiracao)
