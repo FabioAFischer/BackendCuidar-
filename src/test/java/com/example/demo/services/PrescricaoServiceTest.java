@@ -16,6 +16,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -55,6 +59,40 @@ class PrescricaoServiceTest {
 
     @InjectMocks
     private PrescricaoService service;
+
+
+
+    @Test
+    void deveListarPrescricoesAtivasQuandoExistiremRegistros() {
+        Pageable pageable = PageRequest.of(0, 10);
+        Prescricao prescricao = prescricao(1, remedio(), idoso(), Status.ATIVO);
+        Page<Prescricao> pagina = new PageImpl<>(List.of(prescricao), pageable, 1);
+
+        when(prescricaoRepository.findAtivasNaoVencidas(any(Status.class), any(LocalDateTime.class), any(Pageable.class)))
+                .thenReturn(pagina);
+
+        Page<PrescricaoDTO> resultado = service.listarPrescricoesAtivas(pageable);
+
+        assertEquals(1, resultado.getTotalElements());
+        assertEquals(1, resultado.getContent().get(0).getId());
+        verify(prescricaoRepository).findAtivasNaoVencidas(any(Status.class), any(LocalDateTime.class), any(Pageable.class));
+    }
+
+    @Test
+    void deveListarPrescricoesPorIdosoQuandoExistiremRegistros() {
+        Pageable pageable = PageRequest.of(0, 10);
+        Prescricao prescricao = prescricao(1, remedio(), idoso(), Status.ATIVO);
+        Page<Prescricao> pagina = new PageImpl<>(List.of(prescricao), pageable, 1);
+
+        when(prescricaoRepository.findAtivasNaoVencidasPorIdoso(any(Integer.class), any(Status.class), any(LocalDateTime.class), any(Pageable.class)))
+                .thenReturn(pagina);
+
+        Page<PrescricaoDTO> resultado = service.listarPrescricoesPorIdoso(20, pageable);
+
+        assertEquals(1, resultado.getTotalElements());
+        assertEquals(20, resultado.getContent().get(0).getIdosoId());
+        verify(prescricaoRepository).findAtivasNaoVencidasPorIdoso(any(Integer.class), any(Status.class), any(LocalDateTime.class), any(Pageable.class));
+    }
 
     @Test
     void deveCriarPrescricao() {
