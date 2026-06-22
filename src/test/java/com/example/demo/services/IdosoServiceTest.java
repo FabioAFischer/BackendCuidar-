@@ -75,6 +75,35 @@ class IdosoServiceTest {
                 "segredo-de-teste-para-criptografia");
     }
 
+
+
+    @Test
+    void deveListarIdososAtivosQuandoExistiremRegistros() {
+        Pageable pageable = PageRequest.of(0, 10);
+        Idoso idosoAtivo = idoso(1, "Maria", "12345678901", Status.ATIVO);
+
+        when(idosoRepository.findByStatus(Status.ATIVO, pageable))
+                .thenReturn(new PageImpl<>(List.of(idosoAtivo), pageable, 1));
+
+        var resultado = service.listarIdososAtivos(pageable);
+
+        assertEquals(1, resultado.getTotalElements());
+        assertEquals("Maria", resultado.getContent().get(0).getNome());
+        verify(idosoRepository).findByStatus(Status.ATIVO, pageable);
+    }
+
+    @Test
+    void deveBuscarIdosoPorCpfQuandoCpfExistir() {
+        Idoso idoso = idoso(1, "Maria", "12345678901", Status.ATIVO);
+
+        when(idosoRepository.findByCpf("12345678901")).thenReturn(Optional.of(idoso));
+
+        IdosoDTO resultado = service.buscarIdosoPorCpf("123.456.789-01");
+
+        assertEquals(1, resultado.getId());
+        assertEquals("12345678901", resultado.getCpf());
+    }
+
     @Test
     void deveListarIdososAtivosPorInstituicao() {
         Pageable pageable = PageRequest.of(0, 10);
