@@ -15,11 +15,11 @@ class RemedioMapperTest {
 
     @Test
     void deveConverterRemedioParaDTOQuandoRemedioForValido() {
-        RemedioDTO dto = RemedioMapper.converterRemedioParaDTO(remedio(1, "DIPIRONA", "TOMAR COM AGUA", Status.ATIVO));
+        RemedioDTO dto = RemedioMapper.converterRemedioParaDTO(remedio(1, "DIPIRONA", "Tomar COM água", Status.ATIVO));
 
         assertEquals(1, dto.getId());
         assertEquals("Dipirona", dto.getNome());
-        assertEquals("Tomar Com Agua", dto.getObservacao());
+        assertEquals("Tomar COM água", dto.getObservacao());
     }
 
     @Test
@@ -27,6 +27,7 @@ class RemedioMapperTest {
         Remedio remedio = RemedioMapper.converterDTOParaRemedio(remedioDTO("Dipirona", "Tomar", null));
 
         assertEquals("DIPIRONA", remedio.getNome());
+        assertEquals("Tomar", remedio.getObservacao());
         assertEquals(Status.ATIVO, remedio.getStatus());
     }
 
@@ -37,6 +38,7 @@ class RemedioMapperTest {
         RemedioMapper.atualizarRemedioComDTO(remedio, remedioDTO("Paracetamol", "Nova", Status.INATIVO));
 
         assertEquals("PARACETAMOL", remedio.getNome());
+        assertEquals("Nova", remedio.getObservacao());
         assertEquals(Status.INATIVO, remedio.getStatus());
     }
 

@@ -41,10 +41,12 @@ class PrescricaoMapperTest {
         Prescricao prescricao = prescricao(1, remedio(), idoso(), Status.ATIVO);
         PrescricaoDTO dto = prescricaoDTO();
         dto.setDosagem("2 comprimidos");
+        dto.setInstrucao("Tomar APÓS o almoço");
 
         PrescricaoMapper.atualizarPrescricaoComDTO(prescricao, dto, remedio(), idoso());
 
         assertEquals("2 COMPRIMIDOS", prescricao.getDosagem());
+        assertEquals("Tomar APÓS o almoço", prescricao.getInstrucao());
         assertEquals(10, prescricao.getRemedio().getId());
     }
 

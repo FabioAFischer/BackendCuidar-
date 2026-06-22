@@ -21,7 +21,7 @@ public class IdosoMapper {
         dto.setId(idoso.getId());
         dto.setNome(TextoUtils.formatarTextoParaExibicao(idoso.getNome()));
         dto.setCpf(idoso.getCpf());
-        dto.setObservacoes(TextoUtils.formatarTextoParaExibicao(idoso.getObservacoes()));
+        dto.setObservacoes(TextoUtils.manterTextoLivre(idoso.getObservacoes()));
         dto.setSenhaAcessoGerada(idoso.getSenhaAcessoCriptografada() != null
                 && !idoso.getSenhaAcessoCriptografada().isBlank());
 
@@ -49,7 +49,7 @@ public class IdosoMapper {
        
         idoso.setNome(TextoUtils.normalizarTextoParaBanco(dto.getNome()));
         idoso.setCpf(normalizarDocumento(dto.getCpf()));
-        idoso.setObservacoes(TextoUtils.normalizarTextoParaBanco(dto.getObservacoes()));
+        idoso.setObservacoes(TextoUtils.manterTextoLivre(dto.getObservacoes()));
 
         if (dto.getInstituicaoId() != null) {
             Instituicao instituicao = new Instituicao();
@@ -89,7 +89,7 @@ public class IdosoMapper {
 
         idoso.setNome(TextoUtils.normalizarTextoParaBanco(dto.getNome()));
         idoso.setCpf(normalizarDocumento(dto.getCpf()));
-        idoso.setObservacoes(TextoUtils.normalizarTextoParaBanco(dto.getObservacoes()));
+        idoso.setObservacoes(TextoUtils.manterTextoLivre(dto.getObservacoes()));
 
         if (instituicao != null) {
             idoso.setInstituicao(instituicao);

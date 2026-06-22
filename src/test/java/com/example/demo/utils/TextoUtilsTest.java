@@ -17,8 +17,14 @@ class TextoUtilsTest {
     void deveFormatarTextoParaExibicao() {
         assertEquals("Jos\u00e9 Da Silva", TextoUtils.formatarTextoParaExibicao("JOS\u00c9 DA SILVA"));
         assertEquals("Rem\u00e9dio D\u00f3rflex", TextoUtils.formatarTextoParaExibicao("REM\u00c9DIO D\u00d3RFLEX"));
-        assertEquals("a b c", TextoUtils.formatarTextoParaExibicao("A B C"));
-        assertEquals("Tomar Após o Almoço", TextoUtils.formatarTextoParaExibicao("TOMAR APÓS O ALMOÇO"));
+        assertEquals("A B C", TextoUtils.formatarTextoParaExibicao("A B C"));
+        assertEquals("Tomar Após O Almoço", TextoUtils.formatarTextoParaExibicao("TOMAR APÓS O ALMOÇO"));
+    }
+
+    @Test
+    void deveManterTextoLivreSemAlteracao() {
+        assertEquals("  Observação livre COM acento!  ", TextoUtils.manterTextoLivre("  Observação livre COM acento!  "));
+        assertNull(TextoUtils.manterTextoLivre(null));
     }
 
     @Test

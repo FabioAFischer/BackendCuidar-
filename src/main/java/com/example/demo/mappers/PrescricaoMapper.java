@@ -26,7 +26,7 @@ public class PrescricaoMapper {
         dto.setDataFim(prescricao.getData_fim());
         dto.setStatus(prescricao.getStatus());
         dto.setNecessarioJejum(prescricao.getNecessario_jejum());
-        dto.setInstrucao(TextoUtils.formatarTextoParaExibicao(prescricao.getInstrucao()));
+        dto.setInstrucao(TextoUtils.manterTextoLivre(prescricao.getInstrucao()));
         dto.setIntervalo(prescricao.getIntervalo());
         dto.setDosagem(TextoUtils.formatarTextoParaExibicao(prescricao.getDosagem()));
 
@@ -55,7 +55,7 @@ public class PrescricaoMapper {
         prescricao.setIdoso(idoso);
         prescricao.setData_fim(dto.getDataFim());
         prescricao.setNecessario_jejum(Boolean.TRUE.equals(dto.getNecessarioJejum()));
-        prescricao.setInstrucao(TextoUtils.normalizarTextoParaBanco(dto.getInstrucao()));
+        prescricao.setInstrucao(TextoUtils.manterTextoLivre(dto.getInstrucao()));
         prescricao.setIntervalo(dto.getIntervalo());
         prescricao.setDosagem(TextoUtils.normalizarTextoParaBanco(dto.getDosagem()));
 

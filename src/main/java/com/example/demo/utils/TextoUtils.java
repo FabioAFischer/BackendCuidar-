@@ -34,7 +34,7 @@ public final class TextoUtils {
             }
 
             if (palavra.length() == 1) {
-                resultado.append(palavra);
+                resultado.append(Character.toTitleCase(palavra.charAt(0)));
             } else {
                 resultado.append(Character.toTitleCase(palavra.charAt(0)));
                 resultado.append(palavra.substring(1));
@@ -42,6 +42,10 @@ public final class TextoUtils {
         }
 
         return resultado.toString();
+    }
+
+    public static String manterTextoLivre(String valor) {
+        return valor;
     }
 
     public static String normalizarDocumento(String valor) {

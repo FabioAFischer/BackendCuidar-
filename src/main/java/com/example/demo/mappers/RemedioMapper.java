@@ -14,7 +14,7 @@ public class RemedioMapper {
         RemedioDTO dto = new RemedioDTO();
         dto.setId(remedio.getId());
         dto.setNome(TextoUtils.formatarTextoParaExibicao(remedio.getNome()));
-        dto.setObservacao(TextoUtils.formatarTextoParaExibicao(remedio.getObservacao()));
+        dto.setObservacao(TextoUtils.manterTextoLivre(remedio.getObservacao()));
         dto.setStatus(remedio.getStatus());
 
         return dto;
@@ -27,7 +27,7 @@ public class RemedioMapper {
         Remedio remedio = new Remedio();
 
         remedio.setNome(TextoUtils.normalizarTextoParaBanco(dto.getNome()));
-        remedio.setObservacao(TextoUtils.normalizarTextoParaBanco(dto.getObservacao()));
+        remedio.setObservacao(TextoUtils.manterTextoLivre(dto.getObservacao()));
 
         if (dto.getStatus() != null) {
             remedio.setStatus(dto.getStatus());
@@ -43,7 +43,7 @@ public class RemedioMapper {
             return;
 
         remedio.setNome(TextoUtils.normalizarTextoParaBanco(dto.getNome()));
-        remedio.setObservacao(TextoUtils.normalizarTextoParaBanco(dto.getObservacao()));
+        remedio.setObservacao(TextoUtils.manterTextoLivre(dto.getObservacao()));
 
         if (dto.getStatus() != null) {
             remedio.setStatus(dto.getStatus());
