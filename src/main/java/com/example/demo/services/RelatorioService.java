@@ -148,7 +148,7 @@ public class RelatorioService {
                         i.getId(),
                         TextoUtils.formatarTextoParaExibicao(i.getNome()),
                         i.getCpf(),
-                        TextoUtils.formatarTextoParaExibicao(i.getObservacoes()),
+                        TextoUtils.manterTextoLivre(i.getObservacoes()),
                         i.getStatus().name()))
                 .toList();
 

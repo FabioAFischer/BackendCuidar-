@@ -10,6 +10,11 @@ import static com.example.demo.support.TestDataFactory.remedio;
 import static com.example.demo.support.TestDataFactory.remedioDTO;
 
 import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -45,6 +50,37 @@ class RemedioServiceTest {
 
     @InjectMocks
     private RemedioService service;
+
+
+
+    @Test
+    void deveListarRemediosAtivosQuandoExistiremRegistros() {
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Remedio> pagina = new PageImpl<>(List.of(remedio(1, "DIPIRONA", null, Status.ATIVO)), pageable, 1);
+
+        when(remedioRepository.findByCuidadorIdAndStatus(CUIDADOR_ID, Status.ATIVO, pageable)).thenReturn(pagina);
+
+        Page<RemedioDTO> resultado = service.listarRemediosAtivos(CUIDADOR_ID, pageable);
+
+        assertEquals(1, resultado.getTotalElements());
+        assertEquals("Dipirona", resultado.getContent().get(0).getNome());
+        verify(remedioRepository).findByCuidadorIdAndStatus(CUIDADOR_ID, Status.ATIVO, pageable);
+    }
+
+    @Test
+    void deveAtualizarRemedioQuandoDadosForemValidos() {
+        RemedioDTO dto = remedioDTO("Dipirona", "Nova observacao", Status.ATIVO);
+        Remedio existente = remedio(1, "DIPIRONA", null, Status.ATIVO);
+
+        when(remedioRepository.findByIdAndCuidadorId(1, CUIDADOR_ID)).thenReturn(Optional.of(existente));
+        when(remedioRepository.save(existente)).thenReturn(existente);
+
+        RemedioDTO resultado = service.atualizarRemedio(1, dto, CUIDADOR_ID);
+
+        assertEquals("Dipirona", resultado.getNome());
+        assertEquals("Nova Observacao", resultado.getObservacao());
+        verify(remedioRepository).save(existente);
+    }
 
     @Test
     void deveCriarRemedioNovo() {

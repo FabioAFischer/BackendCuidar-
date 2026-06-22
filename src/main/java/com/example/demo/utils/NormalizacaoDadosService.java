@@ -1,4 +1,4 @@
-package com.example.demo.services;
+package com.example.demo.utils;
 
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -20,8 +20,6 @@ import com.example.demo.repository.IdosoRepository;
 import com.example.demo.repository.InstituicaoRepository;
 import com.example.demo.repository.PrescricaoRepository;
 import com.example.demo.repository.RemedioRepository;
-import com.example.demo.utils.TextoUtils;
-
 @Service
 @ConditionalOnProperty(name = "cuidar.normalizacao-dados.enabled", havingValue = "true", matchIfMissing = true)
 public class NormalizacaoDadosService {
@@ -88,7 +86,6 @@ public class NormalizacaoDadosService {
         for (Idoso idoso : idosoRepository.findAll()) {
             idoso.setNome(TextoUtils.normalizarTextoParaBanco(idoso.getNome()));
             idoso.setCpf(TextoUtils.normalizarDocumento(idoso.getCpf()));
-            idoso.setObservacoes(TextoUtils.normalizarTextoParaBanco(idoso.getObservacoes()));
         }
     }
 
@@ -105,7 +102,6 @@ public class NormalizacaoDadosService {
 
     private void normalizarPrescricoes() {
         for (Prescricao prescricao : prescricaoRepository.findAll()) {
-            prescricao.setInstrucao(TextoUtils.normalizarTextoParaBanco(prescricao.getInstrucao()));
             prescricao.setDosagem(TextoUtils.normalizarTextoParaBanco(prescricao.getDosagem()));
         }
     }
@@ -113,7 +109,6 @@ public class NormalizacaoDadosService {
     private void normalizarRemedios() {
         for (Remedio remedio : remedioRepository.findAll()) {
             remedio.setNome(TextoUtils.normalizarTextoParaBanco(remedio.getNome()));
-            remedio.setObservacao(TextoUtils.normalizarTextoParaBanco(remedio.getObservacao()));
         }
     }
 }

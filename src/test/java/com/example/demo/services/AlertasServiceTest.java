@@ -9,7 +9,13 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Optional;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,6 +34,7 @@ import com.example.demo.exceptions.ResourceNotFoundException;
 import com.example.demo.exceptions.UnauthorizedException;
 import com.example.demo.repository.AlertasRepository;
 import com.example.demo.repository.IdosoRepository;
+import com.example.demo.repository.PrescricaoRepository;
 import com.example.demo.repository.VinculoRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -40,6 +47,9 @@ class AlertasServiceTest {
     private IdosoRepository idosoRepository;
 
     @Mock
+    private PrescricaoRepository prescricaoRepository;
+
+    @Mock
     private VinculoRepository vinculoRepository;
 
     @InjectMocks
@@ -48,8 +58,10 @@ class AlertasServiceTest {
     @Test
     void deveCriarAlertaParaIdosoVinculadoAoCuidador() {
         AlertasDTO dto = alertaDTO();
+        dto.setTipoAlerta(TipoAlerta.CONSULTA);
         Idoso idoso = idoso();
         Alertas salvo = alerta(1, idoso, StatusAlertas.AGENDADO);
+        salvo.setTipoAlerta(TipoAlerta.CONSULTA);
 
         when(idosoRepository.findById(20)).thenReturn(Optional.of(idoso));
         when(vinculoRepository.existsByIdosoIdAndCuidadorId(20, 2)).thenReturn(true);
@@ -60,7 +72,7 @@ class AlertasServiceTest {
         assertEquals(1, resultado.getId());
         assertEquals(20, resultado.getIdosoId());
         assertEquals("Maria", resultado.getIdosoNome());
-        assertEquals(TipoAlerta.REMEDIO, resultado.getTipoAlerta());
+        assertEquals(TipoAlerta.CONSULTA, resultado.getTipoAlerta());
         assertEquals(StatusAlertas.AGENDADO, resultado.getStatusAlertas());
     }
 
@@ -91,6 +103,85 @@ class AlertasServiceTest {
 
         assertEquals(TipoAlerta.CONSULTA, resultado.getTipoAlerta());
         verify(alertasRepository).save(existente);
+    }
+
+
+    @Test
+    void deveListarAlertasAtivosDoCuidadorQuandoCuidadorForInformado() {
+        Pageable pageable = PageRequest.of(0, 10);
+        Alertas alerta = alerta(1, idoso(), StatusAlertas.AGENDADO);
+        Page<Alertas> pagina = new PageImpl<>(List.of(alerta), pageable, 1);
+
+        when(alertasRepository.findNaoCanceladosPorCuidador(2, StatusAlertas.CANCELADO, pageable)).thenReturn(pagina);
+
+        Page<AlertasDTO> resultado = service.listarAlertasAtivosDoCuidador(2, pageable);
+
+        assertEquals(1, resultado.getTotalElements());
+        assertEquals(1, resultado.getContent().get(0).getId());
+        verify(alertasRepository).findNaoCanceladosPorCuidador(2, StatusAlertas.CANCELADO, pageable);
+    }
+
+    @Test
+    void deveListarAlertasPorIdosoQuandoCuidadorPossuirVinculo() {
+        Pageable pageable = PageRequest.of(0, 10);
+        Alertas alerta = alerta(1, idoso(), StatusAlertas.AGENDADO);
+        Page<Alertas> pagina = new PageImpl<>(List.of(alerta), pageable, 1);
+
+        when(vinculoRepository.existsByIdosoIdAndCuidadorId(20, 2)).thenReturn(true);
+        when(alertasRepository.findNaoCanceladosPorIdosoECuidador(20, 2, StatusAlertas.CANCELADO, pageable))
+                .thenReturn(pagina);
+
+        Page<AlertasDTO> resultado = service.listarAlertasPorIdoso(20, 2, pageable);
+
+        assertEquals(1, resultado.getTotalElements());
+        assertEquals(20, resultado.getContent().get(0).getIdosoId());
+        verify(alertasRepository).findNaoCanceladosPorIdosoECuidador(20, 2, StatusAlertas.CANCELADO, pageable);
+    }
+
+    @Test
+    void deveListarAlertasDoIdosoQuandoIdosoForInformado() {
+        Pageable pageable = PageRequest.of(0, 10);
+        Alertas alerta = alerta(1, idoso(), StatusAlertas.AGENDADO);
+        Page<Alertas> pagina = new PageImpl<>(List.of(alerta), pageable, 1);
+
+        when(alertasRepository.findByIdosoIdAndStatusAlertasNot(20, StatusAlertas.CANCELADO, pageable)).thenReturn(pagina);
+
+        Page<AlertasDTO> resultado = service.listarAlertasDoIdoso(20, pageable);
+
+        assertEquals(1, resultado.getTotalElements());
+        assertEquals(StatusAlertas.AGENDADO, resultado.getContent().get(0).getStatusAlertas());
+        verify(alertasRepository).findByIdosoIdAndStatusAlertasNot(20, StatusAlertas.CANCELADO, pageable);
+    }
+
+    @Test
+    void deveConfirmarAlertaQuandoPertencerAoIdoso() {
+        Alertas alerta = alerta(1, idoso(), StatusAlertas.AGENDADO);
+
+        when(alertasRepository.findById(1)).thenReturn(Optional.of(alerta));
+        when(alertasRepository.save(alerta)).thenReturn(alerta);
+
+        AlertasDTO resultado = service.confirmarAlerta(1, 20);
+
+        assertEquals(StatusAlertas.REALIZADO, resultado.getStatusAlertas());
+        verify(alertasRepository).save(alerta);
+    }
+
+    @Test
+    void deveLancarExcecaoQuandoConfirmarAlertaDeOutroIdoso() {
+        Alertas alerta = alerta(1, idoso(), StatusAlertas.AGENDADO);
+
+        when(alertasRepository.findById(1)).thenReturn(Optional.of(alerta));
+
+        assertThrows(UnauthorizedException.class, () -> service.confirmarAlerta(1, 99));
+    }
+
+    @Test
+    void deveLancarExcecaoQuandoConfirmarAlertaCancelado() {
+        Alertas alerta = alerta(1, idoso(), StatusAlertas.CANCELADO);
+
+        when(alertasRepository.findById(1)).thenReturn(Optional.of(alerta));
+
+        assertThrows(InvalidRequestException.class, () -> service.confirmarAlerta(1, 20));
     }
 
     @Test
