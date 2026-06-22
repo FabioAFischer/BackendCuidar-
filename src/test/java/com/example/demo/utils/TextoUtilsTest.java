@@ -15,15 +15,17 @@ class TextoUtilsTest {
 
     @Test
     void deveFormatarTextoParaExibicao() {
-        assertEquals("Jos\u00e9 Da Silva", TextoUtils.formatarTextoParaExibicao("JOS\u00c9 DA SILVA"));
+        assertEquals("Jos\u00e9 da Silva", TextoUtils.formatarTextoParaExibicao("JOS\u00c9 DA SILVA"));
         assertEquals("Rem\u00e9dio D\u00f3rflex", TextoUtils.formatarTextoParaExibicao("REM\u00c9DIO D\u00d3RFLEX"));
         assertEquals("A B C", TextoUtils.formatarTextoParaExibicao("A B C"));
-        assertEquals("Tomar Após O Almoço", TextoUtils.formatarTextoParaExibicao("TOMAR APÓS O ALMOÇO"));
+        assertEquals("Tomar Ap\u00f3s o Almo\u00e7o", TextoUtils.formatarTextoParaExibicao("TOMAR AP\u00d3S O ALMO\u00c7O"));
+        assertEquals("Casa de Repouso dos Santos", TextoUtils.formatarTextoParaExibicao("CASA DE REPOUSO DOS SANTOS"));
+        assertEquals("Da Silva", TextoUtils.formatarTextoParaExibicao("DA SILVA"));
     }
 
     @Test
     void deveManterTextoLivreSemAlteracao() {
-        assertEquals("  Observação livre COM acento!  ", TextoUtils.manterTextoLivre("  Observação livre COM acento!  "));
+        assertEquals("  Observa\u00e7\u00e3o livre COM acento!  ", TextoUtils.manterTextoLivre("  Observa\u00e7\u00e3o livre COM acento!  "));
         assertNull(TextoUtils.manterTextoLivre(null));
     }
 
