@@ -34,6 +34,7 @@ import com.example.demo.repository.IdosoRepository;
 import com.example.demo.repository.InstituicaoRepository;
 import com.example.demo.repository.PrescricaoRepository;
 import com.example.demo.repository.RemedioRepository;
+import com.example.demo.utils.NormalizacaoDadosService;
 
 @ExtendWith(MockitoExtension.class)
 class NormalizacaoDadosServiceTest {
@@ -100,9 +101,12 @@ class NormalizacaoDadosServiceTest {
         assertEquals("11", contato.getDdd());
         assertEquals("CUIDADOR", cuidador.getNome());
         assertEquals("MARIA", idoso.getNome());
+        assertEquals(" observa ", idoso.getObservacoes());
         assertEquals("INSTITUICAO", instituicao.getNome());
+        assertEquals(" tomar com agua ", prescricao.getInstrucao());
         assertEquals("1 COMPRIMIDO", prescricao.getDosagem());
         assertEquals("DIPIRONA", remedio.getNome());
+        assertEquals(" dor ", remedio.getObservacao());
         verify(remedioRepository).findAll();
     }
 }

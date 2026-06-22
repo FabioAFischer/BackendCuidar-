@@ -22,11 +22,13 @@ class IdosoMapperTest {
     void deveConverterIdosoParaDTOQuandoIdosoForValido() {
         Idoso idoso = idoso(20, "MARIA", "12345678901", Status.ATIVO);
         idoso.setSenhaAcessoCriptografada("hash");
+        idoso.setObservacoes("ALERGIA forte a dipirona");
 
         IdosoDTO dto = IdosoMapper.converterIdosoParaDTO(idoso);
 
         assertEquals(20, dto.getId());
         assertEquals("Maria", dto.getNome());
+        assertEquals("ALERGIA forte a dipirona", dto.getObservacoes());
         assertTrue(dto.getSenhaAcessoGerada());
         assertEquals(10, dto.getInstituicaoId());
     }
@@ -40,6 +42,7 @@ class IdosoMapperTest {
 
         assertEquals("MARIA", idoso.getNome());
         assertEquals("12345678901", idoso.getCpf());
+        assertEquals(dto.getObservacoes(), idoso.getObservacoes());
         assertEquals(Perfil.IDOSO, idoso.getPerfil());
         assertEquals(Status.ATIVO, idoso.getStatus());
         assertNotNull(idoso.getData_criacao());
@@ -55,6 +58,7 @@ class IdosoMapperTest {
         IdosoMapper.atualizarIdosoComDTO(idoso, dto, instituicao());
 
         assertEquals("MARIA ATUALIZADA", idoso.getNome());
+        assertEquals(dto.getObservacoes(), idoso.getObservacoes());
         assertEquals(10, idoso.getInstituicao().getId());
         assertEquals(5, idoso.getContato().getId());
     }
