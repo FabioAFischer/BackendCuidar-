@@ -86,7 +86,7 @@ public class AlertasService {
 
         Idoso idoso = buscarIdosoPorId(dto.getIdosoId());
         validarVinculoEntreIdosoECuidador(idoso.getId(), cuidadorId);
-        Prescricao prescricao = buscarPrescricaoVinculadaAoAlerta(dto, idoso);
+        Prescricao prescricao = buscarPrescricaoVinculadaAoAlerta(dto, idoso, alerta.getPrescricao());
 
         AlertasMapper.atualizarAlertaComDTO(alerta, dto, idoso, prescricao);
         return AlertasMapper.converterAlertaParaDTO(repository.save(alerta));
@@ -131,22 +131,34 @@ public class AlertasService {
     }
 
     private Prescricao buscarPrescricaoVinculadaAoAlerta(AlertasDTO dto, Idoso idoso) {
+        return buscarPrescricaoVinculadaAoAlerta(dto, idoso, null);
+    }
+
+    private Prescricao buscarPrescricaoVinculadaAoAlerta(AlertasDTO dto, Idoso idoso, Prescricao prescricaoAtual) {
         if (dto.getTipoAlerta() != TipoAlerta.REMEDIO) {
             return null;
         }
 
         if (dto.getPrescricaoId() == null) {
-            throw new InvalidRequestException("Prescricao e obrigatoria para alerta de remedio");
+            if (prescricaoAtual == null) {
+                throw new InvalidRequestException("Prescricao e obrigatoria para alerta de remedio");
+            }
+
+            validarPrescricaoPertenceAoIdoso(prescricaoAtual, idoso);
+            return prescricaoAtual;
         }
 
         Prescricao prescricao = prescricaoRepository.findById(dto.getPrescricaoId())
                 .orElseThrow(() -> new ResourceNotFoundException("Prescricao", dto.getPrescricaoId().longValue()));
 
+        validarPrescricaoPertenceAoIdoso(prescricao, idoso);
+        return prescricao;
+    }
+
+    private void validarPrescricaoPertenceAoIdoso(Prescricao prescricao, Idoso idoso) {
         if (prescricao.getIdoso() == null || prescricao.getIdoso().getId() != idoso.getId()) {
             throw new InvalidRequestException("Prescricao nao pertence ao idoso informado");
         }
-
-        return prescricao;
     }
 
     private void validarDadosAlerta(AlertasDTO dto) {
