@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import com.example.demo.entity.Alertas;
 import com.example.demo.enums.StatusAlertas;
+import com.example.demo.enums.TipoAlerta;
 
 @Repository
 public interface AlertasRepository extends JpaRepository<Alertas, Integer> {
@@ -46,4 +47,6 @@ public interface AlertasRepository extends JpaRepository<Alertas, Integer> {
     Page<Alertas> findByIdosoIdAndStatusAlertasNot(Integer idosoId, StatusAlertas status, Pageable pageable);
 
     List<Alertas> findByPrescricaoIdAndStatusAlertas(Integer prescricaoId, StatusAlertas status);
+
+    void deleteByPrescricaoIdAndTipoAlerta(Integer prescricaoId, TipoAlerta tipoAlerta);
 }

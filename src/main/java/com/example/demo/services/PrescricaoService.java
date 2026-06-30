@@ -99,7 +99,7 @@ public class PrescricaoService {
         Prescricao prescricao = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Prescricao", (long) id));
 
-        cancelarAlertasAgendadosDaPrescricao(prescricao);
+        excluirAlertasDeRemedioDaPrescricao(prescricao);
         prescricao.setStatus(Status.INATIVO);
         repository.save(prescricao);
     }
@@ -203,5 +203,9 @@ public class PrescricaoService {
             alerta.setData_atualizacao(agora);
         });
         alertasRepository.saveAll(alertasAgendados);
+    }
+
+    private void excluirAlertasDeRemedioDaPrescricao(Prescricao prescricao) {
+        alertasRepository.deleteByPrescricaoIdAndTipoAlerta(prescricao.getId(), TipoAlerta.REMEDIO);
     }
 }

@@ -161,20 +161,15 @@ class PrescricaoServiceTest {
     @Test
     void deveInativarPrescricao() {
         Prescricao prescricao = prescricao(1, remedio(), idoso(), Status.ATIVO);
-        Alertas alertaAgendado = criarAlertaAgendado(prescricao, prescricao.getIdoso());
 
         when(prescricaoRepository.findById(1)).thenReturn(Optional.of(prescricao));
-        when(alertasRepository.findByPrescricaoIdAndStatusAlertas(1, StatusAlertas.AGENDADO))
-                .thenReturn(List.of(alertaAgendado));
 
         service.inativarPrescricao(1);
 
         ArgumentCaptor<Prescricao> captor = ArgumentCaptor.forClass(Prescricao.class);
         verify(prescricaoRepository).save(captor.capture());
         assertEquals(Status.INATIVO, captor.getValue().getStatus());
-        assertEquals(StatusAlertas.CANCELADO, alertaAgendado.getStatusAlertas());
-        assertNotNull(alertaAgendado.getData_atualizacao());
-        verify(alertasRepository).saveAll(List.of(alertaAgendado));
+        verify(alertasRepository).deleteByPrescricaoIdAndTipoAlerta(1, TipoAlerta.REMEDIO);
     }
 
     @Test

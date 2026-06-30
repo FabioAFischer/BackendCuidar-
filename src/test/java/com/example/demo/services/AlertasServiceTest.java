@@ -2,6 +2,8 @@ package com.example.demo.services;
 
 import static com.example.demo.support.TestDataFactory.alerta;
 import static com.example.demo.support.TestDataFactory.alertaDTO;
+import static com.example.demo.support.TestDataFactory.criarPrescricao;
+import static com.example.demo.support.TestDataFactory.criarRemedio;
 import static com.example.demo.support.TestDataFactory.idoso;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -27,8 +29,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.example.demo.dtos.AlertasDTO;
 import com.example.demo.entity.Alertas;
 import com.example.demo.entity.Idoso;
+import com.example.demo.entity.Prescricao;
 import com.example.demo.enums.StatusAlertas;
 import com.example.demo.enums.TipoAlerta;
+import com.example.demo.enums.Status;
 import com.example.demo.exceptions.InvalidRequestException;
 import com.example.demo.exceptions.ResourceNotFoundException;
 import com.example.demo.exceptions.UnauthorizedException;
@@ -102,6 +106,29 @@ class AlertasServiceTest {
         AlertasDTO resultado = service.atualizarAlerta(1, dto, 2);
 
         assertEquals(TipoAlerta.CONSULTA, resultado.getTipoAlerta());
+        verify(alertasRepository).save(existente);
+    }
+
+    @Test
+    void deveAtualizarStatusDeAlertaDeRemedioSemReenviarPrescricao() {
+        Idoso idoso = idoso();
+        Prescricao prescricao = criarPrescricao(5, criarRemedio(), idoso, Status.ATIVO);
+        Alertas existente = alerta(1, idoso, StatusAlertas.AGENDADO);
+        existente.setPrescricao(prescricao);
+
+        AlertasDTO dto = alertaDTO();
+        dto.setPrescricaoId(null);
+        dto.setStatusAlertas(StatusAlertas.REALIZADO);
+
+        when(alertasRepository.findById(1)).thenReturn(Optional.of(existente));
+        when(idosoRepository.findById(20)).thenReturn(Optional.of(idoso));
+        when(vinculoRepository.existsByIdosoIdAndCuidadorId(20, 2)).thenReturn(true);
+        when(alertasRepository.save(existente)).thenReturn(existente);
+
+        AlertasDTO resultado = service.atualizarAlerta(1, dto, 2);
+
+        assertEquals(StatusAlertas.REALIZADO, resultado.getStatusAlertas());
+        assertEquals(5, resultado.getPrescricaoId());
         verify(alertasRepository).save(existente);
     }
 
