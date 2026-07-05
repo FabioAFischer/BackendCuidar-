@@ -46,6 +46,10 @@ public class Alertas {
     @JoinColumn(name = "id_prescricao", foreignKey = @ForeignKey(name = "fk_prescricao_alerta"))
     private Prescricao prescricao;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_consulta", foreignKey = @ForeignKey(name = "fk_consulta_alerta"))
+    private Consulta consulta;
+
     @NotNull(message = "tipo do alerta obrigatorio")
     @Enumerated(EnumType.STRING)
     @Column(name = "tipoAlerta", nullable = false, length = 20)
