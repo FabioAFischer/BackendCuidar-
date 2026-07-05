@@ -32,13 +32,13 @@ class InstituicaoControllerTest {
     @Test
     void deveListarInstituicoesQuandoExistiremRegistros() {
         Pageable pageable = PageRequest.of(0, 10);
-        when(service.listarInstituicoesAtivas(pageable)).thenReturn(new PageImpl<>(List.of(dto()), pageable, 1));
+        when(service.listarInstituicoesAtivas(null, pageable)).thenReturn(new PageImpl<>(List.of(dto()), pageable, 1));
 
-        var resposta = controller.listarInstituicoes(pageable);
+        var resposta = controller.listarInstituicoes(null, pageable);
 
         assertEquals(HttpStatus.OK, resposta.getStatusCode());
         assertEquals(1, resposta.getBody().getTotalElements());
-        verify(service).listarInstituicoesAtivas(pageable);
+        verify(service).listarInstituicoesAtivas(null, pageable);
     }
 
     @Test

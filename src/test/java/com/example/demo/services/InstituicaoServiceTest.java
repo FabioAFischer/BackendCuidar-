@@ -56,7 +56,7 @@ class InstituicaoServiceTest {
 
         when(repository.findAll(pageable)).thenReturn(pagina);
 
-        Page<InstituicaoDTO> resultado = service.listarInstituicoesAtivas(pageable);
+        Page<InstituicaoDTO> resultado = service.listarInstituicoesAtivas(null, pageable);
 
         assertEquals(1, resultado.getTotalElements());
         assertEquals("Instituicao", resultado.getContent().get(0).getNome());
