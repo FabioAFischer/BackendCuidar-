@@ -151,7 +151,7 @@ class AuthServiceTest {
         Idoso idoso = idoso(20, "Maria", "12345678901", Status.ATIVO);
 
         when(idosoService.autenticarIdosoPorSenhaAcesso("BC-ABCDEFGH")).thenReturn(idoso);
-        when(jwtService.gerarTokenJwt(idoso)).thenReturn("token-idoso");
+        when(jwtService.gerarTokenJwtPermanente(idoso)).thenReturn("token-idoso");
 
         Map<String, Object> resposta = service.autenticarIdoso(Map.of("senhaAcesso", "BC-ABCDEFGH"));
 

@@ -112,7 +112,7 @@ public class AuthService {
             throw new InvalidRequestException("Senha de acesso é obrigatória.");
         }
 
-        return gerarRespostaAutenticacao(idosoService.autenticarIdosoPorSenhaAcesso(senhaAcesso));
+        return gerarRespostaAutenticacaoIdoso(idosoService.autenticarIdosoPorSenhaAcesso(senhaAcesso));
     }
 
     private String obterEmailDoUsuario(Usuario usuario) {
@@ -141,11 +141,19 @@ public class AuthService {
     }
 
     private Map<String, Object> gerarRespostaAutenticacao(Usuario usuario) {
+        return gerarRespostaAutenticacaoComToken(usuario, jwtService.gerarTokenJwt(usuario));
+    }
+
+    private Map<String, Object> gerarRespostaAutenticacaoIdoso(Usuario usuario) {
+        return gerarRespostaAutenticacaoComToken(usuario, jwtService.gerarTokenJwtPermanente(usuario));
+    }
+
+    private Map<String, Object> gerarRespostaAutenticacaoComToken(Usuario usuario, String token) {
         Map<String, Object> resposta = new HashMap<>();
         resposta.put("id", usuario.getId());
         resposta.put("nome", usuario.getNome());
         resposta.put("perfil", usuario.getPerfil());
-        resposta.put("token", jwtService.gerarTokenJwt(usuario));
+        resposta.put("token", token);
         resposta.put("tipo", "Bearer");
         resposta.put("autenticado", true);
 
