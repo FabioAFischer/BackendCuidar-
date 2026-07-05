@@ -16,7 +16,7 @@ import com.example.demo.repository.AdministradorRepository;
 @Configuration
 public class AdministradorSeedConfig {
 
-    public static final String ADMIN_CPF = "00000000000";
+    public static final String ADMIN_CPF = "14554668916";
     public static final String ADMIN_EMAIL = "admin@bomcuidado.com";
     public static final String ADMIN_SENHA = "Admin@123";
 
