@@ -29,6 +29,7 @@ import com.example.demo.dtos.VinculoDTO;
 import com.example.demo.entity.Cuidador;
 import com.example.demo.entity.Idoso;
 import com.example.demo.entity.Vinculo;
+import com.example.demo.enums.Status;
 import com.example.demo.enums.TipoVinculo;
 import com.example.demo.exceptions.DuplicateResourceException;
 import com.example.demo.exceptions.InvalidRequestException;
@@ -72,13 +73,13 @@ class VinculoServiceTest {
         Pageable pageable = PageRequest.of(0, 10);
         Page<Vinculo> pagina = new PageImpl<>(List.of(vinculo(1, TipoVinculo.PADRAO)), pageable, 1);
 
-        when(repository.findByIdosoId(20, pageable)).thenReturn(pagina);
+        when(repository.findByIdosoIdAndCuidadorStatus(20, Status.ATIVO, pageable)).thenReturn(pagina);
 
         Page<VinculoDTO> resultado = service.listarVinculosPorIdoso(20, pageable);
 
         assertEquals(1, resultado.getTotalElements());
         assertEquals(20, resultado.getContent().get(0).getIdosoId());
-        verify(repository).findByIdosoId(20, pageable);
+        verify(repository).findByIdosoIdAndCuidadorStatus(20, Status.ATIVO, pageable);
     }
 
     @Test
@@ -156,6 +157,16 @@ class VinculoServiceTest {
     }
 
     @Test
+    void deveFalharAoDefinirCuidadorInativoComoEmergencia() {
+        Vinculo vinculo = vinculo(2, TipoVinculo.PADRAO);
+        vinculo.getCuidador().setStatus(Status.INATIVO);
+
+        when(repository.findById(2)).thenReturn(Optional.of(vinculo));
+
+        assertThrows(InvalidRequestException.class, () -> service.definirCuidadorEmergencia(2));
+    }
+
+    @Test
     void deveBuscarContatoDeEmergenciaQuandoCuidadorPossuirContato() {
         Cuidador cuidador = cuidador();
         cuidador.setContato(contato(5, "11", "999999999"));
@@ -195,7 +206,7 @@ class VinculoServiceTest {
 
     private Vinculo vinculo(int id, TipoVinculo tipoVinculo) {
         Vinculo vinculo = new Vinculo();
-        Idoso idoso = idoso(20, "Maria", "12345678901", com.example.demo.enums.Status.ATIVO);
+        Idoso idoso = idoso(20, "Maria", "12345678901", Status.ATIVO);
         Cuidador cuidador = cuidador();
         vinculo.setId(id);
         vinculo.setDataCriacao(LocalDate.now());
