@@ -36,10 +36,16 @@ public class InstituicaoService {
         this.emailValidationService = emailValidationService;
     }
 
-    public Page<InstituicaoDTO> listarInstituicoesAtivas(Pageable pageable) {
-    return repository.findAll(pageable)
-            .map(InstituicaoMapper::converterInstituicaoParaDTO);
-}
+    public Page<InstituicaoDTO> listarInstituicoesAtivas(String status, Pageable pageable) {
+        if (status == null || status.isBlank()) {
+            return repository.findAll(pageable)
+                    .map(InstituicaoMapper::converterInstituicaoParaDTO);
+        }
+
+        Status statusEnum = Status.valueOf(status.toUpperCase());
+        return repository.findByStatus(statusEnum, pageable)
+                .map(InstituicaoMapper::converterInstituicaoParaDTO);
+    }
 
     public InstituicaoDTO buscarInstituicaoPorId(Integer id) {
         Instituicao instituicao = repository.findById(id)
