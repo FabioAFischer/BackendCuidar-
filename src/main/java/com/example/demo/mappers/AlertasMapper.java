@@ -25,6 +25,11 @@ public class AlertasMapper {
                 alerta.getPrescricao() != null && alerta.getPrescricao().getRemedio() != null
                         ? TextoUtils.formatarTextoParaExibicao(alerta.getPrescricao().getRemedio().getNome())
                         : null);
+        dto.setConsultaId(alerta.getConsulta() != null ? alerta.getConsulta().getId() : null);
+        dto.setMedico(alerta.getConsulta() != null ? TextoUtils.formatarTextoParaExibicao(alerta.getConsulta().getMedico()) : null);
+        dto.setEspecialidade(alerta.getConsulta() != null ? TextoUtils.formatarTextoParaExibicao(alerta.getConsulta().getEspecialidade()) : null);
+        dto.setLocal(alerta.getConsulta() != null ? TextoUtils.formatarTextoParaExibicao(alerta.getConsulta().getLocal()) : null);
+        dto.setObservacoes(alerta.getConsulta() != null ? alerta.getConsulta().getObservacoes() : null);
         dto.setTipoAlerta(alerta.getTipoAlerta());
         dto.setStatusAlertas(alerta.getStatusAlertas());
         dto.setDataCriacao(alerta.getData_criacao());
@@ -47,6 +52,7 @@ public class AlertasMapper {
         alerta.setData_criacao(LocalDateTime.now());
         alerta.setIdoso(idoso);
         alerta.setPrescricao(prescricao);
+        alerta.setConsulta(null);
         alerta.setTipoAlerta(dto.getTipoAlerta());
         alerta.setStatusAlertas(dto.getStatusAlertas() != null ? dto.getStatusAlertas() : StatusAlertas.AGENDADO);
         alerta.setData_agendade(dto.getDataAgendada());
@@ -65,6 +71,7 @@ public class AlertasMapper {
 
         alerta.setIdoso(idoso);
         alerta.setPrescricao(prescricao);
+        alerta.setConsulta(null);
         alerta.setTipoAlerta(dto.getTipoAlerta());
         alerta.setData_agendade(dto.getDataAgendada());
         alerta.setData_atualizacao(LocalDateTime.now());

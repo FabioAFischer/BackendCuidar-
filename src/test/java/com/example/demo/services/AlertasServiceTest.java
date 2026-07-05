@@ -37,6 +37,7 @@ import com.example.demo.exceptions.InvalidRequestException;
 import com.example.demo.exceptions.ResourceNotFoundException;
 import com.example.demo.exceptions.UnauthorizedException;
 import com.example.demo.repository.AlertasRepository;
+import com.example.demo.repository.ConsultaRepository;
 import com.example.demo.repository.IdosoRepository;
 import com.example.demo.repository.PrescricaoRepository;
 import com.example.demo.repository.VinculoRepository;
@@ -52,6 +53,9 @@ class AlertasServiceTest {
 
     @Mock
     private PrescricaoRepository prescricaoRepository;
+
+    @Mock
+    private ConsultaRepository consultaRepository;
 
     @Mock
     private VinculoRepository vinculoRepository;

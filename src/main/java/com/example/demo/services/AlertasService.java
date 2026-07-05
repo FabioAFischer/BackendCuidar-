@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.demo.dtos.AlertasDTO;
 import com.example.demo.entity.Alertas;
+import com.example.demo.entity.Consulta;
 import com.example.demo.entity.Idoso;
 import com.example.demo.entity.Prescricao;
 import com.example.demo.enums.StatusAlertas;
@@ -17,6 +18,7 @@ import com.example.demo.exceptions.ResourceNotFoundException;
 import com.example.demo.exceptions.UnauthorizedException;
 import com.example.demo.mappers.AlertasMapper;
 import com.example.demo.repository.AlertasRepository;
+import com.example.demo.repository.ConsultaRepository;
 import com.example.demo.repository.IdosoRepository;
 import com.example.demo.repository.PrescricaoRepository;
 import com.example.demo.repository.VinculoRepository;
@@ -27,16 +29,19 @@ public class AlertasService {
     private final AlertasRepository repository;
     private final IdosoRepository idosoRepository;
     private final PrescricaoRepository prescricaoRepository;
+    private final ConsultaRepository consultaRepository;
     private final VinculoRepository vinculoRepository;
 
     public AlertasService(
             AlertasRepository repository,
             IdosoRepository idosoRepository,
             PrescricaoRepository prescricaoRepository,
+            ConsultaRepository consultaRepository,
             VinculoRepository vinculoRepository) {
         this.repository = repository;
         this.idosoRepository = idosoRepository;
         this.prescricaoRepository = prescricaoRepository;
+        this.consultaRepository = consultaRepository;
         this.vinculoRepository = vinculoRepository;
     }
 
@@ -73,8 +78,12 @@ public class AlertasService {
         Idoso idoso = buscarIdosoPorId(dto.getIdosoId());
         validarVinculoEntreIdosoECuidador(idoso.getId(), cuidadorId);
         Prescricao prescricao = buscarPrescricaoVinculadaAoAlerta(dto, idoso);
+        Consulta consulta = salvarConsultaVinculadaAoAlerta(dto, idoso, null);
 
-        return AlertasMapper.converterAlertaParaDTO(repository.save(AlertasMapper.converterDTOParaAlerta(dto, idoso, prescricao)));
+        Alertas alerta = AlertasMapper.converterDTOParaAlerta(dto, idoso, prescricao);
+        alerta.setConsulta(consulta);
+
+        return AlertasMapper.converterAlertaParaDTO(repository.save(alerta));
     }
 
     public AlertasDTO atualizarAlerta(int id, AlertasDTO dto, Integer cuidadorId) {
@@ -87,8 +96,10 @@ public class AlertasService {
         Idoso idoso = buscarIdosoPorId(dto.getIdosoId());
         validarVinculoEntreIdosoECuidador(idoso.getId(), cuidadorId);
         Prescricao prescricao = buscarPrescricaoVinculadaAoAlerta(dto, idoso, alerta.getPrescricao());
+        Consulta consulta = salvarConsultaVinculadaAoAlerta(dto, idoso, alerta.getConsulta());
 
         AlertasMapper.atualizarAlertaComDTO(alerta, dto, idoso, prescricao);
+        alerta.setConsulta(consulta);
         return AlertasMapper.converterAlertaParaDTO(repository.save(alerta));
     }
 
@@ -153,6 +164,46 @@ public class AlertasService {
 
         validarPrescricaoPertenceAoIdoso(prescricao, idoso);
         return prescricao;
+    }
+
+    private Consulta salvarConsultaVinculadaAoAlerta(AlertasDTO dto, Idoso idoso, Consulta consultaAtual) {
+        if (dto.getTipoAlerta() == TipoAlerta.REMEDIO) {
+            return null;
+        }
+
+        validarDadosConsulta(dto);
+
+        Consulta consulta = consultaAtual != null ? consultaAtual : new Consulta();
+        if (consultaAtual == null) {
+            consulta.setDataCriacao(LocalDateTime.now());
+        }
+
+        consulta.setIdoso(idoso);
+        consulta.setMedico(dto.getMedico().trim());
+        consulta.setEspecialidade(dto.getEspecialidade().trim());
+        consulta.setLocal(dto.getLocal().trim());
+        consulta.setObservacoes(dto.getObservacoes() != null ? dto.getObservacoes().trim() : null);
+        consulta.setDataAtualizacao(LocalDateTime.now());
+
+        return consultaRepository.save(consulta);
+    }
+
+    private void validarDadosConsulta(AlertasDTO dto) {
+        if (textoVazio(dto.getMedico())) {
+            throw new InvalidRequestException("Medico e obrigatorio para alerta de consulta");
+        }
+
+        if (textoVazio(dto.getEspecialidade())) {
+            throw new InvalidRequestException("Especialidade e obrigatoria para alerta de consulta");
+        }
+
+        if (textoVazio(dto.getLocal())) {
+            throw new InvalidRequestException("Local e obrigatorio para alerta de consulta");
+        }
+    }
+
+    private boolean textoVazio(String valor) {
+        return valor == null || valor.trim().isEmpty();
     }
 
     private void validarPrescricaoPertenceAoIdoso(Prescricao prescricao, Idoso idoso) {

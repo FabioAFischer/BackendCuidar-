@@ -75,6 +75,10 @@ public final class TestDataFactory {
         dto.setIdosoId(20);
         dto.setTipoAlerta(TipoAlerta.REMEDIO);
         dto.setDataAgendada(LocalDateTime.now().plusHours(2));
+        dto.setMedico("Dr. Joao");
+        dto.setEspecialidade("Cardiologia");
+        dto.setLocal("Clinica Bom Cuidado");
+        dto.setObservacoes("Levar exames anteriores");
         return dto;
     }
 
