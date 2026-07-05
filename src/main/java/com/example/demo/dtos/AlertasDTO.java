@@ -22,6 +22,11 @@ public class AlertasDTO {
     private String idosoNome;
     private Integer prescricaoId;
     private String remedioNome;
+    private Integer consultaId;
+    private String medico;
+    private String especialidade;
+    private String local;
+    private String observacoes;
     private TipoAlerta tipoAlerta;
     private StatusAlertas statusAlertas;
     private LocalDateTime dataCriacao;

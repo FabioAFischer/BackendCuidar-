@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.dtos.InstituicaoDTO;
@@ -39,8 +40,9 @@ public class InstituicaoController {
     )
     @GetMapping("/listar_todas")
     public ResponseEntity<Page<InstituicaoDTO>> listarInstituicoes(
+            @RequestParam(required = false) String status,
             @PageableDefault(size = 10, sort = "nome") Pageable pageable) {
-        return ResponseEntity.ok(service.listarInstituicoesAtivas(pageable));
+        return ResponseEntity.ok(service.listarInstituicoesAtivas(status, pageable));
     }
 
     @Operation(
