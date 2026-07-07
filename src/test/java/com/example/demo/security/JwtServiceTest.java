@@ -1,6 +1,7 @@
 package com.example.demo.security;
 
 import static com.example.demo.support.TestDataFactory.administrador;
+import static com.example.demo.support.TestDataFactory.idoso;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -60,6 +61,14 @@ class JwtServiceTest {
         String token = service.gerarTokenJwt(administrador());
 
         assertTrue(service.verificarTokenValido(token));
+    }
+
+    @Test
+    void deveGerarTokenPermanenteValidoParaIdoso() {
+        String token = service.gerarTokenJwtPermanente(idoso());
+
+        assertTrue(service.verificarTokenValido(token));
+        assertEquals(Perfil.IDOSO, service.extrairPerfil(token));
     }
 
     @Test

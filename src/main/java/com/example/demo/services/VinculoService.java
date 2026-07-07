@@ -10,6 +10,7 @@ import com.example.demo.dtos.VinculoDTO;
 import com.example.demo.entity.Cuidador;
 import com.example.demo.entity.Idoso;
 import com.example.demo.entity.Vinculo;
+import com.example.demo.enums.Status;
 import com.example.demo.enums.TipoVinculo;
 import com.example.demo.exceptions.DuplicateResourceException;
 import com.example.demo.exceptions.InvalidRequestException;
@@ -41,7 +42,8 @@ public class VinculoService {
     }
 
     public Page<VinculoDTO> listarVinculosPorIdoso(Integer idosoId, Pageable pageable) {
-        return repository.findByIdosoId(idosoId, pageable).map(VinculoMapper::converterVinculoParaDTO);
+        return repository.findByIdosoIdAndCuidadorStatus(idosoId, Status.ATIVO, pageable)
+                .map(VinculoMapper::converterVinculoParaDTO);
     }
 
     public Page<VinculoDTO> listarVinculosPorCuidador(Integer cuidadorId, Pageable pageable) {
@@ -85,6 +87,10 @@ public class VinculoService {
     public VinculoDTO definirCuidadorEmergencia(Integer vinculoId) {
         Vinculo vinculo = repository.findById(vinculoId)
                 .orElseThrow(() -> new ResourceNotFoundException("Vínculo", vinculoId.longValue()));
+
+        if (vinculo.getCuidador() == null || !Status.ATIVO.equals(vinculo.getCuidador().getStatus())) {
+            throw new InvalidRequestException("Apenas cuidadores ativos podem ser contato de emergência");
+        }
 
         repository.findByIdosoIdAndTipoVinculo(vinculo.getIdoso().getId(), TipoVinculo.EMERGENCIA)
                 .ifPresent(atual -> {
