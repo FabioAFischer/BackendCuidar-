@@ -32,18 +32,13 @@ public class JwtService {
         Date agora = new Date();
         Date expiracao = new Date(agora.getTime() + expirationMs);
 
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("id", usuario.getId());
-        claims.put("nome", usuario.getNome());
-        claims.put("perfil", usuario.getPerfil().name());
-
-        return Jwts.builder()
-                .claims(claims)
-                .subject(String.valueOf(usuario.getId()))
-                .issuedAt(agora)
+        return criarBuilderToken(usuario, agora)
                 .expiration(expiracao)
-                .signWith(gerarChaveAssinatura())
                 .compact();
+    }
+
+    public String gerarTokenJwtPermanente(Usuario usuario) {
+        return criarBuilderToken(usuario, new Date()).compact();
     }
 
     public boolean verificarTokenValido(String token) {
@@ -77,6 +72,19 @@ public class JwtService {
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
+    }
+
+    private io.jsonwebtoken.JwtBuilder criarBuilderToken(Usuario usuario, Date emissao) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("id", usuario.getId());
+        claims.put("nome", usuario.getNome());
+        claims.put("perfil", usuario.getPerfil().name());
+
+        return Jwts.builder()
+                .claims(claims)
+                .subject(String.valueOf(usuario.getId()))
+                .issuedAt(emissao)
+                .signWith(gerarChaveAssinatura());
     }
 
     private SecretKey gerarChaveAssinatura() {
