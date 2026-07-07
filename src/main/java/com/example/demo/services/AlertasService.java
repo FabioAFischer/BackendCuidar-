@@ -74,6 +74,7 @@ public class AlertasService {
     public AlertasDTO criarAlerta(AlertasDTO dto, Integer cuidadorId) {
         validarCuidadorAutenticado(cuidadorId);
         validarDadosAlerta(dto);
+        validarDataAgendadaNaoPassada(dto.getDataAgendada());
 
         Idoso idoso = buscarIdosoPorId(dto.getIdosoId());
         validarVinculoEntreIdosoECuidador(idoso.getId(), cuidadorId);
@@ -227,6 +228,12 @@ public class AlertasService {
 
         if (dto.getDataAgendada() == null) {
             throw new InvalidRequestException("Data agendada e obrigatoria");
+        }
+    }
+
+    private void validarDataAgendadaNaoPassada(LocalDateTime dataAgendada) {
+        if (dataAgendada.isBefore(LocalDateTime.now())) {
+            throw new InvalidRequestException("Nao e possivel agendar um alerta no passado");
         }
     }
 
