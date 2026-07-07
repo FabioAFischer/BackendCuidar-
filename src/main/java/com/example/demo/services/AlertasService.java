@@ -90,6 +90,7 @@ public class AlertasService {
     public AlertasDTO atualizarAlerta(int id, AlertasDTO dto, Integer cuidadorId) {
         validarCuidadorAutenticado(cuidadorId);
         validarDadosAlerta(dto);
+        validarDataAgendadaNaoPassada(dto.getDataAgendada());
 
         Alertas alerta = buscarEntidadeAlertaPorId(id);
         validarVinculoEntreIdosoECuidador(alerta.getIdoso().getId(), cuidadorId);
