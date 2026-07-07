@@ -11,6 +11,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -256,6 +257,22 @@ class AlertasServiceTest {
         dto.setDataAgendada(null);
 
         assertThrows(InvalidRequestException.class, () -> service.criarAlerta(dto, 2));
+    }
+
+    @Test
+    void deveFalharAoCriarComDataAgendadaNoPassado() {
+        AlertasDTO dto = alertaDTO();
+        dto.setDataAgendada(LocalDateTime.now().minusMinutes(1));
+
+        assertThrows(InvalidRequestException.class, () -> service.criarAlerta(dto, 2));
+    }
+
+    @Test
+    void deveFalharAoAtualizarComDataAgendadaNoPassado() {
+        AlertasDTO dto = alertaDTO();
+        dto.setDataAgendada(LocalDateTime.now().minusMinutes(1));
+
+        assertThrows(InvalidRequestException.class, () -> service.atualizarAlerta(1, dto, 2));
     }
 
     @Test
