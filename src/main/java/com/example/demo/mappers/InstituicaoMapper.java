@@ -28,6 +28,7 @@ public class InstituicaoMapper {
         dto.setEmail(instituicao.getEmail());
         dto.setRua(TextoUtils.formatarTextoParaExibicao(instituicao.getRua()));
         dto.setBairro(TextoUtils.formatarTextoParaExibicao(instituicao.getBairro()));
+        dto.setComplemento(TextoUtils.formatarTextoParaExibicao(instituicao.getComplemento()));
         dto.setUf(TextoUtils.normalizarUf(instituicao.getUf()));
         dto.setNumero(instituicao.getNumero());
         dto.setCep(instituicao.getCep());
@@ -49,6 +50,7 @@ public class InstituicaoMapper {
         instituicao.setSenha(dto.getSenha());
         instituicao.setRua(TextoUtils.normalizarTextoParaBanco(dto.getRua()));
         instituicao.setBairro(TextoUtils.normalizarTextoParaBanco(dto.getBairro()));
+        instituicao.setComplemento(TextoUtils.normalizarTextoParaBanco(dto.getComplemento()));
         instituicao.setUf(TextoUtils.normalizarTextoParaBanco(dto.getUf()));
         instituicao.setNumero(dto.getNumero());
         instituicao.setCep(normalizarDocumento(dto.getCep()));
