@@ -86,6 +86,7 @@ public class InstituicaoService {
         }
         instituicao.setRua(TextoUtils.normalizarTextoParaBanco(dto.getRua()));
         instituicao.setBairro(TextoUtils.normalizarTextoParaBanco(dto.getBairro()));
+        instituicao.setComplemento(TextoUtils.normalizarTextoParaBanco(dto.getComplemento()));
         instituicao.setUf(TextoUtils.normalizarTextoParaBanco(dto.getUf()));
         instituicao.setNumero(dto.getNumero());
         instituicao.setCep(normalizarDocumento(dto.getCep()));
