@@ -22,6 +22,7 @@ public class InstituicaoDTO {
     private String senha;
     private String rua;
     private String bairro;
+    private String complemento;
     private String uf;
     private Integer numero;
     private String cep;

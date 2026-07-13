@@ -43,6 +43,9 @@ public class Instituicao extends Usuario {
     @Column(length = 200)
     private String bairro;
 
+    @Column(length = 200)
+    private String complemento;
+
     @NotBlank(message = "Uf deve ser preenchido")
     @Column(length = 2)
     private String uf;
